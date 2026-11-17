@@ -78,16 +78,16 @@
         { id: 'hulu', name: 'hulu', font: '800 1.25em "Arial Rounded MT Bold", "Segoe UI", Arial, sans-serif', spacing: '-.02em' },
       ],
       pages: {
-        home: ['@continue', '@brands', 'recent-movies', '@because0', 'originals', 'trending-movies', 'recent-series', '@soon',
+        home: ['@brands', '@continue', 'recent-movies', '@because0', 'originals', 'trending-movies', 'recent-series', '@soon',
           'trending-series', '@mylist', '@because1', 'new-movies', 'new-series', 'brand-marvel-movies', 'brand-pixar-movies',
           'brand-disney-movies', 'brand-starwars-series', 'acclaimed-movies', 'acclaimed-series', 'animation-movies',
           'action-movies', 'comedy-movies', 'brand-hulu-series', 'drama-series', 'scifi-series', 'brand-natgeo-series',
           'docs', 'kids-movies', 'all-series', 'all-movies'],
-        series: ['@continue', '@brands', 'recent-series', '@because0', 'originals', 'trending-series', 'new-series',
+        series: ['@continue', 'recent-series', '@because0', 'originals', 'trending-series', 'new-series',
           'acclaimed-series', 'brand-marvel-series', 'brand-starwars-series', 'brand-hulu-series', 'drama-series',
           'comedy-series', 'action-series', 'scifi-series', 'mystery-series', 'crime-series', 'anime-series',
           'docu-series', 'brand-natgeo-series', 'reality-series', 'all-series'],
-        movies: ['@continue', '@brands', 'recent-movies', '@because1', 'new-movies', 'trending-movies', 'acclaimed-movies',
+        movies: ['@continue', 'recent-movies', '@because1', 'new-movies', 'trending-movies', 'acclaimed-movies',
           'brand-marvel-movies', 'brand-pixar-movies', 'brand-disney-movies', 'brand-starwars-movies', 'brand-hulu-movies',
           'animation-movies', 'action-movies', 'comedy-movies', 'scifi-movies', 'thriller-movies', 'horror-movies',
           'romance-movies', 'brand-natgeo-movies', 'docs', 'all-movies'],
@@ -1105,21 +1105,30 @@
   html[data-sm-mode="disney"] #sm-app, html[data-sm-mode="disney"] #sm-modal, html[data-sm-mode="disney"] #sm-profiles,
   html[data-sm-mode="disney"] .sm-menu, html[data-sm-mode="disney"] .sm-intro.disney {
     font-family:"Avenir Next", Avenir, "Nunito Sans", "Segoe UI", Arial, sans-serif; }
-  html[data-sm-mode="disney"] #sm-app { --rail:5.6rem; --pad:3.2vw; --gap:1.4vw; padding-left:var(--rail); color:#f9f9f9;
+  html[data-sm-mode="disney"] #sm-app { --rail:max(5.6rem, 76px); --pad:3.2vw; --gap:1.4vw; padding-left:var(--rail); color:#f9f9f9;
     --cw:calc((100vw - var(--rail) - var(--pad) * 2 - var(--gap) * (var(--per) - 1)) / var(--per));
     background:radial-gradient(ellipse 70% 45% at 75% 0%, rgba(39,58,112,.42), transparent 70%),
       radial-gradient(ellipse 60% 40% at 0% 100%, rgba(26,40,82,.35), transparent 70%), linear-gradient(180deg, #1a1d29 0%, #13151f 100%); }
   @media (min-width:1400px) { html[data-sm-mode="disney"] #sm-app { --per:5; } }
+  html[data-sm-mode="disney"] #sm-app::before { content:""; position:fixed; inset:-25%; z-index:-1; pointer-events:none;
+    background:radial-gradient(32% 28% at 72% 12%, rgba(52,92,200,.32), transparent 70%),
+      radial-gradient(28% 26% at 18% 78%, rgba(98,64,190,.2), transparent 70%),
+      radial-gradient(24% 22% at 88% 70%, rgba(20,120,200,.16), transparent 70%);
+    animation:sm-aurora 26s ease-in-out infinite alternate; }
+  @keyframes sm-aurora { from { transform:translate3d(-3%, -2%, 0) rotate(0deg); } to { transform:translate3d(3%, 2%, 0) rotate(6deg); } }
+  html[data-sm-mode="disney"] #sm-app > :not(.sm-rail) { position:relative; z-index:1; }
 
   /* Menu lateral: ícones; ao passar o mouse aparecem os nomes sobre um degradê escuro */
-  .sm-rail { position:fixed; left:0; top:0; bottom:0; z-index:40; width:var(--rail); display:flex; flex-direction:column; align-items:stretch;
+  .sm-rail { position:fixed; left:0; top:0; bottom:0; z-index:40; width:var(--rail); min-width:76px; display:flex; flex-direction:column; align-items:stretch;
     padding:1.3rem 0 1.2rem; box-sizing:border-box; }
   .sm-rail::before { content:""; position:absolute; left:0; top:0; bottom:0; width:max(26rem, 34vw); z-index:-1; pointer-events:none; opacity:0;
     background:linear-gradient(90deg, rgba(10,11,16,.97) 0%, rgba(10,11,16,.88) 45%, rgba(10,11,16,0) 100%); transition:opacity .3s ease; }
   .sm-rail:hover::before, .sm-rail:focus-within::before { opacity:1; }
   .sm-rail-logo { display:flex; flex-direction:column; align-items:center; gap:.1rem; margin:0 auto 2.4rem; color:#f9f9f9; cursor:pointer; user-select:none; }
-  .sm-rail-logo svg { width:3.2rem; height:1.25rem; filter:drop-shadow(0 0 6px rgba(127,196,255,.75)); }
-  .sm-rail-logo span { margin-top:-.35rem; font:800 .74rem/1 "Nunito Sans", "Avenir Next", Arial, sans-serif; letter-spacing:.2em; }
+  .sm-rail-logo svg { width:3rem; height:1.2rem; overflow:visible; filter:drop-shadow(0 0 6px rgba(127,196,255,.85)); }
+  .sm-rail-logo svg path { stroke-dasharray:1; stroke-dashoffset:0; animation:sm-arc-glow 6s ease-in-out infinite; }
+  @keyframes sm-arc-glow { 0%, 100% { opacity:.75; } 50% { opacity:1; filter:drop-shadow(0 0 4px #9fd2ff); } }
+  .sm-rail-logo span { margin-top:-.3rem; font:800 10px/1 "Nunito Sans", "Avenir Next", Arial, sans-serif; letter-spacing:.16em; white-space:nowrap; }
   .sm-rail-items { display:flex; flex-direction:column; gap:.35rem; flex:1; justify-content:center; }
   .sm-rail-item { position:relative; display:flex; align-items:center; gap:1.6rem; height:3.2rem; padding:0 0 0 2.05rem; border:0; background:none;
     color:rgba(249,249,249,.62); cursor:pointer; font:inherit; white-space:nowrap; transition:color .2s; }
@@ -1130,6 +1139,7 @@
   .sm-rail-item:hover, .sm-rail-item:focus-visible { color:#f9f9f9; outline:none; }
   .sm-rail-item:hover .sm-ico { transform:scale(1.08); }
   .sm-rail-item.active { color:#f9f9f9; }
+  .sm-rail-item.active .sm-ico { filter:drop-shadow(0 0 6px rgba(255,255,255,.55)); }
   .sm-rail-item.active .sm-rail-label { font-weight:800; }
   .sm-rail-item.active::after { content:""; position:absolute; left:2.05rem; bottom:.25rem; width:1.55rem; height:2px; border-radius:2px; background:#f9f9f9; }
   .sm-rail-bottom { display:flex; flex-direction:column; align-items:center; gap:.9rem; }
@@ -1141,27 +1151,60 @@
   .sm-rail .sm-pop::before { display:none; }
 
   /* Carrossel de destaque */
-  .sm-carousel { --car-gap:1.2vw; position:relative; padding:1.6rem var(--pad) 0; overflow:hidden; }
-  .sm-car-track { display:flex; gap:var(--car-gap); transition:transform .7s cubic-bezier(.25,.8,.25,1); }
-  .sm-car-slide { position:relative; flex:0 0 100%; aspect-ratio:3.25/1; min-height:15rem; border-radius:.55rem; overflow:hidden; cursor:pointer;
-    background:#0d0f16; outline:3px solid rgba(249,249,249,.08); outline-offset:-3px;
-    box-shadow:rgba(0,0,0,.69) 0 26px 30px -10px, rgba(0,0,0,.73) 0 16px 10px -10px; transition:outline-color .3s, opacity .5s; }
-  .sm-car-slide.on:hover, .sm-car-slide:focus-visible { outline-color:rgba(249,249,249,.8); }
-  .sm-car-img { position:absolute; inset:0; background:center 25%/cover no-repeat; transition:transform 7s ease-out; }
-  .sm-car-slide.on .sm-car-img { transform:scale(1.04); }
-  .sm-car-slide::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg, rgba(0,0,0,.72) 0%, rgba(0,0,0,.35) 32%, transparent 58%); }
-  .sm-car-info { position:absolute; z-index:1; left:4.5%; top:0; bottom:0; width:34%; display:flex; flex-direction:column; justify-content:center; gap:.8rem; }
-  .sm-car-logo { max-width:100%; max-height:55%; object-fit:contain; object-position:left center; filter:drop-shadow(0 2px 12px rgba(0,0,0,.5)); }
+  .sm-carousel { --car-gap:1.3vw; position:relative; padding:1.6rem var(--pad) 0; }
+  .sm-car-glow { position:absolute; left:2%; right:2%; top:-6rem; height:calc(100% + 8rem); z-index:0; pointer-events:none;
+    background:center/cover no-repeat; filter:blur(70px) saturate(1.7); opacity:0; transform:scale(1.05); transition:opacity 1.4s ease; }
+  .sm-car-glow.show { opacity:.5; }
+  /* Recorte dos slides: mostra as vizinhas só até a borda do conteúdo (não por baixo do menu) e deixa espaço para a sombra */
+  .sm-car-view { position:relative; z-index:1; overflow:hidden; margin:-1rem calc(var(--pad) * -1) -2.6rem; padding:1rem var(--pad) 2.6rem; }
+  .sm-car-stage { position:relative; aspect-ratio:3.25/1; min-height:15rem; }
+  .sm-car-slide { position:absolute; inset:0; border-radius:.6rem; overflow:hidden; cursor:pointer; background:#0d0f16;
+    transform:translateX(calc(var(--off, 0) * (100% + var(--car-gap)))); opacity:0;
+    box-shadow:rgba(0,0,0,.69) 0 26px 30px -10px, rgba(0,0,0,.73) 0 16px 10px -10px;
+    transition:transform .85s cubic-bezier(.25,.8,.25,1), opacity .85s ease, box-shadow .3s; }
+  .sm-carousel.ready .sm-car-slide:not(.far) { opacity:1; }
+  .sm-car-slide.far { transition:none; visibility:hidden; }
+  .sm-car-slide::after { content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+    box-shadow:inset 0 0 0 3px rgba(249,249,249,.1); transition:box-shadow .3s; }
+  .sm-car-slide.on:hover::after, .sm-car-slide:focus-visible::after { box-shadow:inset 0 0 0 3px rgba(249,249,249,.85); }
+  .sm-car-slide:focus-visible { outline:none; }
+  .sm-car-slide.on:hover { box-shadow:rgba(0,0,0,.8) 0 40px 58px -16px, rgba(0,0,0,.72) 0 30px 22px -10px, 0 0 40px rgba(110,160,255,.18); }
+  .sm-car-img { position:absolute; inset:0; background:center 25%/cover no-repeat; }
+  .sm-car-img::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg, rgba(0,0,0,.72) 0%, rgba(0,0,0,.35) 32%, transparent 58%); }
+  .sm-car-slide.on .sm-car-img { animation:sm-kb 10s ease-out both; }
+  .sm-car-info { position:absolute; z-index:2; left:4.5%; top:0; bottom:0; width:34%; display:flex; flex-direction:column; justify-content:center; gap:.9rem; }
+  .sm-car-logo { max-width:100%; max-height:55%; object-fit:contain; object-position:left center; filter:drop-shadow(0 2px 14px rgba(0,0,0,.55)); }
   .sm-car-title { font-size:clamp(1.6rem, 3vw, 3.2rem); font-weight:800; line-height:1.05; text-shadow:0 2px 14px rgba(0,0,0,.6); }
-  .sm-car-meta { font-size:clamp(.8rem, .95vw, 1.05rem); font-weight:600; color:rgba(249,249,249,.85); text-shadow:0 1px 6px rgba(0,0,0,.6); }
-  .sm-car-arrow { position:absolute; top:1.6rem; bottom:0; z-index:2; width:var(--pad); display:grid; place-items:center; border:0; padding:0;
+  .sm-car-meta { font-size:clamp(.8rem, .95vw, 1.05rem); font-weight:600; color:rgba(249,249,249,.88); text-shadow:0 1px 6px rgba(0,0,0,.6); }
+  .sm-car-slide .sm-car-info > * { opacity:0; }
+  .sm-car-slide.on .sm-car-info > :first-child { animation:sm-rise-in .9s .25s cubic-bezier(.2,.8,.2,1) both; }
+  .sm-car-slide.on .sm-car-info > :nth-child(2) { animation:sm-rise-in .9s .45s cubic-bezier(.2,.8,.2,1) both; }
+  /* Reflexo de luz que atravessa o banner ao entrar e ao passar o mouse */
+  .sm-car-shine, .sm-shine { position:absolute; inset:0; z-index:1; pointer-events:none; overflow:hidden; border-radius:inherit; }
+  .sm-car-shine::before, .sm-shine::before { content:""; position:absolute; top:-20%; bottom:-20%; left:-60%; width:45%;
+    background:linear-gradient(100deg, transparent 0%, rgba(255,255,255,.0) 20%, rgba(255,255,255,.16) 50%, rgba(255,255,255,0) 80%, transparent 100%);
+    transform:translateX(0) skewX(-12deg); opacity:0; }
+  .sm-car-slide.on .sm-car-shine::before { animation:sm-sheen 1.6s .5s ease-out both; }
+  .sm-car-slide.on:hover .sm-car-shine::before, .sm-brand:hover .sm-shine::before, .sm-card:hover > .sm-shine::before { animation:sm-sheen 1.1s ease-out both; }
+  .sm-car-arrow { position:absolute; top:1.6rem; z-index:3; height:calc(100% - 1.6rem); width:var(--pad); display:grid; place-items:center; border:0; padding:0;
     background:none; color:#f9f9f9; cursor:pointer; opacity:0; transition:opacity .25s; }
   .sm-car-arrow.l { left:0; } .sm-car-arrow.r { right:0; }
-  .sm-car-arrow .sm-ico { width:2rem !important; height:2rem !important; filter:drop-shadow(0 0 6px rgba(0,0,0,.8)); }
+  .sm-car-arrow .sm-ico { width:2.2rem !important; height:2.2rem !important; filter:drop-shadow(0 0 8px rgba(0,0,0,.9)); transition:transform .2s; }
+  .sm-car-arrow:hover .sm-ico { transform:scale(1.15); }
   .sm-carousel:hover .sm-car-arrow { opacity:1; }
-  .sm-car-dots { position:absolute; right:calc(var(--pad) + 1.4rem); bottom:1rem; z-index:2; display:flex; gap:.45rem; }
-  .sm-car-dot { width:.5rem; height:.5rem; padding:0; border:0; border-radius:50%; background:rgba(249,249,249,.4); cursor:pointer; transition:background .3s, transform .3s; }
-  .sm-car-dot.on { background:#f9f9f9; transform:scale(1.15); }
+  /* Pílula de progresso: o ponto atual vira uma barrinha que enche até a próxima troca */
+  .sm-car-dots { position:absolute; right:calc(var(--pad) + 1.5rem); bottom:1.1rem; z-index:3; display:flex; align-items:center; gap:.45rem; }
+  .sm-car-dot { position:relative; width:.5rem; height:.5rem; padding:0; border:0; border-radius:999px; background:rgba(249,249,249,.4); cursor:pointer;
+    overflow:hidden; transition:width .45s cubic-bezier(.2,.8,.2,1), background .3s; }
+  .sm-car-dot:hover { background:rgba(249,249,249,.7); }
+  .sm-car-dot i { position:absolute; left:0; top:0; bottom:0; width:0; background:#f9f9f9; border-radius:inherit; }
+  .sm-car-dot.on { width:2.2rem; background:rgba(249,249,249,.35); }
+  .sm-car-dot.on i { animation:sm-dotfill 8s linear forwards; }
+  .sm-carousel:hover .sm-car-dot.on i, .sm-carousel.paused .sm-car-dot.on i, .sm-carousel.offscreen .sm-car-dot.on i { animation-play-state:paused; }
+  @keyframes sm-dotfill { from { width:0; } to { width:100%; } }
+  @keyframes sm-kb { from { transform:scale(1.09); } to { transform:scale(1); } }
+  @keyframes sm-rise-in { from { opacity:0; transform:translateY(14px); filter:blur(4px); } to { opacity:1; transform:none; filter:none; } }
+  @keyframes sm-sheen { 0% { transform:translateX(0) skewX(-12deg); opacity:0; } 15% { opacity:1; } 100% { transform:translateX(420%) skewX(-12deg); opacity:0; } }
 
   /* Blocos de marca */
   .sm-brands { display:grid; grid-template-columns:repeat(6, 1fr); gap:var(--gap); margin:2.6rem var(--pad) 2.6rem; }
@@ -1172,7 +1215,11 @@
   .sm-brand-bg { position:absolute; inset:0; background:center/cover no-repeat; opacity:0; transform:scale(1.08); transition:opacity .45s, transform .9s ease-out; }
   .sm-brand-bg::after { content:""; position:absolute; inset:0; background:rgba(10,12,20,.45); }
   .sm-brand:hover, .sm-brand:focus-visible { transform:scale(1.05); border-color:rgba(249,249,249,.8); outline:none;
-    box-shadow:rgba(0,0,0,.8) 0 40px 58px -16px, rgba(0,0,0,.72) 0 30px 22px -10px; }
+    box-shadow:rgba(0,0,0,.8) 0 40px 58px -16px, rgba(0,0,0,.72) 0 30px 22px -10px, 0 0 36px rgba(120,170,255,.22); }
+  .sm-brand { animation:sm-pop-in .7s calc(var(--i, 0) * 70ms + .15s) cubic-bezier(.2,.8,.2,1) both; }
+  .sm-brand .sm-shine { z-index:2; }
+  .sm-brand:hover .sm-brand-name { text-shadow:0 0 18px rgba(255,255,255,.45), 0 2px 12px rgba(0,0,0,.4); }
+  @keyframes sm-pop-in { from { opacity:0; transform:translateY(18px) scale(.97); } to { opacity:1; transform:none; } }
   .sm-brand:hover .sm-brand-bg { opacity:1; transform:scale(1); }
   .sm-brand-name { position:relative; z-index:1; display:inline-flex; align-items:center; gap:.45em; text-align:center; line-height:1.02;
     color:#f9f9f9; text-shadow:0 2px 12px rgba(0,0,0,.35); }
@@ -1208,8 +1255,19 @@
     transition:transform .25s cubic-bezier(.25,.46,.45,.94), outline-color .25s, box-shadow .25s; }
   html[data-sm-mode="disney"] .sm-card:not(.rank):not(.skeleton):hover, html[data-sm-mode="disney"] .sm-card:not(.rank):focus-visible {
     transform:scale(1.05); outline-color:rgba(249,249,249,.8); z-index:2;
-    box-shadow:rgba(0,0,0,.8) 0 40px 58px -16px, rgba(0,0,0,.72) 0 30px 22px -10px; }
-  html[data-sm-mode="disney"] .sm-card.skeleton { background:linear-gradient(rgb(48,50,62), rgb(30,31,42)); }
+    box-shadow:rgba(0,0,0,.8) 0 40px 58px -16px, rgba(0,0,0,.72) 0 30px 22px -10px, 0 0 30px rgba(120,170,255,.16); }
+  html[data-sm-mode="disney"] .sm-card.skeleton { background:linear-gradient(110deg, rgb(40,43,56) 30%, rgb(58,61,76) 50%, rgb(40,43,56) 70%);
+    background-size:250% 100%; animation:sm-skel 1.4s linear infinite; }
+  @keyframes sm-skel { from { background-position:100% 0; } to { background-position:-150% 0; } }
+  html[data-sm-mode="disney"] .sm-track > .sm-card:not(.skeleton) { animation:sm-pop-in .55s cubic-bezier(.2,.8,.2,1) both; }
+  html[data-sm-mode="disney"] .sm-track > .sm-card:nth-child(2) { animation-delay:.05s; }
+  html[data-sm-mode="disney"] .sm-track > .sm-card:nth-child(3) { animation-delay:.1s; }
+  html[data-sm-mode="disney"] .sm-track > .sm-card:nth-child(4) { animation-delay:.15s; }
+  html[data-sm-mode="disney"] .sm-track > .sm-card:nth-child(5) { animation-delay:.2s; }
+  html[data-sm-mode="disney"] .sm-track > .sm-card:nth-child(n+6) { animation-delay:.25s; }
+  html[data-sm-mode="disney"] .sm-card::before { content:""; position:absolute; top:-20%; bottom:-20%; left:-60%; width:45%; z-index:2; pointer-events:none;
+    background:linear-gradient(100deg, transparent, rgba(255,255,255,.14) 50%, transparent); transform:skewX(-12deg); opacity:0; }
+  html[data-sm-mode="disney"] .sm-card:not(.skeleton):hover::before { animation:sm-sheen 1s ease-out both; }
   html[data-sm-mode="disney"] .sm-card-progress { left:6%; right:6%; bottom:7%; height:4px; border-radius:2px; background:rgba(249,249,249,.3); overflow:hidden; }
   html[data-sm-mode="disney"] .sm-card-progress i { background:#f9f9f9; }
 
@@ -1747,7 +1805,7 @@
   function brandTile(b, mode) {
     const bg = h('div', { class: 'sm-brand-bg' });
     const el = h('button', { type: 'button', class: 'sm-brand', 'aria-label': b.name.replace('\n', ' '),
-      onclick: () => openBrand(b.id) }, bg, brandName(b));
+      style: { '--i': String(mode.brands.indexOf(b)) }, onclick: () => openBrand(b.id) }, bg, h('div', { class: 'sm-shine' }), brandName(b));
     let loaded = false;
     el.addEventListener('mouseenter', () => {
       if (loaded) return;
@@ -2118,19 +2176,31 @@
   }
 
   // ---------- Destaque ----------
-  // Disney+: carrossel de capas largas com cantos arredondados, que passa sozinho e mostra as vizinhas nas bordas.
+  // Disney+: carrossel de capas largas com cantos arredondados. Os slides ficam empilhados no mesmo lugar e só o
+  // atual e os vizinhos aparecem (deslocados para os lados): uma trilha com todos lado a lado passa de 16 mil px e o
+  // Electron do Stremio deixa de desenhar camadas desse tamanho. Atrás, um brilho com as cores da arte atual.
+  // A troca acontece quando a pílula de progresso termina de encher (pausa com o mouse em cima ou com janela aberta).
   function buildCarousel(wrap, rows, sources) {
     const hero = h('section', { class: 'sm-carousel', 'aria-label': 'Destaques', 'aria-roledescription': 'carrossel' });
     wrap.appendChild(hero);
     let stopped = false;
-    let timer = null;
     let idx = 0;
-    heroCtl = { destroy() { stopped = true; clearInterval(timer); }, pause() {}, resume() {}, onScroll() {} };
+    heroCtl = {
+      destroy() { stopped = true; },
+      pause() { hero.classList.add('paused'); },
+      resume() { hero.classList.remove('paused'); },
+      onScroll(y) { hero.classList.toggle('offscreen', y > hero.offsetHeight * 0.8); },
+    };
     (async () => {
       const lists = await Promise.all(sources.map((src) => catalog(src.type, src.id).then((ms) => ms.slice(0, 8)).catch(() => [])));
       const pool = [];
       const seen = new Set();
-      for (let i = 0; i < 8 && pool.length < 10; i++) for (const l of lists) { const m = l[i]; if (m?.background && !seen.has(m.id) && pool.length < 10) { seen.add(m.id); pool.push(m); } }
+      for (let i = 0; i < 8 && pool.length < 10; i++) {
+        for (const l of lists) {
+          const m = l[i];
+          if (m?.background && !seen.has(m.id) && pool.length < 10) { seen.add(m.id); pool.push(m); }
+        }
+      }
       if (stopped) return;
       if (!pool.length) {
         hero.remove();
@@ -2138,35 +2208,59 @@
         rows.prepend(h('div', { class: 'sm-offline', text: offlineText() }));
         return;
       }
-      const track = h('div', { class: 'sm-car-track' });
+      const glowA = h('div', { class: 'sm-car-glow' });
+      const glowB = h('div', { class: 'sm-car-glow' });
+      const stage = h('div', { class: 'sm-car-stage' });
       const dots = h('div', { class: 'sm-car-dots' });
-      const go = (i) => {
-        idx = (i + pool.length) % pool.length;
-        track.style.transform = `translateX(calc(${-idx} * (100% + var(--car-gap))))`;
-        [...dots.children].forEach((d, j) => d.classList.toggle('on', j === idx));
-        [...track.children].forEach((el, j) => el.classList.toggle('on', j === idx));
-        clearInterval(timer);
-        timer = setInterval(() => {
-          if (!stopped && !hero.matches(':hover') && document.visibilityState === 'visible' && !modalEl) go(idx + 1);
-        }, 7000);
-      };
-      pool.forEach((it, i) => {
+      let glowFront = glowA;
+      const n = pool.length;
+      const slides = pool.map((it, i) => {
         const meta = [it.releaseInfo, ...(it.genres || []).slice(0, 2)].filter(Boolean).join(' • ');
-        const slide = h('div', { class: 'sm-car-slide', role: 'button', tabindex: '0', 'aria-label': it.name,
+        const slide = h('div', { class: 'sm-car-slide', role: 'button', tabindex: '-1', 'aria-label': it.name,
           onclick: () => (i === idx ? openModal(it) : go(i)),
           onkeydown: (e) => { if (e.key === 'Enter') openModal(it); } },
           h('div', { class: 'sm-car-img', style: { backgroundImage: cssUrl(it.background) } }),
+          h('div', { class: 'sm-car-shine' }),
           h('div', { class: 'sm-car-info' },
             logoOrTitle(it, 'sm-car-logo', 'sm-car-title'),
             meta ? h('div', { class: 'sm-car-meta', text: meta }) : null));
-        track.appendChild(slide);
-        dots.appendChild(h('button', { type: 'button', class: 'sm-car-dot', 'aria-label': `Destaque ${i + 1}`, onclick: () => go(i) }));
+        stage.appendChild(slide);
+        const fill = h('i');
+        fill.addEventListener('animationend', () => { if (!stopped && i === idx) go(idx + 1); });
+        dots.appendChild(h('button', { type: 'button', class: 'sm-car-dot', 'aria-label': `Destaque ${i + 1}`, onclick: () => go(i) }, fill));
+        return slide;
       });
-      hero.append(track,
+      function go(i) {
+        idx = (i + n) % n;
+        slides.forEach((el, j) => {
+          let d = (j - idx + n) % n;
+          if (d > n / 2) d -= n; // -1 = anterior, 0 = atual, 1 = próximo; o resto fica escondido
+          const near = Math.abs(d) <= 1;
+          el.classList.toggle('far', !near);
+          el.classList.toggle('on', d === 0);
+          el.tabIndex = d === 0 ? 0 : -1;
+          el.style.setProperty('--off', String(near ? d : Math.sign(d) * 2));
+        });
+        [...dots.children].forEach((dt, j) => {
+          dt.classList.toggle('on', j === idx);
+          const f = dt.firstChild; // reinicia a animação da pílula
+          f.style.animation = 'none';
+          void f.offsetWidth;
+          f.style.animation = '';
+        });
+        // Brilho: troca suave entre duas camadas com a arte em tamanho pequeno (desfocada no CSS).
+        const back = glowFront === glowA ? glowB : glowA;
+        back.style.backgroundImage = cssUrl(tmdbSize(pool[idx].background, 'w300') || pool[idx].background);
+        back.classList.add('show');
+        glowFront.classList.remove('show');
+        glowFront = back;
+      }
+      hero.append(glowA, glowB, h('div', { class: 'sm-car-view' }, stage),
         h('button', { type: 'button', class: 'sm-car-arrow l', 'aria-label': 'Anterior', onclick: () => go(idx - 1) }, icon('left')),
         h('button', { type: 'button', class: 'sm-car-arrow r', 'aria-label': 'Próximo', onclick: () => go(idx + 1) }, icon('right')),
         dots);
       go(0);
+      requestAnimationFrame(() => hero.classList.add('ready'));
     })();
   }
 
