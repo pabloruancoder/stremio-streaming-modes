@@ -88,6 +88,8 @@ export function upcoming(provider) {
         : none,
     ].map((p) => p.catch(() => ({ results: [] }))));
     const many = up.days ? 2 : 1;
+    const okLang = (x) => !up.langs || up.langs.includes(x.original_language);
+    for (const list of [newSeries, returning, movies, digital, theaters]) list.results = (list.results || []).filter(okLang);
     const pool = [
       ...(newSeries.results || []).slice(0, 14 * many).map((x) => ['series', x]),
       ...(returning.results || []).slice(0, 10 * many).map((x) => ['series', x]),

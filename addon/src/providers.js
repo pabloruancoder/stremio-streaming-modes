@@ -53,6 +53,18 @@ export const PROVIDERS = {
     originalMovies: { companies: '194232', since: '2019-11-01', allowTheatrical: true },
     upcoming: { days: 180, networks: '2552', movieCompanies: '194232' },
   },
+  prime: {
+    key: 'prime',
+    label: 'Prime Video',
+    tmdbProviderId: 119,
+    tmdbNetworkId: 1024, // rede "Prime Video" = séries originais
+    hasOfficialTop10: false,
+    // Filmes originais: Amazon Studios e Amazon MGM Studios (inclui os que passaram nos cinemas).
+    originalMovies: { companies: '20580|210099', since: '2016-01-01', allowTheatrical: true },
+    freshDays: { movie: 90, series: 60 },
+    // Em breve: só idiomas que costumam chegar ao Brasil (a Amazon tem muitos originais regionais).
+    upcoming: { days: 180, networks: '1024', movieCompanies: '20580|210099', langs: ['en', 'pt', 'es', 'fr', 'it', 'de', 'ko'] },
+  },
 };
 
 // Separador entre o nome do streaming e o nome da fileira.
