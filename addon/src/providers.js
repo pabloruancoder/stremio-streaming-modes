@@ -102,6 +102,7 @@ export const PROVIDERS = {
     tmdbProviderId: 307,
     tmdbNetworkId: '3290', // rede Globoplay = originais
     originalsMinVotes: 0, // séries brasileiras têm poucos votos no TMDB
+    cardShape: 'poster', // pôsteres verticais, como no app
     hasOfficialTop10: false,
     freshDays: { movie: 120, series: 90 },
     extraRows: [

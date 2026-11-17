@@ -260,10 +260,16 @@
 
   MODES.globoplay = topNavMode({
     key: 'globoplay', label: 'Globoplay', prep: 'no', accent: '#ff1e46', bg: '#0b0b0d', splash: 'Globoplay', provider: 'globoplay', prefix: 'Globoplay • ',
-    heroCatalogs: [{ type: 'series', id: 'globoplay.originals', kicker: 'Original Globoplay' }, { type: 'series', id: 'globoplay.novelas', kicker: 'Novela' },
-      { type: 'movie', id: 'globoplay.globofilmes', kicker: 'Globo Filmes' }],
-    navPages: [['home', 'Início'], ['series', 'Séries e novelas'], ['movies', 'Filmes'], ['new', 'Novidades'], ['mylist', 'Minha lista']],
+    heroCatalogs: [{ type: 'series', id: 'globoplay.novelas', kicker: 'Novela' }, { type: 'series', id: 'globoplay.originals', kicker: 'Série' },
+      { type: 'movie', id: 'globoplay.globofilmes', kicker: 'Filme' }],
+    navPages: [['home', 'Início'], ['novelas', 'Novelas'], ['series', 'Séries'], ['movies', 'Filmes'], ['new', 'Novidades'], ['mylist', 'Minha lista']],
+    portrait: true, // pôsteres verticais, como no app
+    moreLabel: 'Mostrar mais',
+    originalBadge: 'original globoplay',
+    rowTitles: { originals: 'Séries originais', novelas: 'Novelas', tvglobo: 'Na TV Globo', globofilmes: 'Filmes nacionais', 'new-series': 'Lançamentos mais recentes',
+      'trending-series': 'Em alta no Globoplay', '@genres': 'Escolha pelo gênero' },
     pages: {
+      novelas: ['@continue', 'novelas', 'tvglobo', '@because0', 'trending-series', 'br-series', 'drama-series', 'comedy-series'],
       home: ['@continue', 'originals', 'novelas', '@because0', 'trending-series', 'tvglobo', 'new-series', '@soon', 'globofilmes', 'br-movies',
         'trending-movies', 'comedy-series', 'drama-series', '@genres', 'reality-series', 'docu-series', 'kids-series', '@mylist', 'all-series', 'all-movies'],
       series: ['@continue', 'novelas', 'originals', 'tvglobo', '@because0', 'trending-series', 'new-series', 'br-series', 'drama-series',
@@ -282,9 +288,11 @@
   MODES.crunchyroll = topNavMode({
     key: 'crunchyroll', label: 'Crunchyroll', prep: 'na', accent: '#f47521', bg: '#000000', splash: 'Crunchyroll', provider: 'crunchyroll',
     prefix: 'Crunchyroll • ', portrait: true,
-    heroCatalogs: [{ type: 'series', id: 'crunchyroll.simulcast', kicker: 'Simulcast' }, { type: 'series', id: 'crunchyroll.trending-series', kicker: '' },
-      { type: 'movie', id: 'crunchyroll.anime-movies', kicker: 'Filme' }],
-    navPages: [['home', 'Início'], ['series', 'Animes'], ['movies', 'Filmes'], ['new', 'Novidades'], ['mylist', 'Minha lista']],
+    heroCatalogs: [{ type: 'series', id: 'crunchyroll.simulcast', kicker: '' }, { type: 'series', id: 'crunchyroll.trending-series', kicker: '' },
+      { type: 'movie', id: 'crunchyroll.anime-movies', kicker: '' }],
+    navPages: [['home', 'Início'], ['series', 'Explorar'], ['simulcasts', 'Simulcasts'], ['movies', 'Filmes'], ['mylist', 'Minhas listas']],
+    rowTitles: { simulcast: 'Simulcasts da temporada', 'trending-series': 'Mais populares', 'acclaimed-series': 'Mais bem avaliados', 'anime-movies': 'Filmes',
+      '@genres': 'Gêneros de anime' },
     pages: {
       home: ['@continue', 'simulcast', 'trending-series', '@because0', 'anime-action', 'anime-fantasy', '@genres', 'anime-comedy',
         'acclaimed-series', 'anime-drama', 'anime-mystery', 'anime-movies', '@mylist', 'all-series', 'all-movies'],
@@ -404,6 +412,8 @@
   const isApple = () => MODES[state.mode]?.layout === 'apple';
   const isPrime = () => MODES[state.mode]?.layout === 'prime';
   const isHbo = () => MODES[state.mode]?.layout === 'hbo';
+  const isCR = () => state.mode === 'crunchyroll';
+  const isGlobo = () => state.mode === 'globoplay';
   // Modos com interface própria (Disney+, Apple TV): sem prévia ao passar o mouse, detalhes em página inteira, trailer.
   const isCustom = () => isDisney() || isApple() || isPrime() || isHbo();
   const isBoardRoute = () => /^(#\/?)?$/.test(location.hash);
@@ -2198,6 +2208,103 @@
     background:linear-gradient(180deg, #fff 30%, #c9ccd6); -webkit-background-clip:text; background-clip:text; color:transparent; }
   .sm-hbo-intro span { font:800 clamp(3.4rem, 8.5vw, 6.8rem)/1 Inter, Arial, sans-serif; letter-spacing:-.06em; }
 
+  /* ===================== Globoplay (app 4.252, nov/2026) ===================== */
+  html[data-sm-mode="globoplay"] #sm-app { background:#0f0f10 !important; }
+  html[data-sm-mode="globoplay"] .sm-wordmark { font:800 1.55rem/1 Inter, Arial, sans-serif; letter-spacing:-.04em; text-transform:lowercase; }
+  html[data-sm-mode="globoplay"] .sm-links a.active { background:#fff; color:#0f0f10; }
+  /* Destaque em cartão com margens e cantos arredondados (não ocupa a largura toda) */
+  html[data-sm-mode="globoplay"] .sm-herowrap { padding:5.4rem var(--pad) 0; }
+  html[data-sm-mode="globoplay"] .sm-bill { height:min(62vh, 38vw); min-height:22rem; border-radius:14px; box-shadow:0 20px 50px rgba(0,0,0,.6); }
+  html[data-sm-mode="globoplay"] .sm-bill-slide::after { background:linear-gradient(90deg, rgba(10,10,12,.85) 0%, rgba(10,10,12,.35) 40%, rgba(10,10,12,0) 65%),
+    linear-gradient(0deg, rgba(10,10,12,.9) 0%, rgba(10,10,12,0) 50%); }
+  html[data-sm-mode="globoplay"] .sm-bill-info { left:2.6rem; bottom:2.4rem; width:min(32rem, 44%); }
+  html[data-sm-mode="globoplay"] .sm-bill-kicker { display:inline-flex; align-items:center; gap:.45rem; font-size:.78rem; font-weight:700; letter-spacing:0;
+    text-transform:none; color:#fff; }
+  html[data-sm-mode="globoplay"] .sm-bill-kicker::before { content:""; width:.95rem; height:.95rem; border-radius:3px; background:#ffd400; }
+  html[data-sm-mode="globoplay"] .sm-bill-logo { max-height:7rem; }
+  html[data-sm-mode="globoplay"] .sm-bill-title { font-size:clamp(1.6rem, 2.6vw, 2.6rem); }
+  html[data-sm-mode="globoplay"] .sm-bill-desc { -webkit-line-clamp:2; font-size:.92rem; }
+  html[data-sm-mode="globoplay"] .sm-bill-arrow, html[data-sm-mode="globoplay"] .sm-bill-mute { display:none; }
+  html[data-sm-mode="globoplay"] .sm-bill-pager { bottom:1.2rem; right:2rem; }
+  html[data-sm-mode="globoplay"] .sm-rows { margin-top:1.6rem; }
+  .sm-gp-go { display:inline-flex; align-items:center; gap:.5rem; height:2.6rem; padding:0 1.4rem 0 1.1rem !important; border-radius:999px !important;
+    background:#fff !important; color:#0f0f10; font:700 .95rem/1 inherit; cursor:pointer; }
+  .sm-gp-go:hover { background:#e2e2e2 !important; }
+  .sm-gp-go .sm-ico, .sm-gp-sec .sm-ico { width:1rem !important; height:1rem !important; }
+  .sm-gp-sec { display:inline-flex; align-items:center; gap:.45rem; height:2.6rem; padding:0 1.1rem !important; border-radius:999px !important;
+    background:rgba(255,255,255,.14) !important; color:#fff; font:600 .9rem/1 inherit; cursor:pointer; }
+  .sm-gp-sec:hover { background:rgba(255,255,255,.24) !important; }
+  html[data-sm-mode="globoplay"] .sm-row-title { font-size:clamp(.95rem, 1.15vw, 1.2rem); }
+  html[data-sm-mode="globoplay"] .sm-explore { color:#9a9a9f; font-weight:600; font-size:.82rem; }
+  html[data-sm-mode="globoplay"] .sm-explore:hover { color:#fff; text-decoration:none; }
+  html[data-sm-mode="globoplay"] .sm-card:not(.rank) { border-radius:6px; }
+  html[data-sm-mode="globoplay"] .sm-card:not(.rank):not(.skeleton):hover { transform:scale(1.05); box-shadow:0 0 0 2px #fff, 0 14px 30px rgba(0,0,0,.6); }
+  .sm-gp-badge { position:absolute; z-index:2; left:.4rem; top:.4rem; display:flex; flex-direction:column; align-items:flex-start; line-height:.95;
+    padding:.18rem .35rem; border-radius:3px; background:rgba(0,0,0,.55); color:#fff; }
+  .sm-gp-badge small { font-size:.5rem; font-weight:600; }
+  .sm-gp-badge b { font-size:.62rem; font-weight:800; letter-spacing:-.02em; background:linear-gradient(90deg, #ff3d3d, #ff8a00); -webkit-background-clip:text;
+    background-clip:text; color:transparent; }
+  html[data-sm-mode="globoplay"] .sm-track > .sm-xpl { flex-basis:calc(var(--cwp) * 1.7); height:calc(var(--cwp) * .95); border-radius:6px; }
+  html[data-sm-mode="globoplay"] .sm-btn-white { border-radius:999px !important; }
+  html[data-sm-mode="globoplay"] .sm-dlg-info .sm-btn, html[data-sm-mode="globoplay"] .sm-round { border-radius:999px !important; }
+  html[data-sm-mode="globoplay"] .sm-tab[aria-selected="true"]::after { background:#fff; }
+
+  /* ===================== Crunchyroll (app 4.124, nov/2026) ===================== */
+  html[data-sm-mode="crunchyroll"] { --l-accent:#ff640a; --l-accent-rgb:255,100,10; --smc-accent:#ff640a; }
+  html[data-sm-mode="crunchyroll"] #sm-app { background:#000 !important; }
+  html[data-sm-mode="crunchyroll"] .sm-wordmark { color:#ff640a; font-weight:800; }
+  html[data-sm-mode="crunchyroll"] .sm-links a { border-radius:0; padding:.5rem .4rem; margin:0 .4rem; text-transform:uppercase; font-size:.82rem; letter-spacing:.04em; }
+  html[data-sm-mode="crunchyroll"] .sm-links a:hover { background:none; color:#ff640a; }
+  html[data-sm-mode="crunchyroll"] .sm-links a.active { background:none; color:#fff; box-shadow:inset 0 -3px 0 #ff640a; }
+  html[data-sm-mode="crunchyroll"] .sm-nav.solid { background-color:#000; }
+  .sm-cr-go { display:inline-flex; align-items:center; gap:.55rem; height:2.8rem; padding:0 1.3rem 0 1rem !important; border-radius:0 !important;
+    background:#ff640a !important; color:#000; font:800 .88rem/1 inherit; text-transform:uppercase; letter-spacing:.02em; cursor:pointer; }
+  .sm-cr-go:hover { background:#ff7d2f !important; }
+  .sm-cr-go .sm-ico { width:1.1rem !important; height:1.1rem !important; }
+  html[data-sm-mode="crunchyroll"] .sm-bill-actions .sm-glass-round { border-radius:0 !important; background:none !important; box-shadow:inset 0 0 0 2px #ff640a !important;
+    color:#ff640a; -webkit-backdrop-filter:none; backdrop-filter:none; }
+  html[data-sm-mode="crunchyroll"] .sm-bill-actions .sm-glass-round:hover { background:rgba(255,100,10,.15) !important; }
+  html[data-sm-mode="crunchyroll"] .sm-bill-kicker { display:none; }
+  html[data-sm-mode="crunchyroll"] .sm-bill-dot { background:rgba(255,255,255,.35) !important; }
+  html[data-sm-mode="crunchyroll"] .sm-bill-dot i { background:#ff640a; }
+  html[data-sm-mode="crunchyroll"] .sm-bill-arrow { border-radius:0 !important; }
+  /* Pôster com título e informações embaixo */
+  html[data-sm-mode="crunchyroll"] .sm-track { padding-bottom:5rem; margin-bottom:-2rem; }
+  html[data-sm-mode="crunchyroll"] .sm-arrow { bottom:5rem; }
+  html[data-sm-mode="crunchyroll"] .sm-card:not(.rank) { border-radius:0; overflow:visible !important; }
+  html[data-sm-mode="crunchyroll"] .sm-card:not(.rank):not(.skeleton):hover { transform:none; box-shadow:none; }
+  .sm-cr-cap { position:absolute; left:0; right:0; top:calc(100% + .5rem); }
+  .sm-cr-name { font-size:.88rem; font-weight:600; color:#fff; line-height:1.25; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sm-cr-meta { margin-top:.2rem; font-size:.75rem; color:#a0a0a0; }
+  .sm-cr-hover { position:absolute; inset:0; z-index:3; display:flex; flex-direction:column; gap:.35rem; padding:.8rem; background:rgba(20,21,25,.95);
+    opacity:0; transition:opacity .2s; pointer-events:none; overflow:hidden; }
+  .sm-card:hover > .sm-cr-hover, .sm-card:focus-visible > .sm-cr-hover { opacity:1; pointer-events:auto; }
+  .sm-cr-hname { font-size:.95rem; font-weight:700; color:#fff; line-height:1.2; }
+  .sm-cr-hmeta { font-size:.75rem; color:#a0a0a0; }
+  .sm-cr-hdesc { margin:0; flex:1; font-size:.78rem; line-height:1.4; color:#dadada; display:-webkit-box; -webkit-line-clamp:7; -webkit-box-orient:vertical; overflow:hidden; }
+  .sm-cr-hbtns { display:flex; gap:.6rem; }
+  .sm-cr-icon { display:grid; place-items:center; width:2rem; height:2rem; padding:0 !important; color:#ff640a; cursor:pointer; }
+  .sm-cr-icon:hover { color:#ff8a45; }
+  .sm-cr-icon .sm-ico { width:1.35rem !important; height:1.35rem !important; }
+  html[data-sm-mode="crunchyroll"] .sm-grid .sm-card.portrait { margin-bottom:3.4rem; }
+  html[data-sm-mode="crunchyroll"] .sm-pv-check { display:none; }
+  /* Gêneros em blocos escurecidos com o nome no centro */
+  html[data-sm-mode="crunchyroll"] .sm-xpl { border-radius:0; align-items:center; justify-content:center; }
+  html[data-sm-mode="crunchyroll"] .sm-xpl-bg::after { background:rgba(0,0,0,.55); }
+  html[data-sm-mode="crunchyroll"] .sm-xpl-name { text-transform:uppercase; font-size:.85rem; letter-spacing:.06em; }
+  html[data-sm-mode="crunchyroll"] .sm-track > .sm-xpl { flex-basis:calc(var(--cwp) * 1.6); height:calc(var(--cwp) * .9); }
+  /* Detalhes */
+  html[data-sm-mode="crunchyroll"] .sm-dlg-info .sm-btn, html[data-sm-mode="crunchyroll"] .sm-round { border-radius:0 !important; }
+  html[data-sm-mode="crunchyroll"] .sm-btn-white { text-transform:uppercase; font-weight:800; }
+  html[data-sm-mode="crunchyroll"] .sm-tab { text-transform:uppercase; font-size:.85rem !important; letter-spacing:.05em; }
+  html[data-sm-mode="crunchyroll"] .sm-tab[aria-selected="true"] { color:#fff; }
+  html[data-sm-mode="crunchyroll"] .sm-tab[aria-selected="true"]::after { background:#ff640a; }
+  html[data-sm-mode="crunchyroll"] .sm-ep-img, html[data-sm-mode="crunchyroll"] .sm-sim-img, html[data-sm-mode="crunchyroll"] .sm-dd-btn { border-radius:0 !important; }
+  /* Simulcasts */
+  .sm-cr-sim .sm-page-title { margin-bottom:.4rem; }
+  .sm-cr-season { display:flex; align-items:center; gap:.4rem; margin:0 var(--pad) 1.6rem; color:#fff; font-weight:700; font-size:.95rem; }
+  .sm-cr-season .sm-ico { width:1rem !important; height:1rem !important; }
+
   /* Filmes / Séries com seletor de gênero */
   .sm-genre-head { display:flex; align-items:center; gap:1.4rem; margin:0 var(--pad) 1.6rem; overflow:visible !important; }
   .sm-genre-head .sm-page-title { margin:0; }
@@ -2869,6 +2976,7 @@
     if (state.page === 'new') return renderNews();
     if (state.page === 'brand') return renderBrand(mode);
     if (state.page === 'categories') return renderCategories(mode);
+    if (state.page === 'simulcasts') return renderSimulcasts(mode);
     if (state.page === 'originals' && mode.layout === 'disney') return renderOriginals(mode);
     if ((state.page === 'movies' || state.page === 'series') && mode.genres && !isKids()) return renderGenrePage(mode);
     const heroWrap = h('div');
@@ -2944,6 +3052,26 @@
     }
     setPage(state.brandPrev || 'home');
   }
+  // Crunchyroll: Simulcasts da temporada (inverno, primavera, verão, outono, como no Japão) em grade de pôsteres.
+  function animeSeason() {
+    const d = new Date();
+    const names = ['Inverno', 'Inverno', 'Inverno', 'Primavera', 'Primavera', 'Primavera', 'Verão', 'Verão', 'Verão', 'Outono', 'Outono', 'Outono'];
+    return `${names[d.getMonth()]} ${d.getFullYear()}`;
+  }
+  function renderSimulcasts(mode) {
+    const grid = h('div', { class: 'sm-grid sm-results' });
+    const token = {};
+    state.simToken = token;
+    app.appendChild(h('div', { class: 'sm-rows flat sm-explorepage sm-cr-sim' },
+      h('h1', { class: 'sm-page-title', text: 'Simulcasts' }),
+      h('div', { class: 'sm-cr-season' }, icon('down'), h('span', { text: animeSeason() })),
+      grid));
+    let skip = 0;
+    infiniteGrid(grid, () => addon(`/catalog/series/${encodeURIComponent(`${mode.provider}.simulcast`)}${skip ? `/skip=${skip}` : ''}.json`)
+      .then((d) => { const metas = d.metas || []; skip += metas.length; return { metas, more: metas.length > 0 }; }),
+    { stop: () => state.page !== 'simulcasts' || state.simToken !== token });
+  }
+
   // HBO Max: "Categorias" com as marcas em círculos e os gêneros em blocos.
   function renderCategories(mode) {
     app.appendChild(h('div', { class: 'sm-rows flat sm-catpage' },
@@ -3614,6 +3742,12 @@
             it.description ? h('p', { class: 'sm-bill-desc', text: it.description }) : null,
             isHbo() ? h('div', { class: 'sm-bill-actions' },
               h('button', { type: 'button', class: 'sm-hbo-go', onclick: () => openModal(it) }, it.type === 'movie' ? 'Ir para o filme' : 'Ir para a série'))
+            : isCR() ? h('div', { class: 'sm-bill-actions' },
+              h('button', { type: 'button', class: 'sm-cr-go', onclick: () => play(it) }, icon('play'), it.type === 'movie' ? 'Assistir' : 'Começar a assistir E1'),
+              listBtn)
+            : isGlobo() ? h('div', { class: 'sm-bill-actions' },
+              h('button', { type: 'button', class: 'sm-gp-go', onclick: () => play(it) }, icon('play', true), 'Assista'),
+              h('button', { type: 'button', class: 'sm-gp-sec', onclick: () => openModal(it) }, icon('info'), 'Detalhes'))
             : h('div', { class: 'sm-bill-actions' },
               h('button', { type: 'button', class: 'sm-pill', onclick: () => play(it) }, icon('play', true), 'Assistir'),
               listBtn,
@@ -3820,7 +3954,7 @@
         if (key === '@genres') {
           const list = (mode.explore || []).filter(([t]) => !typeFilter || t === typeFilter);
           if (list.length) {
-            row = makeRow('Gêneros', () => Promise.resolve(list), { render: ([t, id, label]) => genreTile(mode, t, id, label) });
+            row = makeRow(mode.rowTitles?.['@genres'] || 'Gêneros', () => Promise.resolve(list), { render: ([t, id, label]) => genreTile(mode, t, id, label) });
           }
         } else if (key === '@brands') {
           if (mode.brands?.length) row = brandsRow(mode);
@@ -3858,6 +3992,7 @@
           row = makeRow(name, () => catalog(c.type, c.id), {
             rank: isTop,
             onExplore: isTop ? null : () => openExplore(c, name),
+            badge: key === 'originals' ? mode.originalBadge : null,
           });
         }
         if (row) {
@@ -3881,10 +4016,11 @@
     const dashes = h('div', { class: 'sm-dashes' });
     const head = h('div', { class: 'sm-row-head' },
       h('h2', { class: 'sm-row-title', text: title }),
-      opts.onExplore && !isApple() && !isHbo() ? h('a', { class: 'sm-explore', onclick: opts.onExplore }, isDisney() ? 'VER TUDO' : isPrime() ? 'Ver mais' : 'Explorar tudo ›') : null,
+      opts.onExplore && !isApple() && !isHbo() && !isCR() ? h('a', { class: 'sm-explore', onclick: opts.onExplore },
+        isDisney() ? 'VER TUDO' : MODES[state.mode].moreLabel ? `${MODES[state.mode].moreLabel} ›` : isPrime() ? 'Ver mais' : 'Explorar tudo ›') : null,
       dashes);
     // Apple TV: o título da fileira é o link ("Em alta ›").
-    if ((isApple() || isHbo()) && opts.onExplore) {
+    if ((isApple() || isHbo() || isCR()) && opts.onExplore) {
       const t = head.querySelector('.sm-row-title');
       t.classList.add('link');
       t.appendChild(icon('right'));
@@ -3961,7 +4097,25 @@
       });
       el.appendChild(kebab);
     }
-    if (isPrime() && !opts.progress) {
+    // Globoplay: selo "original globoplay" nos originais.
+    if (opts.badge) el.appendChild(h('div', { class: 'sm-gp-badge' }, h('small', { text: opts.badge.split(' ')[0] }), h('b', { text: opts.badge.split(' ').slice(1).join(' ') })));
+    // Crunchyroll: título e informações embaixo do pôster e, ao passar o mouse, a sinopse com Assistir e Minha lista.
+    if (isCR() && !opts.progress) {
+      const meta = [item.releaseInfo, item.type === 'movie' ? 'Filme' : 'Série'].filter(Boolean).join(' · ');
+      const listBtn = h('button', { type: 'button', class: 'sm-cr-icon', 'aria-label': 'Minha lista' });
+      const setList = () => listBtn.replaceChildren(icon(inMyList(item.id) ? 'check' : 'plus'));
+      setList();
+      listBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleMyList(item); setTimeout(setList, 400); });
+      const playBtn = h('button', { type: 'button', class: 'sm-cr-icon play', 'aria-label': 'Assistir' }, icon('play', true));
+      playBtn.addEventListener('click', (e) => { e.stopPropagation(); play(item); });
+      el.appendChild(h('div', { class: 'sm-cr-hover' },
+        h('div', { class: 'sm-cr-hname', text: item.name }),
+        h('div', { class: 'sm-cr-hmeta', text: [item.rating ? `★ ${item.rating}` : null, meta].filter(Boolean).join('  ·  ') }),
+        item.description ? h('p', { class: 'sm-cr-hdesc', text: item.description }) : null,
+        h('div', { class: 'sm-cr-hbtns' }, playBtn, listBtn)));
+      el.appendChild(h('div', { class: 'sm-cr-cap' }, h('div', { class: 'sm-cr-name', text: item.name }), h('div', { class: 'sm-cr-meta', text: meta })));
+    }
+    if (isPrime() && !opts.progress && !isCR() && !isGlobo()) {
       const meta = [item.releaseInfo, item.rating ? `★ ${item.rating}` : null, item.type === 'movie' ? 'Filme' : 'Série'].filter(Boolean).join('  ·  ');
       const playBtn = h('button', { type: 'button', class: 'sm-pv-play', 'aria-label': `Assistir ${item.name}` }, icon('play', true));
       playBtn.addEventListener('click', (e) => { e.stopPropagation(); play(item); });
@@ -4361,7 +4515,9 @@
     // Disney+: as seções viram abas. Fora dela, addSection só acrescenta a seção.
     const TAB_ORDER = ['eps', 'sim', 'det'];
     const tabs = isDisney() || isPrime() || isHbo() ? h('div', { class: 'sm-tabs', role: 'tablist' }) : null;
-    const TAB_NAMES = isPrime() ? { eps: 'Episódios', sim: 'Relacionados', det: 'Detalhes', cast: 'Elenco' }
+    const TAB_NAMES = isGlobo() ? { eps: 'Episódios', sim: 'Similares', det: 'Detalhes', cast: 'Elenco' }
+      : isCR() ? { eps: 'Episódios', sim: 'Mais como este', det: 'Detalhes', cast: 'Elenco' }
+      : isPrime() ? { eps: 'Episódios', sim: 'Relacionados', det: 'Detalhes', cast: 'Elenco' }
       : isHbo() ? { eps: 'Episódios', sim: 'Mais como este', det: 'Detalhes', cast: 'Elenco' } : null;
     let tabChosen = false;
     const setTab = (key, byUser) => {
