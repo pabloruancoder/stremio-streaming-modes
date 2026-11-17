@@ -44,15 +44,16 @@ async function upcomingItem(type, base, release) {
   if ((d.genres || []).some((g) => [10763, 10766, 10767].includes(g.id))) return null; // jornal, novela, talk show
   if (!date || date < day(0)) return null;
   const imdb = await imdbIdFor(type, base.id).catch(() => null);
-  const backdrop = d.backdrop_path || base.backdrop_path;
-  if (!backdrop) return null;
+  // Sem imagem horizontal (comum em estreias anunciadas há pouco), usa o pôster, que o card recorta.
+  // Sem nenhuma imagem ainda, a estreia aparece mesmo assim (o card mostra o nome sobre um fundo neutro).
+  const backdrop = d.backdrop_path || base.backdrop_path || d.poster_path || base.poster_path;
   return {
     id: imdb || `tmdb:${t}:${base.id}`,
     type,
     name: d.title || d.name,
     description: d.overview || undefined,
-    background: `${IMG}/w1280${backdrop}`,
-    poster: `${IMG}/w780${backdrop}`,
+    background: backdrop ? `${IMG}/w1280${backdrop}` : undefined,
+    poster: backdrop ? `${IMG}/w780${backdrop}` : undefined,
     posterShape: 'landscape',
     logo: pickLogo(d.images) || (imdb ? `https://images.metahub.space/logo/medium/${imdb}/img` : undefined),
     genres: (d.genres || []).map((g) => GENRE_PT[g.name] || g.name).slice(0, 3),

@@ -1508,6 +1508,10 @@
   html[data-sm-mode="apple"] .sm-track > .sm-xpl { flex-basis:calc(var(--cwp) * 1.6); height:calc(var(--cwp) * .9); }
   html[data-sm-mode="apple"] .sm-xpl-name { font-size:1.15rem; }
 
+  /* Estreia anunciada sem imagem ainda: nome sobre um fundo neutro */
+  .sm-up.noimg { background:radial-gradient(ellipse at 30% 20%, rgba(var(--smc-accent-rgb),.35), transparent 60%), linear-gradient(135deg, var(--smc-bg3), var(--smc-bg2)) !important; }
+  .sm-up.noimg .sm-card-name { font-size:clamp(1rem, 1.4vw, 1.5rem); }
+
   /* Elenco e equipe: fotos redondas numa fileira */
   .sm-cast { display:flex; gap:1.6rem; overflow-x:auto !important; overflow-y:visible !important; padding:.4rem .2rem 1rem; scrollbar-width:none; }
   .sm-cast::-webkit-scrollbar { display:none; }
@@ -4187,8 +4191,9 @@
   // Capa de estreia: data no canto, "Chega sexta-feira" embaixo e o sininho de lembrete.
   function upcomingCard(it) {
     const when = new Date(`${it.date}T12:00:00`);
-    const el = h('div', { class: 'sm-card sm-up', tabindex: '0', role: 'button', 'aria-label': `${it.name}, ${arrivalLabel(it.date)}`,
-      style: { backgroundImage: cssUrl(it.poster || it.background) } },
+    const img = it.poster || it.background;
+    const el = h('div', { class: img ? 'sm-card sm-up' : 'sm-card sm-up noimg', tabindex: '0', role: 'button', 'aria-label': `${it.name}, ${arrivalLabel(it.date)}`,
+      style: img ? { backgroundImage: cssUrl(img) } : null },
     h('div', { class: 'sm-up-date' },
       h('b', { text: String(when.getDate()) }),
       h('span', { text: when.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '').toUpperCase() })),
