@@ -780,7 +780,19 @@
   .sm-field { display:block; padding:.4rem .7rem .6rem; font-size:.76rem; opacity:.85; }
   .sm-field input { display:block; width:100%; margin-top:.35rem; padding:.45rem .55rem; border-radius:.3rem;
     border:1px solid rgba(255,255,255,.15); background:#0b0b0b; color:#fff; font:inherit; font-size:.85rem; }
-  .sm-toggle { display:flex; align-items:center; gap:.5rem; padding:.45rem .7rem; font-size:.8rem; cursor:pointer; opacity:.85; }
+  .sm-toggle { display:flex; align-items:center; gap:.7rem; padding:.55rem .7rem; font-size:.8rem; cursor:pointer; opacity:.9; border-radius:8px; }
+  .sm-toggle:hover { background:rgba(255,255,255,.06); opacity:1; }
+  /* Interruptor (o CSS do Stremio esconde a caixa de marcar padrão com appearance:none) */
+  .sm-toggle input[type="checkbox"] { -webkit-appearance:none !important; appearance:none !important; flex:none; position:relative; width:2.4rem !important;
+    height:1.35rem !important; margin:.1rem 0 0 !important; border-radius:999px !important; background:#4a4a52 !important; cursor:pointer;
+    transition:background .2s; overflow:visible !important; }
+  .sm-toggle input[type="checkbox"]::after { content:""; position:absolute; top:.15rem; left:.15rem; width:1.05rem; height:1.05rem; border-radius:50%;
+    background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.4); transition:transform .2s cubic-bezier(.2,.8,.2,1); }
+  .sm-toggle input[type="checkbox"]:checked { background:#2fbf5b !important; }
+  .sm-toggle input[type="checkbox"]:checked::after { transform:translateX(1.05rem); }
+  .sm-toggle input[type="checkbox"]:focus-visible { outline:2px solid #fff; outline-offset:2px; }
+  .sm-all-badge { margin-left:.1rem; padding:.1rem .4rem; border-radius:999px; background:#2fbf5b; color:#04150a; font-size:.62rem; font-weight:800;
+    letter-spacing:.02em; text-transform:uppercase; }
   .sm-hint { padding:.2rem .7rem .4rem; font-size:.7rem; opacity:.45; }
   .sm-status { display:flex; gap:.5rem; align-items:flex-start; padding:0 .7rem .5rem; font-size:.74rem; line-height:1.35; max-width:19rem; }
   .sm-status-dot { flex:none; width:.55rem; height:.55rem; margin-top:.3rem; border-radius:50%; background:#888; }
@@ -2611,8 +2623,10 @@
   function fillSwitcher(btn) {
     const mode = MODES[state.mode];
     btn.style.setProperty('--sm-accent', mode.accent);
-    btn.replaceChildren(MODE_LOGOS[mode.key] ? modeIcon(mode, 'sm-mode-logo sm') : h('span', { class: 'sm-dot' }),
-      h('span', { text: mode.key === 'stremio' ? 'Modo' : mode.label }), icon('down'));
+    btn.replaceChildren(...[MODE_LOGOS[mode.key] ? modeIcon(mode, 'sm-mode-logo sm') : h('span', { class: 'sm-dot' }),
+      h('span', { text: mode.key === 'stremio' ? 'Modo' : mode.label }),
+      state.allContent && mode.provider ? h('span', { class: 'sm-all-badge', title: 'Mostrando conteúdo de todos os streamings', text: 'Todos' }) : null,
+      icon('down')].filter(Boolean));
   }
   const refreshSwitchers = () => document.querySelectorAll('.sm-switch').forEach(fillSwitcher);
 
@@ -2647,6 +2661,7 @@
       state.allContent = cbAll.checked;
       store.set('allContent', cbAll.checked);
       applyRootAttrs();
+      refreshSwitchers();
       closeMenu();
       if (MODES[state.mode].provider) rebuildApp();
     });
