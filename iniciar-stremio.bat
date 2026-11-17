@@ -13,6 +13,23 @@ if errorlevel 1 (
   echo Addon ja esta rodando.
 )
 
+rem 1b) O ffmpeg do Stremio Service vem sem as DLLs e nao roda; sem ele, audio Dolby (AC3/DDP/E-AC3)
+rem     e DTS fica mudo no player. Copia as DLLs do Stremio normal, se estiver instalado. Se acabou de copiar,
+rem     reinicia o servico para ele passar a usar o ffmpeg.
+set "SVC=%LOCALAPPDATA%\Programs\StremioService"
+set "DESK=%LOCALAPPDATA%\Programs\Stremio"
+set "FIXED="
+if exist "%DESK%vcodec-58.dll" if not exist "%SVC%vcodec-58.dll" (
+  echo Corrigindo o ffmpeg do Stremio Service ^(audio Dolby^)...
+  for %%D in (avcodec-58 avdevice-58 avfilter-7 avformat-58 avutil-56 postproc-55 swresample-3 swscale-5) do (
+    if not exist "%SVC%\%%D.dll" copy /y "%DESK%\%%D.dll" "%SVC%\" >nul
+  )
+  set "FIXED=1"
+  taskkill /f /im stremio-service.exe >nul 2>&1
+  taskkill /f /im stremio-runtime.exe >nul 2>&1
+  timeout /t 2 /nobreak >nul
+)
+
 rem 2) Stremio Service (necessario para assistir). Confere a porta 11470 e nao so o processo:
 rem    as vezes o stremio-service.exe fica aberto com o servidor de streaming caido por dentro,
 rem    e ai todo video da "Video is not supported". Nesse caso, reinicia o servico.
