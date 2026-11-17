@@ -55,8 +55,9 @@
     disney: {
       key: 'disney',
       label: 'Disney+',
-      accent: '#1f80e0',
-      bg: '#0f1322',
+      layout: 'disney', // menu lateral, carrossel, blocos de marca e página de detalhes da Disney+
+      accent: '#0063e5',
+      bg: '#1a1d29',
       splash: 'DISNEY+',
       wordmark: 'STREMIO',
       provider: 'disney',
@@ -67,26 +68,27 @@
         { type: 'series', id: 'disney.trending-series' },
       ],
       // Blocos de marca da tela inicial; cada um abre uma página com os filmes e séries daquela marca.
+      // Como no app: todos os blocos no mesmo cinza-azulado, com o nome da marca em branco.
       brands: [
-        { id: 'disney', name: 'Disney', colors: ['#0b1d63', '#2a6fdb'], font: 'italic 700 1em Georgia, "Times New Roman", serif' },
-        { id: 'pixar', name: 'PIXAR', colors: ['#0d3b66', '#3fa9f5'], font: '900 1em "Arial Black", Arial, sans-serif', spacing: '.08em' },
-        { id: 'marvel', name: 'MARVEL', colors: ['#8c0b10', '#ec1d24'], font: '900 1.05em Impact, "Arial Black", sans-serif', spacing: '.02em' },
-        { id: 'starwars', name: 'STAR WARS', colors: ['#050505', '#2b2b2b'], color: '#ffe81f', font: '900 .9em "Arial Black", Arial, sans-serif', spacing: '.12em' },
-        { id: 'natgeo', name: 'NATIONAL GEOGRAPHIC', colors: ['#141414', '#2e2a12'], color: '#fff', font: '700 .62em Arial, sans-serif', spacing: '.14em', frame: '#ffce00' },
-        { id: 'star', name: 'Star', colors: ['#3b0a57', '#c2185b'], font: '700 1.1em "Segoe UI", Arial, sans-serif', spacing: '.02em' },
+        { id: 'disney', name: 'Disney', font: 'italic 700 1.05em Georgia, "Times New Roman", serif' },
+        { id: 'pixar', name: 'PIXAR', font: '900 1em "Arial Black", Arial, sans-serif', spacing: '.06em' },
+        { id: 'marvel', name: 'MARVEL', font: '900 1.1em Impact, "Arial Black", sans-serif', spacing: '.01em', box: true },
+        { id: 'starwars', name: 'STAR\nWARS', font: '900 .85em "Arial Black", Arial, sans-serif', spacing: '.14em' },
+        { id: 'natgeo', name: 'NATIONAL\nGEOGRAPHIC', font: '700 .5em Arial, sans-serif', spacing: '.16em', frame: true },
+        { id: 'hulu', name: 'hulu', font: '800 1.25em "Arial Rounded MT Bold", "Segoe UI", Arial, sans-serif', spacing: '-.02em' },
       ],
       pages: {
         home: ['@continue', '@brands', 'recent-movies', '@because0', 'originals', 'trending-movies', 'recent-series', '@soon',
           'trending-series', '@mylist', '@because1', 'new-movies', 'new-series', 'brand-marvel-movies', 'brand-pixar-movies',
           'brand-disney-movies', 'brand-starwars-series', 'acclaimed-movies', 'acclaimed-series', 'animation-movies',
-          'action-movies', 'comedy-movies', 'brand-star-series', 'drama-series', 'scifi-series', 'brand-natgeo-series',
+          'action-movies', 'comedy-movies', 'brand-hulu-series', 'drama-series', 'scifi-series', 'brand-natgeo-series',
           'docs', 'kids-movies', 'all-series', 'all-movies'],
         series: ['@continue', '@brands', 'recent-series', '@because0', 'originals', 'trending-series', 'new-series',
-          'acclaimed-series', 'brand-marvel-series', 'brand-starwars-series', 'brand-star-series', 'drama-series',
+          'acclaimed-series', 'brand-marvel-series', 'brand-starwars-series', 'brand-hulu-series', 'drama-series',
           'comedy-series', 'action-series', 'scifi-series', 'mystery-series', 'crime-series', 'anime-series',
           'docu-series', 'brand-natgeo-series', 'reality-series', 'all-series'],
         movies: ['@continue', '@brands', 'recent-movies', '@because1', 'new-movies', 'trending-movies', 'acclaimed-movies',
-          'brand-marvel-movies', 'brand-pixar-movies', 'brand-disney-movies', 'brand-starwars-movies', 'brand-star-movies',
+          'brand-marvel-movies', 'brand-pixar-movies', 'brand-disney-movies', 'brand-starwars-movies', 'brand-hulu-movies',
           'animation-movies', 'action-movies', 'comedy-movies', 'scifi-movies', 'thriller-movies', 'horror-movies',
           'romance-movies', 'brand-natgeo-movies', 'docs', 'all-movies'],
         new: ['recent-movies', 'recent-series', 'new-movies', 'new-series', 'trending-series', 'trending-movies'],
@@ -155,6 +157,11 @@
   // Ícones fixos (SVG estático, sem dados externos).
   const SVG_NS = 'http://www.w3.org/2000/svg';
   const ICONS = {
+    home: 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z',
+    film: 'M4 4h16v16H4zM8 4v16M16 4v16M4 9h4M4 15h4M16 9h4M16 15h4',
+    tv: 'M3 6h18v12H3zM8 21h8M8 2l4 4 4-4',
+    star: 'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z',
+    sparkle: 'M12 3v5M12 16v5M3 12h5M16 12h5M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6',
     play: 'M6 4v16a1 1 0 0 0 1.52.85l13-8a1 1 0 0 0 0-1.7l-13-8A1 1 0 0 0 6 4z',
     plus: 'M12 5v14M5 12h14',
     check: 'M5 12.5l4.5 4.5L19 7.5',
@@ -194,6 +201,7 @@
     return svg;
   }
 
+  const isDisney = () => MODES[state.mode]?.layout === 'disney';
   const isBoardRoute = () => /^(#\/?)?$/.test(location.hash);
   // Texto buscado quando a rota é a busca do Stremio (#/search?search=...); null fora dela.
   const searchQuery = () => {
@@ -512,8 +520,8 @@
     --smc-bg:#141414; --smc-bg-rgb:20,20,20; --smc-bg2:#181818; --smc-bg3:#262626;
   }
   html[data-sm-mode="disney"] {
-    --smc-accent:#1f80e0; --smc-accent-rgb:31,128,224; --smc-accent-dark:#0b3d91;
-    --smc-bg:#0f1322; --smc-bg-rgb:15,19,34; --smc-bg2:#161b2e; --smc-bg3:#222a42;
+    --smc-accent:#0063e5; --smc-accent-rgb:0,99,229; --smc-accent-dark:#0047a6;
+    --smc-bg:#1a1d29; --smc-bg-rgb:26,29,41; --smc-bg2:#232633; --smc-bg3:#30333f;
   }
   /* ---------- Seletor de modo ---------- */
   .sm-switch { display:flex; align-items:center; gap:.5rem; height:2.4rem; padding:0 .9rem; margin-right:.5rem;
@@ -1092,26 +1100,214 @@
   .sm-up-when b { color:#46d369; }
   .sm-up-when span { color:#d2d2d2; }
   .sm-up-kind { padding:.1rem .45rem; border:1px solid rgba(255,255,255,.4); border-radius:3px; }
-  /* Blocos de marca (Disney+) */
-  .sm-brands { display:grid; grid-template-columns:repeat(6, 1fr); gap:var(--gap); margin:0 var(--pad) 3vw; }
-  .sm-brand { position:relative; aspect-ratio:16/9; display:grid; place-items:center; padding:0 .6rem; border:2px solid var(--bf);
-    border-radius:.6rem; background:linear-gradient(135deg, var(--b1), var(--b2)); color:#fff; cursor:pointer; overflow:hidden;
-    font-size:clamp(.9rem, 1.7vw, 2rem); box-shadow:0 18px 30px -12px rgba(0,0,0,.7);
-    transition:transform .25s cubic-bezier(.2,.8,.2,1), border-color .25s, box-shadow .25s; }
-  .sm-brand::after { content:""; position:absolute; inset:0; background:radial-gradient(ellipse at 30% 0%, rgba(255,255,255,.22), transparent 60%); pointer-events:none; }
-  .sm-brand:hover, .sm-brand:focus-visible { transform:scale(1.05); border-color:rgba(249,249,249,.85); outline:none;
-    box-shadow:0 26px 36px -14px rgba(0,0,0,.8); }
-  .sm-brand-name { position:relative; z-index:1; text-align:center; line-height:1.05; text-shadow:0 2px 10px rgba(0,0,0,.35); }
-  .sm-brand.big { width:min(17rem, 40vw); font-size:clamp(1.2rem, 2.4vw, 2.6rem); cursor:default; }
-  .sm-brand-head { margin-bottom:1rem; }
+  /* ===================== Visual Disney+ ===================== */
+  /* Fundo, fonte e espaço do menu lateral */
+  html[data-sm-mode="disney"] #sm-app, html[data-sm-mode="disney"] #sm-modal, html[data-sm-mode="disney"] #sm-profiles,
+  html[data-sm-mode="disney"] .sm-menu, html[data-sm-mode="disney"] .sm-intro.disney {
+    font-family:"Avenir Next", Avenir, "Nunito Sans", "Segoe UI", Arial, sans-serif; }
+  html[data-sm-mode="disney"] #sm-app { --rail:5.6rem; --pad:3.2vw; --gap:1.4vw; padding-left:var(--rail); color:#f9f9f9;
+    --cw:calc((100vw - var(--rail) - var(--pad) * 2 - var(--gap) * (var(--per) - 1)) / var(--per));
+    background:radial-gradient(ellipse 70% 45% at 75% 0%, rgba(39,58,112,.42), transparent 70%),
+      radial-gradient(ellipse 60% 40% at 0% 100%, rgba(26,40,82,.35), transparent 70%), linear-gradient(180deg, #1a1d29 0%, #13151f 100%); }
+  @media (min-width:1400px) { html[data-sm-mode="disney"] #sm-app { --per:5; } }
+
+  /* Menu lateral: ícones; ao passar o mouse aparecem os nomes sobre um degradê escuro */
+  .sm-rail { position:fixed; left:0; top:0; bottom:0; z-index:40; width:var(--rail); display:flex; flex-direction:column; align-items:stretch;
+    padding:1.3rem 0 1.2rem; box-sizing:border-box; }
+  .sm-rail::before { content:""; position:absolute; left:0; top:0; bottom:0; width:max(26rem, 34vw); z-index:-1; pointer-events:none; opacity:0;
+    background:linear-gradient(90deg, rgba(10,11,16,.97) 0%, rgba(10,11,16,.88) 45%, rgba(10,11,16,0) 100%); transition:opacity .3s ease; }
+  .sm-rail:hover::before, .sm-rail:focus-within::before { opacity:1; }
+  .sm-rail-logo { display:flex; flex-direction:column; align-items:center; gap:.1rem; margin:0 auto 2.4rem; color:#f9f9f9; cursor:pointer; user-select:none; }
+  .sm-rail-logo svg { width:3.2rem; height:1.25rem; filter:drop-shadow(0 0 6px rgba(127,196,255,.75)); }
+  .sm-rail-logo span { margin-top:-.35rem; font:800 .74rem/1 "Nunito Sans", "Avenir Next", Arial, sans-serif; letter-spacing:.2em; }
+  .sm-rail-items { display:flex; flex-direction:column; gap:.35rem; flex:1; justify-content:center; }
+  .sm-rail-item { position:relative; display:flex; align-items:center; gap:1.6rem; height:3.2rem; padding:0 0 0 2.05rem; border:0; background:none;
+    color:rgba(249,249,249,.62); cursor:pointer; font:inherit; white-space:nowrap; transition:color .2s; }
+  .sm-rail-item .sm-ico { width:1.55rem !important; height:1.55rem !important; flex:none; transition:transform .2s; }
+  .sm-rail-label { font-size:1.15rem; font-weight:600; letter-spacing:.01em; opacity:0; transform:translateX(-.6rem); pointer-events:none;
+    transition:opacity .25s ease, transform .25s ease; }
+  .sm-rail:hover .sm-rail-label, .sm-rail:focus-within .sm-rail-label { opacity:1; transform:none; pointer-events:auto; }
+  .sm-rail-item:hover, .sm-rail-item:focus-visible { color:#f9f9f9; outline:none; }
+  .sm-rail-item:hover .sm-ico { transform:scale(1.08); }
+  .sm-rail-item.active { color:#f9f9f9; }
+  .sm-rail-item.active .sm-rail-label { font-weight:800; }
+  .sm-rail-item.active::after { content:""; position:absolute; left:2.05rem; bottom:.25rem; width:1.55rem; height:2px; border-radius:2px; background:#f9f9f9; }
+  .sm-rail-bottom { display:flex; flex-direction:column; align-items:center; gap:.9rem; }
+  .sm-rail .sm-switch { width:2.4rem; height:2.4rem; padding:0; margin:0; justify-content:center; border-radius:50%; background:rgba(255,255,255,.08); }
+  .sm-rail .sm-switch > span:not(.sm-dot), .sm-rail .sm-switch > .sm-ico { display:none; }
+  .sm-rail .sm-profile > .sm-ico { display:none; }
+  .sm-rail .sm-av-nav { width:2.6rem; height:2.6rem; border-radius:50%; box-shadow:0 0 0 2px rgba(249,249,249,.25); }
+  .sm-rail .sm-pop { left:calc(100% + .9rem); right:auto; top:auto; bottom:0; background:#232633; }
+  .sm-rail .sm-pop::before { display:none; }
+
+  /* Carrossel de destaque */
+  .sm-carousel { --car-gap:1.2vw; position:relative; padding:1.6rem var(--pad) 0; overflow:hidden; }
+  .sm-car-track { display:flex; gap:var(--car-gap); transition:transform .7s cubic-bezier(.25,.8,.25,1); }
+  .sm-car-slide { position:relative; flex:0 0 100%; aspect-ratio:3.25/1; min-height:15rem; border-radius:.55rem; overflow:hidden; cursor:pointer;
+    background:#0d0f16; outline:3px solid rgba(249,249,249,.08); outline-offset:-3px;
+    box-shadow:rgba(0,0,0,.69) 0 26px 30px -10px, rgba(0,0,0,.73) 0 16px 10px -10px; transition:outline-color .3s, opacity .5s; }
+  .sm-car-slide.on:hover, .sm-car-slide:focus-visible { outline-color:rgba(249,249,249,.8); }
+  .sm-car-img { position:absolute; inset:0; background:center 25%/cover no-repeat; transition:transform 7s ease-out; }
+  .sm-car-slide.on .sm-car-img { transform:scale(1.04); }
+  .sm-car-slide::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg, rgba(0,0,0,.72) 0%, rgba(0,0,0,.35) 32%, transparent 58%); }
+  .sm-car-info { position:absolute; z-index:1; left:4.5%; top:0; bottom:0; width:34%; display:flex; flex-direction:column; justify-content:center; gap:.8rem; }
+  .sm-car-logo { max-width:100%; max-height:55%; object-fit:contain; object-position:left center; filter:drop-shadow(0 2px 12px rgba(0,0,0,.5)); }
+  .sm-car-title { font-size:clamp(1.6rem, 3vw, 3.2rem); font-weight:800; line-height:1.05; text-shadow:0 2px 14px rgba(0,0,0,.6); }
+  .sm-car-meta { font-size:clamp(.8rem, .95vw, 1.05rem); font-weight:600; color:rgba(249,249,249,.85); text-shadow:0 1px 6px rgba(0,0,0,.6); }
+  .sm-car-arrow { position:absolute; top:1.6rem; bottom:0; z-index:2; width:var(--pad); display:grid; place-items:center; border:0; padding:0;
+    background:none; color:#f9f9f9; cursor:pointer; opacity:0; transition:opacity .25s; }
+  .sm-car-arrow.l { left:0; } .sm-car-arrow.r { right:0; }
+  .sm-car-arrow .sm-ico { width:2rem !important; height:2rem !important; filter:drop-shadow(0 0 6px rgba(0,0,0,.8)); }
+  .sm-carousel:hover .sm-car-arrow { opacity:1; }
+  .sm-car-dots { position:absolute; right:calc(var(--pad) + 1.4rem); bottom:1rem; z-index:2; display:flex; gap:.45rem; }
+  .sm-car-dot { width:.5rem; height:.5rem; padding:0; border:0; border-radius:50%; background:rgba(249,249,249,.4); cursor:pointer; transition:background .3s, transform .3s; }
+  .sm-car-dot.on { background:#f9f9f9; transform:scale(1.15); }
+
+  /* Blocos de marca */
+  .sm-brands { display:grid; grid-template-columns:repeat(6, 1fr); gap:var(--gap); margin:2.6rem var(--pad) 2.6rem; }
+  .sm-brand { position:relative; aspect-ratio:16/9; display:grid; place-items:center; padding:0 .6rem; border:3px solid rgba(249,249,249,.1);
+    border-radius:10px; background:linear-gradient(rgb(48,50,62), rgb(30,31,42)); color:#f9f9f9; cursor:pointer; overflow:hidden;
+    font-size:clamp(.9rem, 1.6vw, 1.9rem); box-shadow:rgba(0,0,0,.69) 0 26px 30px -10px, rgba(0,0,0,.73) 0 16px 10px -10px;
+    transition:transform .25s cubic-bezier(.25,.46,.45,.94), border-color .25s, box-shadow .25s; }
+  .sm-brand-bg { position:absolute; inset:0; background:center/cover no-repeat; opacity:0; transform:scale(1.08); transition:opacity .45s, transform .9s ease-out; }
+  .sm-brand-bg::after { content:""; position:absolute; inset:0; background:rgba(10,12,20,.45); }
+  .sm-brand:hover, .sm-brand:focus-visible { transform:scale(1.05); border-color:rgba(249,249,249,.8); outline:none;
+    box-shadow:rgba(0,0,0,.8) 0 40px 58px -16px, rgba(0,0,0,.72) 0 30px 22px -10px; }
+  .sm-brand:hover .sm-brand-bg { opacity:1; transform:scale(1); }
+  .sm-brand-name { position:relative; z-index:1; display:inline-flex; align-items:center; gap:.45em; text-align:center; line-height:1.02;
+    color:#f9f9f9; text-shadow:0 2px 12px rgba(0,0,0,.35); }
+  .sm-brand-name.box { padding:.08em .22em; border:.09em solid #f9f9f9; }
+  .sm-brand-name.frame { text-align:left; }
+  .sm-brand-frame { flex:none; width:1.1em; height:1.6em; border:.28em solid #ffce00; box-sizing:border-box; }
   @media (max-width: 900px) { .sm-brands { grid-template-columns:repeat(3, 1fr); } }
 
-  /* Visual Disney+: fundo azul-marinho com brilho no topo e capas arredondadas */
-  html[data-sm-mode="disney"] #sm-app { background:radial-gradient(ellipse 120% 60% at 50% -10%, #1b2a55 0%, rgba(15,19,34,0) 60%), var(--smc-bg); }
-  html[data-sm-mode="disney"] .sm-wordmark { color:#fff; text-shadow:0 0 18px rgba(31,128,224,.75); }
-  html[data-sm-mode="disney"] .sm-card { border-radius:.5rem; }
-  html[data-sm-mode="disney"] .sm-card:not(.rank):not(.skeleton) { outline:2px solid transparent; outline-offset:-2px; transition:outline-color .2s; }
-  html[data-sm-mode="disney"] .sm-card:not(.rank):not(.skeleton):hover { outline-color:rgba(249,249,249,.8); }
+  /* Página da marca */
+  .sm-bpage { position:relative; height:min(46vw, 70vh); min-height:18rem; display:grid; place-items:center; overflow:hidden; }
+  .sm-bpage-bg { position:absolute; inset:0; background:center 25%/cover no-repeat; opacity:0; transform:scale(1.06); transition:opacity 1s, transform 6s ease-out; }
+  .sm-bpage.ready .sm-bpage-bg { opacity:1; transform:scale(1); }
+  .sm-bpage-shade { position:absolute; inset:0; background:radial-gradient(ellipse at center, rgba(15,17,26,.25), rgba(15,17,26,.75) 75%),
+    linear-gradient(0deg, #171a25 0%, transparent 35%); }
+  .sm-bpage-name { position:relative; z-index:1; font-size:clamp(2.4rem, 6vw, 6.5rem); filter:drop-shadow(0 4px 24px rgba(0,0,0,.6)); }
+  .sm-bpage .sm-back { position:absolute; z-index:2; left:var(--pad); top:1.6rem; }
+  .sm-rows.sm-bpage-rows { padding-top:0; margin-top:-3vw; }
+
+  /* Fileiras e capas */
+  html[data-sm-mode="disney"] .sm-rows { margin-top:0; padding-top:.4rem; }
+  html[data-sm-mode="disney"] .sm-rows.flat { padding-top:2.4rem; }
+  html[data-sm-mode="disney"] .sm-row { margin:0 0 1.2vw; }
+  html[data-sm-mode="disney"] .sm-row-head { margin-bottom:0; }
+  html[data-sm-mode="disney"] .sm-row-title { font-size:clamp(1rem, 1.35vw, 1.45rem); font-weight:700; color:#f9f9f9; letter-spacing:.01em; }
+  html[data-sm-mode="disney"] .sm-explore { color:rgba(249,249,249,.75); font-size:.78rem; letter-spacing:.14em; margin-left:auto; opacity:1; transform:none; }
+  html[data-sm-mode="disney"] .sm-explore:hover { color:#f9f9f9; }
+  html[data-sm-mode="disney"] .sm-dashes { display:none; }
+  html[data-sm-mode="disney"] .sm-track { padding-top:1rem; padding-bottom:2.4rem; }
+  html[data-sm-mode="disney"] .sm-arrow { top:1rem; bottom:2.4rem; background:none !important; }
+  html[data-sm-mode="disney"] .sm-arrow .sm-ico { filter:drop-shadow(0 0 6px rgba(0,0,0,.9)); }
+  html[data-sm-mode="disney"] .sm-card:not(.rank) { border-radius:8px; overflow:hidden; outline:3px solid rgba(249,249,249,.1); outline-offset:-3px;
+    box-shadow:rgba(0,0,0,.69) 0 26px 30px -10px, rgba(0,0,0,.73) 0 16px 10px -10px;
+    transition:transform .25s cubic-bezier(.25,.46,.45,.94), outline-color .25s, box-shadow .25s; }
+  html[data-sm-mode="disney"] .sm-card:not(.rank):not(.skeleton):hover, html[data-sm-mode="disney"] .sm-card:not(.rank):focus-visible {
+    transform:scale(1.05); outline-color:rgba(249,249,249,.8); z-index:2;
+    box-shadow:rgba(0,0,0,.8) 0 40px 58px -16px, rgba(0,0,0,.72) 0 30px 22px -10px; }
+  html[data-sm-mode="disney"] .sm-card.skeleton { background:linear-gradient(rgb(48,50,62), rgb(30,31,42)); }
+  html[data-sm-mode="disney"] .sm-card-progress { left:6%; right:6%; bottom:7%; height:4px; border-radius:2px; background:rgba(249,249,249,.3); overflow:hidden; }
+  html[data-sm-mode="disney"] .sm-card-progress i { background:#f9f9f9; }
+
+  /* Botões: ASSISTIR branco, secundários transparentes com borda, redondos com borda branca */
+  html[data-sm-mode="disney"] .sm-btn { height:3.4rem; padding:0 1.6rem 0 1.25rem; border-radius:4px; font-size:.95rem; font-weight:700;
+    letter-spacing:.12em; text-transform:uppercase; transition:background .2s, color .2s; }
+  html[data-sm-mode="disney"] .sm-btn-white { background:#f9f9f9; color:#000; }
+  html[data-sm-mode="disney"] .sm-btn-white:hover { background:#c6c6c6; }
+  html[data-sm-mode="disney"] .sm-btn-gray { background:rgba(0,0,0,.3); color:#f9f9f9; box-shadow:inset 0 0 0 1px #f9f9f9; }
+  html[data-sm-mode="disney"] .sm-btn-gray:hover { background:#c6c6c6; color:#000; }
+  html[data-sm-mode="disney"] .sm-round { width:2.9rem; height:2.9rem; border:2px solid #f9f9f9; background:rgba(0,0,0,.6); color:#f9f9f9; }
+  html[data-sm-mode="disney"] .sm-round:hover { background:#c6c6c6; color:#000; border-color:#c6c6c6; }
+
+  /* Detalhes: página inteira com a arte ao fundo, informações à esquerda e abas embaixo */
+  html[data-sm-mode="disney"] #sm-modal { background:#1a1d29; }
+  html[data-sm-mode="disney"] .sm-dialog { width:100%; min-height:100vh; margin:0; border-radius:0; background:transparent; box-shadow:none; transform:none; }
+  html[data-sm-mode="disney"] .sm-dlg-hero { position:relative; aspect-ratio:auto; min-height:max(36rem, 82vh); background-size:cover; background-position:center top; }
+  html[data-sm-mode="disney"] .sm-dlg-hero::after { background:linear-gradient(90deg, rgba(26,29,41,.96) 0%, rgba(26,29,41,.75) 30%, rgba(26,29,41,0) 62%),
+    linear-gradient(0deg, #1a1d29 0%, rgba(26,29,41,0) 38%); }
+  html[data-sm-mode="disney"] .sm-dlg-info { left:calc(var(--pad, 3.2vw) + 1.6rem); bottom:3.5rem; width:min(40rem, 42%); }
+  html[data-sm-mode="disney"] .sm-dlg-info .sm-hero-logo { max-height:10rem; max-width:80%; margin-bottom:1.6rem; }
+  html[data-sm-mode="disney"] .sm-dlg-info .sm-actions { gap:.9rem; }
+  html[data-sm-mode="disney"] .sm-dlg-close { top:1.4rem; left:1.6rem; right:auto; width:3rem; height:3rem; border:2px solid rgba(249,249,249,.8);
+    background:rgba(0,0,0,.45); }
+  html[data-sm-mode="disney"] .sm-dlg-close:hover { background:#c6c6c6; color:#000; }
+  html[data-sm-mode="disney"] .sm-btn:focus:not(:focus-visible), html[data-sm-mode="disney"] .sm-dlg-info .sm-btn-white:focus { outline:none; }
+  .sm-dlg-bits { display:flex; align-items:center; gap:.7rem; margin:1.4rem 0 .9rem; font-size:.95rem; font-weight:600; color:rgba(249,249,249,.85); }
+  .sm-dlg-sum { margin:0; font-size:1.05rem; line-height:1.55; color:#f9f9f9; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; }
+  html[data-sm-mode="disney"] .sm-dlg-body { padding:0 calc(var(--pad, 3.2vw) + 1.6rem) 4rem; }
+  .sm-tabs { display:flex; gap:2.4rem; margin:0 0 2rem; border-bottom:2px solid rgba(249,249,249,.18); }
+  .sm-tab { position:relative; padding:0 0 .9rem; border:0; background:none; color:rgba(249,249,249,.6); font:inherit; font-size:1rem; font-weight:700;
+    letter-spacing:.16em; cursor:pointer; transition:color .2s; }
+  .sm-tab:hover { color:#f9f9f9; }
+  .sm-tab[aria-selected="true"] { color:#f9f9f9; }
+  .sm-tab[aria-selected="true"]::after { content:""; position:absolute; left:0; right:0; bottom:-2px; height:2px; background:#f9f9f9; }
+  html[data-sm-mode="disney"] .sm-dlg-body[data-tab] > .sm-dlg-section[data-tab] { display:none; margin-top:0; }
+  html[data-sm-mode="disney"] .sm-dlg-body[data-tab="eps"] > [data-tab="eps"],
+  html[data-sm-mode="disney"] .sm-dlg-body[data-tab="sim"] > [data-tab="sim"],
+  html[data-sm-mode="disney"] .sm-dlg-body[data-tab="det"] > [data-tab="det"] { display:block; }
+  html[data-sm-mode="disney"] .sm-dlg-section[data-tab] > h3, html[data-sm-mode="disney"] .sm-dlg-section[data-tab] .sm-dlg-section-head h3 { display:none; }
+  html[data-sm-mode="disney"] .sm-dlg-section-head { justify-content:flex-start; }
+  html[data-sm-mode="disney"] .sm-dlg-body[data-tab="det"] > .sm-det { display:grid; grid-template-columns:1.4fr 1fr; gap:3rem; }
+  .sm-det-title { margin:0 0 .8rem; font-size:1.6rem; font-weight:700; }
+  .sm-det-side { display:grid; gap:1rem; font-size:.95rem; color:#f9f9f9; }
+  .sm-det-side span { display:block; margin-bottom:.15rem; color:rgba(249,249,249,.6); font-size:.85rem; font-weight:600; }
+  html[data-sm-mode="disney"] .sm-ep { border-radius:8px; }
+  html[data-sm-mode="disney"] .sm-ep-img, html[data-sm-mode="disney"] .sm-sim, html[data-sm-mode="disney"] .sm-sim-img { border-radius:8px; }
+  html[data-sm-mode="disney"] .sm-sim { background:transparent; }
+  html[data-sm-mode="disney"] .sm-match { color:#f9f9f9; }
+
+  /* Perfis: avatares redondos */
+  html[data-sm-mode="disney"] .sm-av, html[data-sm-mode="disney"] .sm-prof-av, html[data-sm-mode="disney"] .sm-prof-edit,
+  html[data-sm-mode="disney"] .sm-av-xl { border-radius:50%; }
+  html[data-sm-mode="disney"] #sm-profiles { background:radial-gradient(ellipse 70% 50% at 50% 0%, rgba(39,58,112,.45), transparent 70%), #1a1d29; }
+  html[data-sm-mode="disney"] .sm-gate h1 { font-weight:700; letter-spacing:.01em; }
+  html[data-sm-mode="disney"] .sm-prof { color:rgba(249,249,249,.7); }
+  html[data-sm-mode="disney"] .sm-prof-av { outline:4px solid transparent; transition:outline-color .2s, transform .25s; }
+  html[data-sm-mode="disney"] .sm-prof:hover .sm-prof-av { transform:scale(1.06); outline-color:#f9f9f9; }
+  html[data-sm-mode="disney"] .sm-gate-btn { border-radius:4px; border-color:rgba(249,249,249,.7); color:#f9f9f9; font-weight:700; letter-spacing:.14em; }
+  html[data-sm-mode="disney"] .sm-gate-btn:hover, html[data-sm-mode="disney"] .sm-gate-btn.white:hover { background:#c6c6c6; color:#000; border-color:#c6c6c6; }
+  html[data-sm-mode="disney"] .sm-gate-btn.white { background:#f9f9f9; color:#000; }
+
+  /* Busca: barra larga no topo (como no app) e categorias/sugestões em fileira de etiquetas */
+  html[data-sm-mode="disney"] .sm-searchpage { grid-template-columns:1fr; gap:1.4rem; padding:0 var(--pad) 4rem; }
+  html[data-sm-mode="disney"] .sm-sp-side { position:sticky; top:0; z-index:6; max-height:none; margin:0 calc(var(--pad) * -1); padding:0 0 1rem;
+    background:linear-gradient(180deg, #1a1d29 82%, rgba(26,29,41,0)); }
+  html[data-sm-mode="disney"] .sm-sp-box { height:clamp(4rem, 6.5vw, 5.6rem); padding:0 var(--pad); border:0; border-radius:0; background:rgb(75,78,90); }
+  html[data-sm-mode="disney"] .sm-sp-box:focus-within { background:rgb(88,91,104); }
+  html[data-sm-mode="disney"] .sm-sp-input { font-size:clamp(1.2rem, 2vw, 2.2rem); font-weight:600; color:#f9f9f9; }
+  html[data-sm-mode="disney"] .sm-sp-input::placeholder { color:rgba(249,249,249,.55); }
+  html[data-sm-mode="disney"] .sm-sp-box > .sm-ico { width:1.9rem !important; height:1.9rem !important; color:rgba(249,249,249,.75); }
+  html[data-sm-mode="disney"] .sm-sp-input::placeholder { letter-spacing:.01em; }
+  html[data-sm-mode="disney"] .sm-sp-label { margin:1rem var(--pad) .6rem; color:rgba(249,249,249,.6); }
+  html[data-sm-mode="disney"] .sm-sp-list { display:flex; flex-wrap:wrap; gap:.6rem; margin:0 var(--pad); overflow:visible; }
+  html[data-sm-mode="disney"] .sm-sp-list > li { display:contents; }
+  html[data-sm-mode="disney"] .sm-sp-item { width:auto; padding:.55rem 1.1rem; border-radius:999px; background:rgba(249,249,249,.08);
+    box-shadow:inset 0 0 0 1px rgba(249,249,249,.18); color:#f9f9f9; font-size:.95rem; }
+  html[data-sm-mode="disney"] .sm-sp-item:hover, html[data-sm-mode="disney"] .sm-sp-item:focus-visible { background:#f9f9f9; color:#000; }
+  html[data-sm-mode="disney"] .sm-sp-item:hover b { color:#000; }
+  html[data-sm-mode="disney"] .sm-sp-item.on { background:#f9f9f9; color:#000; box-shadow:none; }
+  html[data-sm-mode="disney"] .sm-sp-title { color:#f9f9f9; }
+  html[data-sm-mode="disney"] .sm-ghost { background:linear-gradient(rgb(48,50,62), rgb(30,31,42)); border-radius:8px; }
+  html[data-sm-mode="disney"] .sm-page-title { margin-top:.6rem; color:#f9f9f9; }
+
+  /* Painéis e menus no tom azul-acinzentado */
+  html[data-sm-mode="disney"] .sm-pop, html[data-sm-mode="disney"] .sm-menu, html[data-sm-mode="disney"] .sm-dd-panel { background:rgba(35,38,51,.98); }
+  html[data-sm-mode="disney"] .sm-offline { background:#2a2033; border-color:#5a3d6e; color:#f0e1ff; }
+
+  /* Abertura: arco de luz que se desenha sobre o nome */
+  .sm-intro.disney { background:radial-gradient(ellipse 60% 50% at 50% 45%, #1d2c57 0%, #0b0d17 70%); flex-direction:column; }
+  .sm-intro.disney .sm-arc { position:absolute; left:50%; top:50%; width:min(56vw, 46rem); transform:translate(-50%, -78%); overflow:visible;
+    filter:drop-shadow(0 0 10px rgba(127,196,255,.9)) drop-shadow(0 0 26px rgba(80,150,255,.6)); }
+  .sm-intro.disney .sm-arc path { stroke-dasharray:1; stroke-dashoffset:1; animation:sm-arc var(--t, 2.3s) cubic-bezier(.55,.1,.3,1) forwards; }
+  .sm-intro.disney .sm-intro-word { position:relative; color:#f9f9f9; font:300 clamp(3rem, 9vw, 8rem)/1 "Nunito Sans", "Avenir Next", Arial, sans-serif;
+    letter-spacing:.28em; text-shadow:0 0 30px rgba(127,196,255,.45); animation:sm-intro-dword var(--t, 2.3s) ease-out forwards; }
+  @keyframes sm-arc { 0% { stroke-dashoffset:1; opacity:1; } 60% { stroke-dashoffset:0; opacity:1; } 100% { stroke-dashoffset:0; opacity:0; } }
+  @keyframes sm-intro-dword { 0% { opacity:0; transform:scale(.94); filter:blur(6px); } 25% { opacity:1; filter:none; } 75% { opacity:1; transform:scale(1); }
+    100% { opacity:0; transform:scale(1.03); } }
 
   .sm-page-title { margin:0 var(--pad) 1.5rem; font-size:clamp(1.4rem, 2.4vw, 2.4rem); font-weight:700; }
   .sm-offline { margin:0 var(--pad) 2rem; padding:1rem 1.2rem; border-radius:4px; background:#2a1414; border:1px solid #7a1e1e; color:#ffd5d5; font-size:.95rem; }
@@ -1136,6 +1332,11 @@
       document.head.appendChild(el);
     }
     el.textContent = CSS;
+    // Fonte parecida com a Avenir da Disney+ (usada só no modo Disney+).
+    if (!document.getElementById('sm-font-disney')) {
+      document.head.appendChild(h('link', { id: 'sm-font-disney', rel: 'stylesheet',
+        href: 'https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800&display=swap' }));
+    }
   }
 
   // ===========================================================================
@@ -1226,6 +1427,10 @@
     const r = anchor.getBoundingClientRect();
     menu.style.top = `${r.bottom + 8}px`;
     menu.style.left = `${Math.max(8, Math.min(window.innerWidth - menu.offsetWidth - 8, r.right - menu.offsetWidth))}px`;
+    if (anchor.closest('.sm-rail')) {
+      menu.style.left = `${r.right + 14}px`;
+      menu.style.top = `${Math.max(8, Math.min(r.top - 8, window.innerHeight - menu.offsetHeight - 8))}px`;
+    }
     menuEl = menu;
     menu.querySelector('.sm-item[aria-checked="true"]')?.focus();
   }
@@ -1263,12 +1468,19 @@
   function buildIntro(mode) {
     const overlay = h('div', { class: 'sm-intro', role: 'presentation' });
     overlay.style.setProperty('--sm-accent', mode.accent);
+    if (mode.layout === 'disney') {
+      overlay.classList.add('disney');
+      overlay.innerHTML = `<svg class="sm-arc" viewBox="0 0 400 140" aria-hidden="true"><defs><linearGradient id="sm-arc-g" x1="0" x2="1">
+        <stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".45" stop-color="#fff"/><stop offset=".85" stop-color="#7fc4ff"/>
+        <stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
+        <path d="M18 128 C 90 10, 310 10, 382 120" fill="none" stroke="url(#sm-arc-g)" stroke-width="3.2" stroke-linecap="round" pathLength="1"/></svg>`;
+    }
     overlay.appendChild(h('div', { class: 'sm-intro-word', text: mode.splash }));
     return overlay;
   }
 
   function simpleTransition(mode, reduced) {
-    const total = reduced ? 600 : 1500;
+    const total = reduced ? 600 : mode.layout === 'disney' ? 2300 : 1500;
     const overlay = buildIntro(mode);
     overlay.style.setProperty('--t', `${total}ms`);
     document.body.appendChild(overlay);
@@ -1525,19 +1737,30 @@
   }
 
   // ---------- Marcas (Disney+: Disney, Pixar, Marvel...) ----------
-  function brandTile(b, big) {
-    const name = h('span', { class: 'sm-brand-name', text: b.name,
-      style: { font: b.font, letterSpacing: b.spacing || '0', color: b.color || '#fff' } });
-    return h(big ? 'div' : 'button', {
-      type: big ? null : 'button',
-      class: big ? 'sm-brand big' : 'sm-brand',
-      'aria-label': big ? null : b.name,
-      style: { '--b1': b.colors[0], '--b2': b.colors[1], '--bf': b.frame || 'rgba(249,249,249,.1)' },
-      onclick: big ? null : () => openBrand(b.id),
-    }, name);
+  function brandName(b) {
+    return h('span', { class: `sm-brand-name${b.box ? ' box' : ''}${b.frame ? ' frame' : ''}`,
+      style: { font: b.font, letterSpacing: b.spacing || '0' } },
+      b.frame ? h('i', { class: 'sm-brand-frame' }) : null,
+      ...b.name.split('\n').flatMap((line, i) => (i ? [h('br'), line] : [line])));
+  }
+  // No app, passar o mouse toca um vídeo da marca dentro do bloco; aqui aparece a capa de um título da marca.
+  function brandTile(b, mode) {
+    const bg = h('div', { class: 'sm-brand-bg' });
+    const el = h('button', { type: 'button', class: 'sm-brand', 'aria-label': b.name.replace('\n', ' '),
+      onclick: () => openBrand(b.id) }, bg, brandName(b));
+    let loaded = false;
+    el.addEventListener('mouseenter', () => {
+      if (loaded) return;
+      loaded = true;
+      catalog('movie', `${mode.provider}.brand-${b.id}-movies`).then((ms) => {
+        const m = ms.find((x) => x.background);
+        if (m) bg.style.backgroundImage = cssUrl(tmdbSize(m.background, 'w780'));
+      }).catch(() => {});
+    });
+    return el;
   }
   function brandsRow(mode) {
-    return h('section', { class: 'sm-brands', 'aria-label': 'Marcas' }, mode.brands.map((b) => brandTile(b)));
+    return h('section', { class: 'sm-brands', 'aria-label': 'Marcas' }, mode.brands.map((b) => brandTile(b, mode)));
   }
   function openBrand(id) {
     hidePreview();
@@ -1552,19 +1775,51 @@
     const b = (mode.brands || []).find((x) => x.id === state.brand);
     if (!b) { state.page = 'home'; return renderPage(); }
     const ids = [`brand-${b.id}-movies`, `brand-${b.id}-series`];
-    const heroWrap = h('div');
-    const rows = h('div', { class: 'sm-rows' },
-      h('div', { class: 'sm-explore-head sm-brand-head' },
-        h('button', { type: 'button', class: 'sm-back', 'aria-label': 'Voltar', title: 'Voltar',
-          onclick: () => setPage(state.brandPrev || 'home') }, icon('left')),
-        brandTile(b, true)));
-    app.append(heroWrap, rows);
-    buildHero(mode, heroWrap, rows, ids.map((id, i) => ({ type: i ? 'series' : 'movie', id: `${mode.provider}.${id}` })));
+    // Como no app: faixa grande com a capa de um título da marca ao fundo e o nome da marca no centro.
+    const bg = h('div', { class: 'sm-bpage-bg' });
+    const banner = h('section', { class: 'sm-bpage' }, bg, h('div', { class: 'sm-bpage-shade' }),
+      h('button', { type: 'button', class: 'sm-back', 'aria-label': 'Voltar', title: 'Voltar',
+        onclick: () => setPage(state.brandPrev || 'home') }, icon('left')),
+      h('div', { class: 'sm-bpage-name' }, brandName(b)));
+    const rows = h('div', { class: 'sm-rows flat sm-bpage-rows' });
+    app.append(banner, rows);
+    catalog('movie', `${mode.provider}.${ids[0]}`).then((ms) => {
+      const pick = ms.filter((m) => m.background).slice(0, 5);
+      const m = pick[Math.floor(Math.random() * pick.length)];
+      if (m) { bg.style.backgroundImage = cssUrl(m.background); banner.classList.add('ready'); }
+    }).catch(() => {});
     buildRows(mode, rows, ids);
   }
 
   // ---------- Barra superior ----------
+  function buildRail(mode) {
+    const item = (label, ic, onclick, active) => h('button', { type: 'button', class: `sm-rail-item${active ? ' active' : ''}`,
+      'aria-label': label, 'aria-current': active ? 'page' : null, onclick }, icon(ic), h('span', { class: 'sm-rail-label', text: label }));
+    const go = (k) => () => setPage(k);
+    const origId = `${mode.provider}.originals`;
+    const onOriginals = state.page === 'explore' && state.explore?.id === origId;
+    const items = [
+      item('Busca', 'search', () => { if (searchQuery() === null) location.hash = '#/search'; }, state.page === 'search'),
+      item('Início', 'home', go('home'), state.page === 'home' || state.page === 'brand'),
+      item('Minha lista', 'plus', go('mylist'), state.page === 'mylist'),
+      item('Filmes', 'film', go('movies'), state.page === 'movies'),
+      item('Séries', 'tv', go('series'), state.page === 'series'),
+    ];
+    if (!isKids()) {
+      items.push(item('Originais', 'star', () => openExplore({ type: 'series', id: origId }, `Originais ${mode.label}`), onOriginals));
+      items.push(item('Novidades', 'sparkle', go('new'), state.page === 'new'));
+    }
+    const logo = h('div', { class: 'sm-rail-logo', title: 'Início', onclick: go('home') });
+    logo.innerHTML = '<svg viewBox="0 0 100 40" aria-hidden="true"><path d="M6 34 C 26 4, 74 4, 94 30" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>';
+    logo.appendChild(h('span', { text: mode.wordmark }));
+    return h('nav', { class: 'sm-rail', 'aria-label': 'Menu' },
+      logo,
+      h('div', { class: 'sm-rail-items' }, items),
+      h('div', { class: 'sm-rail-bottom' }, makeSwitcher(), isKids() ? null : buildBell(mode), buildProfile()));
+  }
+
   function buildNav(mode) {
+    if (mode.layout === 'disney') return buildRail(mode);
     const links = h('ul', { class: 'sm-links' },
       NAV_PAGES.filter(([key]) => !(isKids() && key === 'new')).map(([key, label]) =>
         h('li', null, h('a', { class: state.page === key ? 'active' : null, text: label, onclick: () => setPage(key) }))));
@@ -1863,9 +2118,62 @@
   }
 
   // ---------- Destaque ----------
+  // Disney+: carrossel de capas largas com cantos arredondados, que passa sozinho e mostra as vizinhas nas bordas.
+  function buildCarousel(wrap, rows, sources) {
+    const hero = h('section', { class: 'sm-carousel', 'aria-label': 'Destaques', 'aria-roledescription': 'carrossel' });
+    wrap.appendChild(hero);
+    let stopped = false;
+    let timer = null;
+    let idx = 0;
+    heroCtl = { destroy() { stopped = true; clearInterval(timer); }, pause() {}, resume() {}, onScroll() {} };
+    (async () => {
+      const lists = await Promise.all(sources.map((src) => catalog(src.type, src.id).then((ms) => ms.slice(0, 8)).catch(() => [])));
+      const pool = [];
+      const seen = new Set();
+      for (let i = 0; i < 8 && pool.length < 10; i++) for (const l of lists) { const m = l[i]; if (m?.background && !seen.has(m.id) && pool.length < 10) { seen.add(m.id); pool.push(m); } }
+      if (stopped) return;
+      if (!pool.length) {
+        hero.remove();
+        rows.classList.add('flat');
+        rows.prepend(h('div', { class: 'sm-offline', text: offlineText() }));
+        return;
+      }
+      const track = h('div', { class: 'sm-car-track' });
+      const dots = h('div', { class: 'sm-car-dots' });
+      const go = (i) => {
+        idx = (i + pool.length) % pool.length;
+        track.style.transform = `translateX(calc(${-idx} * (100% + var(--car-gap))))`;
+        [...dots.children].forEach((d, j) => d.classList.toggle('on', j === idx));
+        [...track.children].forEach((el, j) => el.classList.toggle('on', j === idx));
+        clearInterval(timer);
+        timer = setInterval(() => {
+          if (!stopped && !hero.matches(':hover') && document.visibilityState === 'visible' && !modalEl) go(idx + 1);
+        }, 7000);
+      };
+      pool.forEach((it, i) => {
+        const meta = [it.releaseInfo, ...(it.genres || []).slice(0, 2)].filter(Boolean).join(' • ');
+        const slide = h('div', { class: 'sm-car-slide', role: 'button', tabindex: '0', 'aria-label': it.name,
+          onclick: () => (i === idx ? openModal(it) : go(i)),
+          onkeydown: (e) => { if (e.key === 'Enter') openModal(it); } },
+          h('div', { class: 'sm-car-img', style: { backgroundImage: cssUrl(it.background) } }),
+          h('div', { class: 'sm-car-info' },
+            logoOrTitle(it, 'sm-car-logo', 'sm-car-title'),
+            meta ? h('div', { class: 'sm-car-meta', text: meta }) : null));
+        track.appendChild(slide);
+        dots.appendChild(h('button', { type: 'button', class: 'sm-car-dot', 'aria-label': `Destaque ${i + 1}`, onclick: () => go(i) }));
+      });
+      hero.append(track,
+        h('button', { type: 'button', class: 'sm-car-arrow l', 'aria-label': 'Anterior', onclick: () => go(idx - 1) }, icon('left')),
+        h('button', { type: 'button', class: 'sm-car-arrow r', 'aria-label': 'Próximo', onclick: () => go(idx + 1) }, icon('right')),
+        dots);
+      go(0);
+    })();
+  }
+
   function buildHero(mode, wrap, rows, sourcesOverride) {
     const types = state.page === 'series' ? ['series'] : state.page === 'movies' ? ['movie'] : ['series', 'movie'];
     const sources = (sourcesOverride || (isKids() ? mode.kidsHero : mode.heroCatalogs)).filter((c) => types.includes(c.type));
+    if (mode.layout === 'disney') return buildCarousel(wrap, rows, sources);
     const hero = h('section', { class: 'sm-hero', 'aria-label': 'Destaque' });
     wrap.appendChild(hero);
     let iframe = null;
@@ -2039,7 +2347,7 @@
     const dashes = h('div', { class: 'sm-dashes' });
     const head = h('div', { class: 'sm-row-head' },
       h('h2', { class: 'sm-row-title', text: title }),
-      opts.onExplore ? h('a', { class: 'sm-explore', onclick: opts.onExplore }, 'Explorar tudo ›') : null,
+      opts.onExplore ? h('a', { class: 'sm-explore', onclick: opts.onExplore }, isDisney() ? 'VER TUDO' : 'Explorar tudo ›') : null,
       dashes);
     const row = h('section', { class: 'sm-row' }, head, h('div', { class: 'sm-slider' }, left, track, right));
     const n = opts.rank ? 6 : 8;
@@ -2124,6 +2432,11 @@
 
   function wireCard(el, item) {
     let timer = null;
+    if (isDisney()) {
+      el.addEventListener('click', () => openModal(item));
+      el.addEventListener('keydown', (e) => { if (e.key === 'Enter') openModal(item); });
+      return;
+    }
     // Nas fileiras a capa se expande no lugar; no Top 10 e nas grades (busca, Minha lista) abre a prévia flutuante.
     const expandable = () => el.parentElement?.classList.contains('sm-track') && !el.classList.contains('rank');
     el.addEventListener('mouseenter', () => {
@@ -2460,6 +2773,27 @@
     setListIcon();
     listBtn.addEventListener('click', () => { toggleMyList(item); setTimeout(setListIcon, 400); });
     const body = h('div', { class: 'sm-dlg-body' }, h('div', { class: 'sm-meta', text: 'Carregando…' }));
+    // Disney+: as seções viram abas. Fora dela, addSection só acrescenta a seção.
+    const TAB_ORDER = ['eps', 'sim', 'det'];
+    const tabs = isDisney() ? h('div', { class: 'sm-tabs', role: 'tablist' }) : null;
+    let tabChosen = false;
+    const setTab = (key, byUser) => {
+      if (byUser) tabChosen = true;
+      body.dataset.tab = key;
+      tabs?.querySelectorAll('.sm-tab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.key === key)));
+    };
+    const addSection = (key, label, el) => {
+      el.dataset.tab = key;
+      body.appendChild(el);
+      if (!tabs) return;
+      const btn = h('button', { type: 'button', class: 'sm-tab', role: 'tab', text: label, onclick: () => setTab(key, true) });
+      btn.dataset.key = key;
+      const after = [...tabs.children].find((t) => TAB_ORDER.indexOf(t.dataset.key) > TAB_ORDER.indexOf(key));
+      tabs.insertBefore(btn, after || null);
+      const first = tabs.firstElementChild.dataset.key;
+      if (!tabChosen) setTab(first);
+      else setTab(body.dataset.tab);
+    };
     // Já começou? O botão vira "Continuar" (com temporada e episódio, nas séries) e mostra a barra de progresso.
     const libItem = libraryItems().find((x) => x._id === item.id);
     const ls = libItem?.state || {};
@@ -2474,7 +2808,7 @@
         h('span', { text: `Faltam ${Math.max(1, Math.round((ls.duration - ls.timeOffset) / 60000))} min` }))
       : null;
     const dialog = h('div', { class: 'sm-dialog', role: 'dialog', 'aria-modal': 'true', 'aria-label': item.name },
-      h('button', { type: 'button', class: 'sm-dlg-close', 'aria-label': 'Fechar', onclick: closeModal }, icon('close')),
+      h('button', { type: 'button', class: 'sm-dlg-close', 'aria-label': isDisney() ? 'Voltar' : 'Fechar', onclick: closeModal }, icon(isDisney() ? 'left' : 'close')),
       h('div', { class: 'sm-dlg-hero', style: { backgroundImage: cssUrl(item.background || cardImage(item)) } },
         h('div', { class: 'sm-dlg-info' },
           logoOrTitle(item, 'sm-hero-logo', 'sm-hero-title', 'h2'),
@@ -2482,7 +2816,8 @@
             h('button', { type: 'button', class: 'sm-btn sm-btn-white', onclick: () => play(item) }, icon('play', true), playLabel),
             listBtn,
             thumbButton(item)),
-          resume)),
+          resume,
+          isDisney() ? h('div', { class: 'sm-dlg-sub' }) : null)),
       body);
     const el = h('div', { id: 'sm-modal', onclick: (e) => { if (e.target === el) closeModal(); } }, dialog);
     document.body.appendChild(el);
@@ -2504,6 +2839,26 @@
           info.tagline ? h('p', { class: 'sm-dlg-tagline', text: info.tagline }) : null,
           h('p', { class: 'sm-dlg-desc', text: info.description || '' })),
         side));
+    if (tabs) {
+      // Na Disney+, ano/duração/gêneros e a sinopse ficam embaixo dos botões; o resto vai para a aba Detalhes.
+      const sub = dialog.querySelector('.sm-dlg-sub');
+      const bits = [info.year, info.seasonsCount ? (info.seasonsCount === 1 ? '1 temporada' : `${info.seasonsCount} temporadas`)
+        : info.runtime && item.type === 'movie' ? fmtRuntime(info.runtime) : null, (info.genres || []).slice(0, 3).join(', ')].filter(Boolean);
+      sub?.replaceChildren(
+        h('div', { class: 'sm-dlg-bits' }, d?.certification ? certBadge(d.certification) : null, h('span', { text: bits.join(' • ') })),
+        info.description ? h('p', { class: 'sm-dlg-sum', text: info.description }) : null);
+      body.replaceChildren(tabs);
+      addSection('det', 'DETALHES', h('div', { class: 'sm-dlg-section sm-det' },
+        h('div', null, h('h3', { class: 'sm-det-title', text: info.name }), h('p', { class: 'sm-dlg-desc', text: info.description || '' })),
+        h('div', { class: 'sm-det-side' },
+          info.runtime || info.seasonsCount ? h('div', null, h('span', { text: 'Duração' }),
+            info.seasonsCount ? (info.seasonsCount === 1 ? '1 temporada' : `${info.seasonsCount} temporadas`) : fmtRuntime(info.runtime)) : null,
+          info.year ? h('div', null, h('span', { text: 'Lançamento' }), info.year) : null,
+          info.genres?.length ? h('div', null, h('span', { text: 'Gênero' }), info.genres.join(', ')) : null,
+          d?.certification ? h('div', null, h('span', { text: 'Classificação' }), certBadge(d.certification)) : null,
+          info.creators?.length ? h('div', null, h('span', { text: item.type === 'movie' ? 'Direção' : 'Criação' }), info.creators.join(', ')) : null,
+          info.cast?.length ? h('div', null, h('span', { text: 'Elenco' }), info.cast.join(', ')) : null)));
+    }
 
     if (item.type === 'series' && d?.seasons?.length) {
       const list = h('div');
@@ -2545,14 +2900,14 @@
               h('p', { class: 'sm-ep-desc', text: ep.description || '' })));
         }));
       };
-      body.appendChild(h('div', { class: 'sm-dlg-section' },
+      addSection('eps', 'EPISÓDIOS', h('div', { class: 'sm-dlg-section' },
         h('div', { class: 'sm-dlg-section-head' }, h('h3', { text: 'Episódios' }), select), list));
       loadSeason();
     }
 
     const sims = profileFilter(await similar(mode.provider, item.type, item.id));
     if (modalEl !== el || !sims.length) return;
-    body.appendChild(h('div', { class: 'sm-dlg-section' },
+    addSection('sim', 'SUGESTÕES', h('div', { class: 'sm-dlg-section' },
       h('h3', { text: 'Títulos semelhantes', style: { marginBottom: '1rem' } }),
       h('div', { class: 'sm-similar' }, sims.slice(0, 9).map((s) =>
         h('div', { class: 'sm-sim', role: 'button', tabindex: '0', onclick: () => openModal(s) },
