@@ -14,6 +14,7 @@ export const PROVIDERS = {
   disney: {
     key: 'disney',
     label: 'Disney+',
+    prep: 'no', // "Só no ..."
     tmdbProviderId: 337,
     tmdbNetworkId: 2739, // rede "Disney+" = séries originais
     hasOfficialTop10: false, // a Disney+ não publica ranking
@@ -44,6 +45,7 @@ export const PROVIDERS = {
   apple: {
     key: 'apple',
     label: 'Apple TV',
+    prep: 'no', // "Só no ..."
     tmdbProviderId: 350,
     tmdbNetworkId: 2552, // rede "Apple TV" = séries originais
     hasOfficialTop10: false,
@@ -56,6 +58,7 @@ export const PROVIDERS = {
   prime: {
     key: 'prime',
     label: 'Prime Video',
+    prep: 'no', // "Só no ..."
     tmdbProviderId: 119,
     tmdbNetworkId: 1024, // rede "Prime Video" = séries originais
     hasOfficialTop10: false,

@@ -56,6 +56,7 @@
     disney: {
       key: 'disney',
       label: 'Disney+',
+      prep: 'no', // "no Disney+" (no Brasil o serviço é tratado no masculino)
       layout: 'disney', // menu lateral, carrossel, blocos de marca e página de detalhes da Disney+
       accent: '#0063e5',
       bg: '#1a1d29',
@@ -123,6 +124,7 @@
   MODES.apple = {
     key: 'apple',
     label: 'Apple TV',
+    prep: 'no',
     layout: 'apple', // menu lateral de vidro, destaque em tela cheia, pôsteres na vertical (tvOS 26)
     accent: '#0a84ff',
     bg: '#000000',
@@ -170,6 +172,7 @@
   MODES.prime = {
     key: 'prime',
     label: 'Prime Video',
+    prep: 'no',
     layout: 'prime', // barra no topo, destaque rotativo com vídeo, selo "Incluído no Prime", capas com zoom (redesenho de 2024)
     accent: '#1a98ff',
     bg: '#0f171e',
@@ -1336,7 +1339,7 @@
   .sm-brand-bg::after { content:""; position:absolute; inset:0; background:rgba(10,12,20,.45); }
   .sm-brand:hover, .sm-brand:focus-visible { transform:scale(1.05); border-color:rgba(249,249,249,.8); outline:none;
     box-shadow:rgba(0,0,0,.8) 0 40px 58px -16px, rgba(0,0,0,.72) 0 30px 22px -10px, 0 0 36px rgba(120,170,255,.22); }
-  .sm-brand { animation:sm-pop-in .7s calc(var(--i, 0) * 70ms + .15s) cubic-bezier(.2,.8,.2,1) both; }
+  .sm-brand { animation:sm-pop-in .7s calc(var(--i, 0) * 70ms + .15s) cubic-bezier(.2,.8,.2,1) backwards; }
   .sm-brand .sm-shine { z-index:2; }
   .sm-brand:hover .sm-brand-name { text-shadow:0 0 18px rgba(255,255,255,.45), 0 2px 12px rgba(0,0,0,.4); }
   @keyframes sm-pop-in { from { opacity:0; transform:translateY(18px) scale(.97); } to { opacity:1; transform:none; } }
@@ -1484,7 +1487,7 @@
   html[data-sm-mode="apple"] .sm-card.portrait::before { display:none; }
   html[data-sm-mode="apple"] .sm-card.skeleton { background:linear-gradient(110deg, #141416 30%, #232326 50%, #141416 70%); background-size:250% 100%;
     animation:sm-skel 1.4s linear infinite; }
-  html[data-sm-mode="apple"] .sm-track > .sm-card:not(.skeleton) { animation:sm-pop-in .55s cubic-bezier(.2,.8,.2,1) both; }
+  html[data-sm-mode="apple"] .sm-track > .sm-card:not(.skeleton) { animation:sm-pop-in .55s cubic-bezier(.2,.8,.2,1) backwards; }
   html[data-sm-mode="apple"] .sm-track > .sm-card:nth-child(2) { animation-delay:.04s; }
   html[data-sm-mode="apple"] .sm-track > .sm-card:nth-child(3) { animation-delay:.08s; }
   html[data-sm-mode="apple"] .sm-track > .sm-card:nth-child(4) { animation-delay:.12s; }
@@ -1674,6 +1677,20 @@
   html[data-sm-mode="prime"] .sm-links a:hover { background:rgba(255,255,255,.12); color:#fff; }
   html[data-sm-mode="prime"] .sm-links a.active { background:#fff; color:#0f171e; font-weight:700; }
   html[data-sm-mode="prime"] .sm-nav .sm-av-nav { border-radius:50%; }
+  html[data-sm-mode="prime"] .sm-pill, html[data-sm-mode="prime"] .sm-btn { white-space:nowrap; }
+  @media (max-width: 980px) {
+    html[data-sm-mode="prime"] .sm-nav { gap:.8rem; }
+    html[data-sm-mode="prime"] .sm-links { flex:1; min-width:0; overflow-x:auto !important; scrollbar-width:none; }
+    html[data-sm-mode="prime"] .sm-links::-webkit-scrollbar { display:none; }
+    html[data-sm-mode="prime"] .sm-links a { padding:.4rem .7rem; font-size:.88rem; white-space:nowrap; }
+    html[data-sm-mode="prime"] #sm-app .sm-switch > span:not(.sm-dot), html[data-sm-mode="prime"] #sm-app .sm-switch > .sm-ico { display:none; }
+    html[data-sm-mode="prime"] #sm-app .sm-switch { width:2rem; padding:0; justify-content:center; }
+    html[data-sm-mode="prime"] .sm-bill-info { width:auto; right:var(--pad); }
+  }
+  @media (max-width: 600px) {
+    html[data-sm-mode="prime"] .sm-bill-desc { display:none; }
+    html[data-sm-mode="prime"] .sm-bill { min-height:22rem; }
+  }
   html[data-sm-mode="prime"] #sm-app .sm-switch { background:rgba(255,255,255,.1); }
 
   /* Destaque rotativo em tela cheia, com vídeo */
@@ -1733,7 +1750,7 @@
   .sm-pv-meta { font-size:.66rem; font-weight:600; color:var(--pv-gray); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   html[data-sm-mode="prime"] .sm-card.skeleton { background:linear-gradient(110deg, #1a242f 30%, #252e39 50%, #1a242f 70%); background-size:250% 100%;
     animation:sm-skel 1.4s linear infinite; }
-  html[data-sm-mode="prime"] .sm-track > .sm-card:not(.skeleton) { animation:sm-pop-in .5s cubic-bezier(.2,.8,.2,1) both; }
+  html[data-sm-mode="prime"] .sm-track > .sm-card:not(.skeleton) { animation:sm-pop-in .5s cubic-bezier(.2,.8,.2,1) backwards; }
   html[data-sm-mode="prime"] .sm-card-progress { left:6%; right:6%; bottom:8%; height:4px; border-radius:2px; background:rgba(255,255,255,.3); overflow:hidden; }
   html[data-sm-mode="prime"] .sm-card-progress i { background:#1a98ff; }
   html[data-sm-mode="prime"] .sm-track > .sm-xpl { border-radius:8px; }
@@ -1832,7 +1849,7 @@
   .sm-xpl { position:relative; aspect-ratio:16/9; display:flex; align-items:flex-end; padding:.9rem 1rem !important; border-radius:10px;
     background:linear-gradient(rgb(48,50,62), rgb(30,31,42)) !important; color:#f9f9f9; cursor:pointer; overflow:hidden;
     box-shadow:inset 0 0 0 3px rgba(249,249,249,.1), rgba(0,0,0,.69) 0 26px 30px -10px !important;
-    transition:transform .25s cubic-bezier(.25,.46,.45,.94), box-shadow .25s; animation:sm-pop-in .6s both; }
+    transition:transform .25s cubic-bezier(.25,.46,.45,.94), box-shadow .25s; animation:sm-pop-in .6s backwards; }
   .sm-xpl-bg { position:absolute; inset:0; background:center/cover no-repeat; opacity:0; transition:opacity .6s; }
   .sm-xpl.ready .sm-xpl-bg { opacity:1; }
   .sm-xpl-bg::after { content:""; position:absolute; inset:0; background:linear-gradient(0deg, rgba(10,12,20,.85) 0%, rgba(10,12,20,.15) 65%); }
@@ -1901,7 +1918,7 @@
   html[data-sm-mode="disney"] .sm-card.skeleton { background:linear-gradient(110deg, rgb(40,43,56) 30%, rgb(58,61,76) 50%, rgb(40,43,56) 70%);
     background-size:250% 100%; animation:sm-skel 1.4s linear infinite; }
   @keyframes sm-skel { from { background-position:100% 0; } to { background-position:-150% 0; } }
-  html[data-sm-mode="disney"] .sm-track > .sm-card:not(.skeleton) { animation:sm-pop-in .55s cubic-bezier(.2,.8,.2,1) both; }
+  html[data-sm-mode="disney"] .sm-track > .sm-card:not(.skeleton) { animation:sm-pop-in .55s cubic-bezier(.2,.8,.2,1) backwards; }
   html[data-sm-mode="disney"] .sm-track > .sm-card:nth-child(2) { animation-delay:.05s; }
   html[data-sm-mode="disney"] .sm-track > .sm-card:nth-child(3) { animation-delay:.1s; }
   html[data-sm-mode="disney"] .sm-track > .sm-card:nth-child(4) { animation-delay:.15s; }
@@ -2575,14 +2592,16 @@
 
   // Coleções da busca vazia: blocos de marca e capas de gênero com a arte de um título de cada.
   // Bloco de gênero com a arte de um título daquele gênero (busca vazia e fileira "Gêneros").
+  const usedTileArt = new Set();
   function genreTile(mode, type, id, label) {
     const bg = h('div', { class: 'sm-xpl-bg' });
     const tile = h('button', { type: 'button', class: 'sm-xpl', 'aria-label': label,
       onclick: () => openExplore({ type, id: `${mode.provider}.${id}` }, label) },
       bg, h('div', { class: 'sm-shine' }), h('span', { class: 'sm-xpl-name', text: label }));
     catalog(type, `${mode.provider}.${id}`).then((ms) => {
-      const m = ms.find((x) => x.background);
-      if (m) { bg.style.backgroundImage = cssUrl(tmdbSize(m.background, 'w780')); tile.classList.add('ready'); }
+      const withArt = ms.filter((x) => x.background);
+      const m = withArt.find((x) => !usedTileArt.has(x.id)) || withArt[0];
+      if (m) { usedTileArt.add(m.id); bg.style.backgroundImage = cssUrl(tmdbSize(m.background, 'w780')); tile.classList.add('ready'); }
     }).catch(() => {});
     return tile;
   }
@@ -2600,7 +2619,7 @@
     const head = h('header', { class: 'sm-orig-head' },
       h('div', { class: 'sm-orig-kicker', text: mode.label }),
       h('h1', { class: 'sm-orig-title', text: 'Originais' }),
-      h('p', { class: 'sm-orig-sub', text: `Séries e filmes que você só encontra na ${mode.label}.` }));
+      h('p', { class: 'sm-orig-sub', text: `Séries e filmes que você só encontra ${mode.prep || 'na'} ${mode.label}.` }));
     const heroWrap = h('div');
     const rows = h('div', { class: 'sm-rows' });
     app.append(head, heroWrap, rows);
@@ -2721,7 +2740,7 @@
       ts.slice(0, 3).forEach((it, i) => add('top', it, `Nº ${i + 1} em séries esta semana`, it.name));
       tm.slice(0, 3).forEach((it, i) => add('top', it, `Nº ${i + 1} em filmes esta semana`, it.name));
       for (let i = 0; i < 4; i++) {
-        add('new', nm[i], `Chegou na ${mode.label}`, nm[i]?.name);
+        add('new', nm[i], `Chegou ${mode.prep || 'na'} ${mode.label}`, nm[i]?.name);
         add('new', ns[i], 'Nova série', ns[i]?.name);
       }
       return out.slice(0, 12);
@@ -3332,7 +3351,7 @@
             row = makeRow('Continuar assistindo', () => continueRow(typeFilter), { progress: true });
           }
         } else if (key === '@soon') {
-          row = makeRow(`Em breve na ${mode.label}`, () => addon(`/sm/upcoming/${mode.provider}.json`).then((d) => d.items || []),
+          row = makeRow(`Em breve ${mode.prep || 'na'} ${mode.label}`, () => addon(`/sm/upcoming/${mode.provider}.json`).then((d) => d.items || []),
             { render: (it) => upcomingCard(it), onExplore: () => setPage('new') });
         } else if (key === '@mylist') {
           const items = myList().slice(0, 30).map(fromLibrary);
@@ -4226,7 +4245,7 @@
       if (normText(input.value) === normText(q)) renderSuggestions(wrap, input.value, data.suggestions || []);
       if (!metas.length) {
         wrap.__results.replaceChildren(h('div', { class: 'sm-noresults' },
-          h('p', { text: `Sua busca por "${q}" não encontrou resultados na ${mode.label}.` }),
+          h('p', { text: `Sua busca por "${q}" não encontrou resultados ${mode.prep || 'na'} ${mode.label}.` }),
           h('p', { text: 'Sugestões:' }),
           h('ul', null,
             h('li', { text: 'Tente palavras diferentes' }),
@@ -4397,7 +4416,7 @@
     const upRow = (title, test) => makeRow(title, () => soon.then((list) => list.filter((it) => test(daysUntil(it)))),
       { render: (it) => upcomingCard(it) });
 
-    add(makeRow(`Novidades na ${mode.label}`, () =>
+    add(makeRow(`Novidades ${mode.prep || 'na'} ${mode.label}`, () =>
       Promise.all([catalog('series', `${p}.recent-series`), catalog('movie', `${p}.recent-movies`)].map((x) => x.catch(() => [])))
         .then(([sr, mv]) => {
           const out = [];
@@ -4648,7 +4667,7 @@
   // ---------- Minha lista ----------
   function renderMyList() {
     const items = myList().map(fromLibrary);
-    const wrap = h('div', { class: 'sm-rows flat' }, h('h1', { class: 'sm-page-title', text: 'Minha lista' }));
+    const wrap = h('div', { class: 'sm-rows flat' }, h('h1', { class: 'sm-page-title', text: (MODES[state.mode].navPages || []).find(([k]) => k === 'mylist')?.[1] || 'Minha lista' }));
     if (!items.length) wrap.appendChild(h('div', { class: 'sm-empty', text: 'Sua lista está vazia. Use o botão + nos títulos para adicionar.' }));
     else wrap.appendChild(h('div', { class: 'sm-grid' }, items.map((it) => card(it))));
     app.appendChild(wrap);

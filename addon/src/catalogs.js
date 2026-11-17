@@ -19,7 +19,7 @@ function rowsFor(p) {
   }
   if (p.tmdbNetworkId) {
     rows.push({
-      id: 'originals', type: 'series', name: `Só na ${p.label}`, kind: 'discover', shape: 'poster',
+      id: 'originals', type: 'series', name: `Só ${p.prep || 'na'} ${p.label}`, kind: 'discover', shape: 'poster',
       params: { with_networks: p.tmdbNetworkId, sort_by: 'popularity.desc', 'first_air_date.gte': '2013-01-01', 'vote_count.gte': 30 },
       noProviderFilter: true,
     });
