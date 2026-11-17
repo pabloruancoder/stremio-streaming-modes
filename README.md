@@ -1,6 +1,6 @@
 # Streaming Modes para Stremio
 
-Escolha um streaming (Netflix ou Disney+) e o Stremio muda de cara: transição animada,
+Escolha um streaming (Netflix, Disney+ ou Apple TV) e o Stremio muda de cara: transição animada,
 visual inspirado no serviço, banner de destaque e só as fileiras daquele streaming.
 Um clique volta para o Stremio padrão.
 
@@ -124,7 +124,10 @@ O Top 10 oficial só existe para a Netflix. Na Disney+ o destaque e as fileiras 
 tem os blocos de marca (cada um abre uma página com os filmes e as séries da marca).
 
 No GitHub Pages, o manifest da raiz é o da Netflix (o endereço já instalado). Cada streaming também tem o seu:
-`https://USUARIO.github.io/REPOSITORIO/disney/manifest.json` para a Disney+ (e `/netflix/manifest.json`).
+`https://USUARIO.github.io/REPOSITORIO/disney/manifest.json` para a Disney+, `/apple/manifest.json` para a Apple TV (e `/netflix/manifest.json`).
+
+Na Apple TV (o antigo Apple TV+), o visual segue o app do tvOS 26: menu lateral de vidro, destaque em tela cheia, pôsteres na vertical
+que inclinam com o mouse e detalhes em página inteira.
 
 ## Limitações
 

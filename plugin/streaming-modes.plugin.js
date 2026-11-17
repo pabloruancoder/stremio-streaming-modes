@@ -120,6 +120,50 @@
         ['series', 'reality-series', 'Reality shows'], ['movie', 'originals-movies', 'Filmes originais']],
     },
   };
+  MODES.apple = {
+    key: 'apple',
+    label: 'Apple TV',
+    layout: 'apple', // menu lateral de vidro, destaque em tela cheia, pôsteres na vertical (tvOS 26)
+    accent: '#0a84ff',
+    bg: '#000000',
+    splash: 'Apple TV',
+    wordmark: 'STREMIO',
+    provider: 'apple',
+    prefix: 'Apple TV • ',
+    heroCatalogs: [
+      { type: 'series', id: 'apple.originals' },
+      { type: 'movie', id: 'apple.originals-movies' },
+    ],
+    pages: {
+      home: ['@continue', 'originals', 'recent-series', 'originals-movies', '@because0', 'trending-series', 'new-series', '@soon',
+        'acclaimed-series', 'drama-series', 'comedy-series', 'scifi-series', 'mystery-series', '@mylist', 'trending-movies', 'new-movies',
+        'comedy-movies', 'crime-series', 'docu-series', 'docs', 'kids-series', 'all-series', 'all-movies'],
+      series: ['@continue', 'recent-series', 'originals', '@because0', 'new-series', 'trending-series', 'acclaimed-series', 'drama-series',
+        'comedy-series', 'scifi-series', 'mystery-series', 'crime-series', 'action-series', 'docu-series', 'kids-series', 'all-series'],
+      movies: ['@continue', 'recent-movies', 'originals-movies', '@because1', 'new-movies', 'trending-movies', 'acclaimed-movies',
+        'comedy-movies', 'animation-movies', 'docs', 'action-movies', 'scifi-movies', 'romance-movies', 'kids-movies', 'all-movies'],
+    },
+    kidsPages: ['@continue', 'kids-series', 'kids-anim-movies', '@because0', 'kids-movies', 'kids-family-series', '@mylist'],
+    kidsHero: [
+      { type: 'series', id: 'apple.kids-series' },
+      { type: 'movie', id: 'apple.kids-anim-movies' },
+    ],
+    genres: {
+      movie: [['all-movies', 'Todos os filmes'], ['originals-movies', 'Apple Original Films'], ['comedy-movies', 'Comédia'],
+        ['animation-movies', 'Animação'], ['docs', 'Documentários'], ['kids-movies', 'Família'], ['action-movies', 'Ação'],
+        ['scifi-movies', 'Ficção científica'], ['romance-movies', 'Romance'], ['war-movies', 'Guerra e história'],
+        ['thriller-movies', 'Suspense'], ['acclaimed-movies', 'Aclamados pela crítica']],
+      series: [['all-series', 'Todas as séries'], ['originals', 'Originais'], ['drama-series', 'Drama'], ['comedy-series', 'Comédia'],
+        ['scifi-series', 'Ficção científica'], ['mystery-series', 'Mistério'], ['crime-series', 'Policiais'], ['action-series', 'Ação e aventura'],
+        ['docu-series', 'Documentais'], ['kids-series', 'Infantis'], ['acclaimed-series', 'Aclamadas pela crítica']],
+    },
+    explore: [['series', 'drama-series', 'Drama'], ['series', 'comedy-series', 'Comédia'], ['series', 'scifi-series', 'Ficção científica'],
+      ['series', 'mystery-series', 'Mistério'], ['series', 'crime-series', 'Policiais'], ['series', 'docu-series', 'Documentais'],
+      ['movie', 'originals-movies', 'Apple Original Films'], ['movie', 'animation-movies', 'Animação'], ['series', 'kids-series', 'Infantis'],
+      ['movie', 'docs', 'Documentários']],
+  };
+  MODES.disney.originalsNav = true;
+
   const NAV_PAGES = [
     ['home', 'Início'],
     ['series', 'Séries'],
@@ -222,6 +266,9 @@
   }
 
   const isDisney = () => MODES[state.mode]?.layout === 'disney';
+  const isApple = () => MODES[state.mode]?.layout === 'apple';
+  // Modos com interface própria (Disney+, Apple TV): sem prévia ao passar o mouse, detalhes em página inteira, trailer.
+  const isCustom = () => isDisney() || isApple();
   const isBoardRoute = () => /^(#\/?)?$/.test(location.hash);
   // Texto buscado quando a rota é a busca do Stremio (#/search?search=...); null fora dela.
   const searchQuery = () => {
@@ -1256,6 +1303,246 @@
   .sm-brand-frame { flex:none; width:1.1em; height:1.6em; border:.28em solid #ffce00; box-sizing:border-box; }
   @media (max-width: 900px) { .sm-brands { grid-template-columns:repeat(3, minmax(0, 1fr)); } }
 
+  /* ===================== Visual Apple TV (tvOS 26: Liquid Glass) ===================== */
+  html[data-sm-mode="apple"] {
+    --smc-accent:#0a84ff; --smc-accent-rgb:10,132,255; --smc-accent-dark:#0060c7;
+    --smc-bg:#000000; --smc-bg-rgb:0,0,0; --smc-bg2:#1c1c1e; --smc-bg3:#2c2c2e;
+    --glass:rgba(40,40,44,.52); --glass-hi:rgba(255,255,255,.16); --glass-blur:blur(28px) saturate(180%);
+  }
+  html[data-sm-mode="apple"] #sm-app, html[data-sm-mode="apple"] #sm-modal, html[data-sm-mode="apple"] #sm-profiles,
+  html[data-sm-mode="apple"] .sm-menu, html[data-sm-mode="apple"] .sm-intro.apple, html[data-sm-mode="apple"] #sm-trailer {
+    font-family:-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", Inter, "Segoe UI", Arial, sans-serif; letter-spacing:-.01em; }
+  html[data-sm-mode="apple"] #sm-app { --rail:4.6rem; --railspace:calc(var(--rail) + 1.6rem); --pad:2.6vw; --gap:1.1vw; --per:5; --perp:7;
+    padding-left:var(--railspace); color:#f5f5f7; background:#000;
+    --cw:calc((100vw - var(--railspace) - var(--pad) * 2 - var(--gap) * (var(--per) - 1)) / var(--per));
+    --cwp:calc((100vw - var(--railspace) - var(--pad) * 2 - var(--gap) * (var(--perp) - 1)) / var(--perp)); }
+  @media (max-width:1399px) { html[data-sm-mode="apple"] #sm-app { --perp:6; --per:4; } }
+  @media (max-width:1099px) { html[data-sm-mode="apple"] #sm-app { --perp:5; --per:3; } }
+  @media (max-width:799px) { html[data-sm-mode="apple"] #sm-app { --perp:3; --per:2; } }
+  html[data-sm-mode="apple"] #sm-app > :not(.sm-rail) { position:relative; z-index:1; }
+  html[data-sm-mode="apple"] .sm-row, html[data-sm-mode="apple"] .sm-slider, html[data-sm-mode="apple"] .sm-row-head,
+  html[data-sm-mode="apple"] .sm-rows, html[data-sm-mode="apple"] .sm-dlg-info, html[data-sm-mode="apple"] .sm-actions,
+  html[data-sm-mode="apple"] .sm-bill-info, html[data-sm-mode="apple"] .sm-bill-actions, html[data-sm-mode="apple"] .sm-genrepage,
+  html[data-sm-mode="apple"] .sm-explorepage { overflow:visible !important; }
+
+  /* Menu lateral de vidro: flutua com cantos arredondados; ao passar o mouse, cresce e mostra os nomes */
+  html[data-sm-mode="apple"] .sm-rail { top:1rem; bottom:1rem; left:1rem; width:var(--rail); min-width:0; padding:1.1rem 0 1rem; border-radius:1.6rem;
+    background:var(--glass); -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur);
+    box-shadow:inset 0 1px 0 var(--glass-hi), inset 0 0 0 1px rgba(255,255,255,.08), 0 24px 60px rgba(0,0,0,.55);
+    transition:width .35s cubic-bezier(.2,.8,.2,1); overflow:hidden !important; }
+  html[data-sm-mode="apple"] .sm-rail:hover, html[data-sm-mode="apple"] .sm-rail:focus-within { width:15.5rem; }
+  html[data-sm-mode="apple"] .sm-rail::before { display:none; }
+  html[data-sm-mode="apple"] .sm-rail-logo { width:var(--rail); margin:.2rem 0 1.6rem; align-items:center; }
+  html[data-sm-mode="apple"] .sm-rail-logo span { margin:0; font:800 9px/1 Inter, "Segoe UI", sans-serif; letter-spacing:.06em; color:#f5f5f7; }
+  html[data-sm-mode="apple"] .sm-rail-items { gap:.2rem; justify-content:flex-start; }
+  html[data-sm-mode="apple"] .sm-rail-item { height:2.9rem; margin:0 .55rem; padding:0 0 0 1rem; gap:1.1rem; border-radius:999px;
+    color:rgba(245,245,247,.7); transition:background .2s, color .2s; }
+  html[data-sm-mode="apple"] .sm-rail-item .sm-ico { width:1.35rem !important; height:1.35rem !important; }
+  html[data-sm-mode="apple"] .sm-rail-label { font-size:1.02rem; font-weight:500; transform:translateX(-.4rem); }
+  html[data-sm-mode="apple"] .sm-rail-item:hover { background:rgba(255,255,255,.1); color:#fff; }
+  html[data-sm-mode="apple"] .sm-rail-item.active { background:rgba(255,255,255,.92); color:#000; }
+  html[data-sm-mode="apple"] .sm-rail-item.active .sm-rail-label { font-weight:600; }
+  html[data-sm-mode="apple"] .sm-rail-item.active::after { display:none; }
+  html[data-sm-mode="apple"] .sm-rail-item.active .sm-ico { filter:none; }
+  html[data-sm-mode="apple"] .sm-rail-bottom { align-items:flex-start; padding-left:1rem; gap:.8rem; }
+  html[data-sm-mode="apple"] .sm-rail .sm-av-nav { width:2.4rem; height:2.4rem; }
+  html[data-sm-mode="apple"] .sm-rail .sm-pop { background:rgba(36,36,40,.88); -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur);
+    border:1px solid rgba(255,255,255,.1); border-radius:16px; }
+  html[data-sm-mode="apple"] .sm-rail .sm-switch { background:rgba(255,255,255,.1); }
+
+  /* Destaque em tela cheia */
+  .sm-bill { position:relative; margin-left:calc(var(--railspace) * -1); height:min(86vh, 56vw); min-height:30rem; overflow:hidden; background:#000; }
+  .sm-bill-slide { position:absolute; inset:0; opacity:0; visibility:hidden; transition:opacity 1.1s ease, visibility 0s 1.1s; }
+  .sm-bill-slide.on { opacity:1; visibility:visible; transition:opacity 1.1s ease; z-index:1; }
+  .sm-bill-img { position:absolute; inset:0; background:center 20%/cover no-repeat; }
+  .sm-bill-slide.on .sm-bill-img { animation:sm-kb 12s ease-out both; }
+  .sm-bill-slide::after { content:""; position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(90deg, rgba(0,0,0,.78) 0%, rgba(0,0,0,.45) 30%, rgba(0,0,0,0) 60%), linear-gradient(0deg, #000 0%, rgba(0,0,0,.6) 18%, rgba(0,0,0,0) 45%); }
+  .sm-bill-shade { position:absolute; inset:0; z-index:2; pointer-events:none; background:linear-gradient(180deg, rgba(0,0,0,.35), transparent 18%); }
+  .sm-bill-info { position:absolute; z-index:3; left:calc(var(--railspace) + var(--pad)); bottom:calc(7vw + 4.6rem); width:min(34rem, 38%); display:flex; flex-direction:column; gap:.75rem; }
+  .sm-bill-kicker { font-size:.8rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:rgba(245,245,247,.75); }
+  .sm-bill-logo { max-width:100%; max-height:9.5rem; object-fit:contain; object-position:left bottom; filter:drop-shadow(0 4px 18px rgba(0,0,0,.5)); }
+  .sm-bill-title { font-size:clamp(2rem, 4vw, 4rem); font-weight:700; line-height:1.02; letter-spacing:-.02em; }
+  .sm-bill-meta { font-size:.95rem; font-weight:500; color:rgba(245,245,247,.82); }
+  .sm-bill-desc { margin:0; font-size:1rem; line-height:1.45; color:rgba(245,245,247,.85); display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+  .sm-bill-actions { display:flex; align-items:center; gap:.7rem; margin-top:.4rem; }
+  .sm-bill-slide.on .sm-bill-info > * { animation:sm-rise-in .9s cubic-bezier(.2,.8,.2,1) both; }
+  .sm-bill-slide.on .sm-bill-info > :nth-child(2) { animation-delay:.08s; }
+  .sm-bill-slide.on .sm-bill-info > :nth-child(3) { animation-delay:.16s; }
+  .sm-bill-slide.on .sm-bill-info > :nth-child(4) { animation-delay:.24s; }
+  .sm-bill-slide.on .sm-bill-info > :nth-child(5) { animation-delay:.32s; }
+  /* Botões: pílula branca e círculos de vidro */
+  .sm-pill { display:inline-flex; align-items:center; gap:.55rem; height:3rem; padding:0 1.6rem 0 1.25rem !important; border-radius:999px !important;
+    background:#f5f5f7 !important; color:#000; font:600 1.02rem/1 inherit; cursor:pointer; transition:transform .2s, background .2s; }
+  .sm-pill:hover { transform:scale(1.04); background:#fff !important; }
+  .sm-pill .sm-ico { width:1.15rem !important; height:1.15rem !important; }
+  .sm-glass-round { display:grid; place-items:center; width:3rem; height:3rem; padding:0 !important; border-radius:50% !important; color:#fff; cursor:pointer;
+    background:rgba(255,255,255,.14) !important; -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.22), inset 0 0 0 1px rgba(255,255,255,.1) !important; transition:transform .2s, background .2s; }
+  .sm-glass-round:hover { transform:scale(1.08); background:rgba(255,255,255,.24) !important; }
+  .sm-glass-round .sm-ico { width:1.25rem !important; height:1.25rem !important; }
+  .sm-bill-arrow { position:absolute; z-index:4; top:50%; width:3rem; height:3rem; margin-top:-1.5rem; display:grid; place-items:center; padding:0 !important;
+    border-radius:50% !important; color:#fff; cursor:pointer; opacity:0; transition:opacity .25s, transform .2s;
+    background:rgba(255,255,255,.12) !important; -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.2) !important; }
+  .sm-bill-arrow.l { left:calc(var(--railspace) + .6rem); } .sm-bill-arrow.r { right:1.2rem; }
+  .sm-bill:hover .sm-bill-arrow { opacity:1; }
+  .sm-bill-arrow:hover { transform:scale(1.08); }
+  .sm-bill-arrow .sm-ico { width:1.4rem !important; height:1.4rem !important; }
+  /* Cápsula de vidro com o progresso */
+  .sm-bill-pager { position:absolute; z-index:4; left:50%; bottom:calc(7vw + 1.4rem); transform:translateX(-50%); display:flex; align-items:center; gap:.45rem;
+    padding:.5rem .7rem !important; border-radius:999px; background:rgba(255,255,255,.12); -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.18) !important; }
+  .sm-bill-dot { position:relative; width:.45rem; height:.45rem; padding:0 !important; border-radius:999px !important; background:rgba(255,255,255,.45) !important;
+    cursor:pointer; overflow:hidden; transition:width .45s cubic-bezier(.2,.8,.2,1); }
+  .sm-bill-dot.on { width:2rem; background:rgba(255,255,255,.3) !important; }
+  .sm-bill-dot i { position:absolute; left:0; top:0; bottom:0; width:0; border-radius:inherit; background:#fff; }
+  .sm-bill-dot.on i { animation:sm-dotfill 9s linear forwards; }
+  .sm-bill.paused .sm-bill-dot.on i, .sm-bill.offscreen .sm-bill-dot.on i { animation-play-state:paused; }
+  html[data-sm-mode="apple"] .sm-rows { margin-top:-7vw; padding-top:0; z-index:2 !important; }
+  html[data-sm-mode="apple"] .sm-rows.flat { margin-top:0; padding-top:2.4rem; }
+
+  /* Fileiras: título com "›", pôsteres verticais arredondados que inclinam e brilham ao passar o mouse */
+  html[data-sm-mode="apple"] .sm-row { margin:0 0 1.4vw; }
+  html[data-sm-mode="apple"] .sm-row-head { margin-bottom:.1rem; }
+  html[data-sm-mode="apple"] .sm-row-title { display:inline-flex; align-items:center; gap:.25rem; font-size:clamp(1.05rem, 1.35vw, 1.45rem); font-weight:700;
+    color:#f5f5f7; letter-spacing:-.015em; }
+  html[data-sm-mode="apple"] .sm-row-title.link { cursor:pointer; }
+  html[data-sm-mode="apple"] .sm-row-title .sm-ico { width:1.1em !important; height:1.1em !important; color:rgba(245,245,247,.55); transition:transform .2s, color .2s; }
+  html[data-sm-mode="apple"] .sm-row-title.link:hover .sm-ico { transform:translateX(3px); color:#fff; }
+  html[data-sm-mode="apple"] .sm-dashes { display:none; }
+  html[data-sm-mode="apple"] .sm-track { padding-top:1.1rem; padding-bottom:2.6rem; perspective:900px; }
+  html[data-sm-mode="apple"] .sm-arrow { top:1.1rem; bottom:2.6rem; background:none !important; }
+  html[data-sm-mode="apple"] .sm-arrow .sm-ico { width:2.4rem !important; height:2.4rem !important; padding:.5rem; box-sizing:border-box; border-radius:50%;
+    background:rgba(255,255,255,.14); -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur); }
+  html[data-sm-mode="apple"] .sm-card:not(.rank) { border-radius:14px; overflow:hidden; box-shadow:0 10px 24px rgba(0,0,0,.45);
+    transform:perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale(var(--s, 1));
+    transition:transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s; will-change:transform; }
+  html[data-sm-mode="apple"] .sm-card:not(.rank)::after { content:""; position:absolute; inset:0; z-index:3; pointer-events:none; opacity:0; transition:opacity .3s;
+    background:radial-gradient(circle at var(--mx, 50%) var(--my, 0%), rgba(255,255,255,.28), rgba(255,255,255,0) 55%); border-radius:inherit;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.25), inset 0 0 0 1px rgba(255,255,255,.12); }
+  html[data-sm-mode="apple"] .sm-card:not(.rank):not(.skeleton):hover, html[data-sm-mode="apple"] .sm-card:not(.rank):focus-visible {
+    --s:1.07; z-index:3; box-shadow:0 28px 46px rgba(0,0,0,.7); outline:none; }
+  html[data-sm-mode="apple"] .sm-card:not(.rank):not(.skeleton):hover::after { opacity:1; }
+  html[data-sm-mode="apple"] .sm-track > .sm-card.portrait { flex-basis:var(--cwp); height:calc(var(--cwp) * 1.5); }
+  html[data-sm-mode="apple"] .sm-card.portrait > .sm-card-logo, html[data-sm-mode="apple"] .sm-card.portrait > .sm-card-name { display:none; }
+  html[data-sm-mode="apple"] .sm-card.portrait::before { display:none; }
+  html[data-sm-mode="apple"] .sm-card.skeleton { background:linear-gradient(110deg, #141416 30%, #232326 50%, #141416 70%); background-size:250% 100%;
+    animation:sm-skel 1.4s linear infinite; }
+  html[data-sm-mode="apple"] .sm-track > .sm-card:not(.skeleton) { animation:sm-pop-in .55s cubic-bezier(.2,.8,.2,1) both; }
+  html[data-sm-mode="apple"] .sm-track > .sm-card:nth-child(2) { animation-delay:.04s; }
+  html[data-sm-mode="apple"] .sm-track > .sm-card:nth-child(3) { animation-delay:.08s; }
+  html[data-sm-mode="apple"] .sm-track > .sm-card:nth-child(4) { animation-delay:.12s; }
+  html[data-sm-mode="apple"] .sm-track > .sm-card:nth-child(5) { animation-delay:.16s; }
+  html[data-sm-mode="apple"] .sm-track > .sm-card:nth-child(n+6) { animation-delay:.2s; }
+  html[data-sm-mode="apple"] .sm-card-progress { left:6%; right:6%; bottom:8%; height:4px; border-radius:2px; background:rgba(255,255,255,.3); overflow:hidden; }
+  html[data-sm-mode="apple"] .sm-card-progress i { background:#fff; }
+  html[data-sm-mode="apple"] .sm-grid .sm-card.portrait { aspect-ratio:2/3; height:auto; }
+  html[data-sm-mode="apple"] .sm-genrepage .sm-grid, html[data-sm-mode="apple"] .sm-explorepage .sm-grid { grid-template-columns:repeat(auto-fill, minmax(11rem, 1fr)); padding:0 var(--pad); }
+
+  /* Detalhes em página inteira: arte ao fundo, botões em pílula, seções empilhadas */
+  html[data-sm-mode="apple"] #sm-modal { background:#000; }
+  html[data-sm-mode="apple"] .sm-dialog { width:100%; min-height:100vh; margin:0; border-radius:0; background:transparent; box-shadow:none; transform:none; }
+  html[data-sm-mode="apple"] .sm-dlg-hero { position:relative; aspect-ratio:auto; min-height:max(36rem, 88vh); background-size:cover; background-position:center 20%; }
+  html[data-sm-mode="apple"] .sm-dlg-hero::after { z-index:1; background:linear-gradient(90deg, rgba(0,0,0,.85) 0%, rgba(0,0,0,.5) 32%, rgba(0,0,0,0) 62%),
+    linear-gradient(0deg, #000 0%, rgba(0,0,0,.55) 20%, rgba(0,0,0,0) 48%); }
+  html[data-sm-mode="apple"] .sm-dlg-info { left:4.5vw; bottom:4rem; width:min(36rem, 42%); }
+  html[data-sm-mode="apple"] .sm-dlg-info .sm-hero-logo { max-height:9.5rem; max-width:85%; margin-bottom:1.4rem; }
+  html[data-sm-mode="apple"] .sm-dlg-info .sm-actions { gap:.7rem; }
+  html[data-sm-mode="apple"] .sm-dlg-info .sm-btn { height:3rem; padding:0 1.6rem 0 1.25rem; border-radius:999px; font-weight:600; font-size:1rem; letter-spacing:0; text-transform:none; }
+  html[data-sm-mode="apple"] .sm-btn-white { background:#f5f5f7; color:#000; }
+  html[data-sm-mode="apple"] .sm-btn-white:hover { background:#fff; transform:scale(1.04); }
+  html[data-sm-mode="apple"] .sm-btn-gray { background:rgba(255,255,255,.14); color:#fff; -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.2); }
+  html[data-sm-mode="apple"] .sm-btn-gray:hover { background:rgba(255,255,255,.24); }
+  html[data-sm-mode="apple"] .sm-round { width:3rem; height:3rem; border:0; background:rgba(255,255,255,.14); color:#fff;
+    -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur); box-shadow:inset 0 1px 0 rgba(255,255,255,.2); }
+  html[data-sm-mode="apple"] .sm-round:hover { background:rgba(255,255,255,.24); }
+  html[data-sm-mode="apple"] .sm-btn:focus:not(:focus-visible), html[data-sm-mode="apple"] .sm-dlg-info .sm-btn-white:focus { outline:none; }
+  html[data-sm-mode="apple"] .sm-dlg-close { top:1.4rem; left:1.6rem; right:auto; width:3rem; height:3rem; border:0;
+    background:rgba(255,255,255,.14); -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur); box-shadow:inset 0 1px 0 rgba(255,255,255,.2); }
+  html[data-sm-mode="apple"] .sm-dlg-body { display:flex; flex-direction:column; padding:0 4.5vw 4rem; }
+  html[data-sm-mode="apple"] .sm-dlg-body > [data-tab="eps"] { order:1; }
+  html[data-sm-mode="apple"] .sm-dlg-body > [data-tab="sim"] { order:2; }
+  html[data-sm-mode="apple"] .sm-dlg-body > [data-tab="det"] { order:3; display:grid; grid-template-columns:1.4fr 1fr; gap:3rem; }
+  html[data-sm-mode="apple"] .sm-dlg-section { margin-top:2.6rem; }
+  html[data-sm-mode="apple"] .sm-dlg-section h3, html[data-sm-mode="apple"] .sm-det-title { font-size:1.35rem; font-weight:700; letter-spacing:-.015em; }
+  html[data-sm-mode="apple"] .sm-dlg-section-head { justify-content:flex-start; gap:1rem; }
+  html[data-sm-mode="apple"] .sm-dlg-section-head .sm-dd-panel { left:0; right:auto; background:rgba(36,36,40,.92); border-radius:14px; }
+  html[data-sm-mode="apple"] .sm-dd-btn { border-radius:999px; background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.14); }
+  html[data-sm-mode="apple"] .sm-dlg-section[data-tab="eps"] > div:last-child { display:grid; grid-template-columns:repeat(auto-fill, minmax(17rem, 1fr));
+    gap:2rem 1.4rem; overflow:visible !important; }
+  html[data-sm-mode="apple"] .sm-ep { grid-template-columns:auto 1fr; gap:.7rem .45rem; align-items:start; padding:0; border:0; background:none !important; overflow:visible !important; }
+  html[data-sm-mode="apple"] .sm-ep > .sm-ep-img { grid-column:1 / -1; grid-row:1; border-radius:14px; box-shadow:0 10px 24px rgba(0,0,0,.45); transition:transform .3s; }
+  html[data-sm-mode="apple"] .sm-ep:hover > .sm-ep-img { transform:scale(1.04); }
+  html[data-sm-mode="apple"] .sm-ep > .sm-ep-num { grid-column:1; grid-row:2; font-size:.95rem; font-weight:600; color:rgba(245,245,247,.6); text-align:left; }
+  html[data-sm-mode="apple"] .sm-ep > .sm-ep-num::before { content:"EP "; }
+  html[data-sm-mode="apple"] .sm-ep > div:last-child { grid-column:2; grid-row:2; min-width:0; }
+  html[data-sm-mode="apple"] .sm-ep-top { font-size:1rem; font-weight:600; }
+  html[data-sm-mode="apple"] .sm-ep-right { font-weight:500; color:rgba(245,245,247,.6); font-size:.88rem; }
+  html[data-sm-mode="apple"] .sm-ep-desc { color:rgba(245,245,247,.7); font-size:.88rem; }
+  html[data-sm-mode="apple"] .sm-ep-img .sm-ico { opacity:0; transition:opacity .2s; }
+  html[data-sm-mode="apple"] .sm-ep:hover .sm-ep-img .sm-ico { opacity:1; }
+  html[data-sm-mode="apple"] .sm-similar { grid-template-columns:repeat(auto-fill, minmax(14rem, 1fr)); gap:1.4rem; overflow:visible !important; }
+  html[data-sm-mode="apple"] .sm-sim { background:none; border-radius:14px; overflow:visible !important; }
+  html[data-sm-mode="apple"] .sm-sim-img { border-radius:14px; box-shadow:0 10px 24px rgba(0,0,0,.45); transition:transform .3s; }
+  html[data-sm-mode="apple"] .sm-sim:hover .sm-sim-img { transform:scale(1.05); }
+  html[data-sm-mode="apple"] .sm-sim-body { display:none; }
+  html[data-sm-mode="apple"] .sm-dlg-cols, html[data-sm-mode="apple"] .sm-match, html[data-sm-mode="apple"] .sm-hd { display:none; }
+
+  /* Busca: campo de vidro arredondado, etiquetas e capas para explorar */
+  html[data-sm-mode="apple"] .sm-searchpage { grid-template-columns:1fr; gap:1.2rem; padding:1.4rem var(--pad) 4rem; }
+  html[data-sm-mode="apple"] .sm-sp-side { position:sticky; top:0; z-index:6; max-height:none; padding:0 0 .8rem; background:linear-gradient(180deg, #000 80%, rgba(0,0,0,0)); }
+  html[data-sm-mode="apple"] .sm-sp-box { height:3.4rem; padding:0 1.2rem; border:0; border-radius:999px; background:rgba(255,255,255,.1);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.14), inset 0 0 0 1px rgba(255,255,255,.08); }
+  html[data-sm-mode="apple"] .sm-sp-box:focus-within { background:rgba(255,255,255,.16); box-shadow:inset 0 0 0 2px rgba(10,132,255,.9); }
+  html[data-sm-mode="apple"] .sm-sp-input { font-size:1.1rem; color:#f5f5f7; }
+  html[data-sm-mode="apple"] .sm-sp-box > .sm-ico { width:1.3rem !important; height:1.3rem !important; color:rgba(245,245,247,.6); }
+  html[data-sm-mode="apple"] .sm-sp-list { display:flex; flex-wrap:wrap; gap:.5rem; overflow:visible; }
+  html[data-sm-mode="apple"] .sm-sp-list > li { display:contents; }
+  html[data-sm-mode="apple"] .sm-sp-item { width:auto; padding:.5rem 1rem; border-radius:999px; background:rgba(255,255,255,.1); color:#f5f5f7; font-size:.92rem; }
+  html[data-sm-mode="apple"] .sm-sp-item:hover, html[data-sm-mode="apple"] .sm-sp-item.on { background:#f5f5f7; color:#000; box-shadow:none; }
+  html[data-sm-mode="apple"] .sm-sp-item:hover b { color:#000; }
+  html[data-sm-mode="apple"] .sm-sp-label { color:rgba(245,245,247,.55); }
+  html[data-sm-mode="apple"] .sm-sp-title, html[data-sm-mode="apple"] .sm-page-title { color:#f5f5f7; letter-spacing:-.02em; }
+  html[data-sm-mode="apple"] .sm-xpl { border-radius:16px; background:#1c1c1e !important; box-shadow:0 10px 24px rgba(0,0,0,.45) !important; }
+  html[data-sm-mode="apple"] .sm-xpl:hover { box-shadow:0 26px 44px rgba(0,0,0,.7) !important; }
+  html[data-sm-mode="apple"] .sm-xpl-name { font-weight:700; letter-spacing:-.01em; }
+  html[data-sm-mode="apple"] .sm-ghost { background:#141416; border-radius:14px; }
+
+  /* Painéis, perfis e abertura */
+  html[data-sm-mode="apple"] .sm-pop, html[data-sm-mode="apple"] .sm-menu, html[data-sm-mode="apple"] .sm-dd-panel {
+    background:rgba(36,36,40,.9); -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur); border-radius:16px; }
+  html[data-sm-mode="apple"] .sm-genre-head .sm-dd-btn { font-size:1.05rem; }
+  html[data-sm-mode="apple"] #sm-profiles { background:radial-gradient(ellipse 70% 55% at 50% 30%, #1c1c22, #000 75%); }
+  html[data-sm-mode="apple"] .sm-av, html[data-sm-mode="apple"] .sm-prof-av, html[data-sm-mode="apple"] .sm-prof-edit,
+  html[data-sm-mode="apple"] .sm-av-xl { border-radius:50%; }
+  html[data-sm-mode="apple"] .sm-gate h1 { font-weight:700; letter-spacing:-.025em; }
+  html[data-sm-mode="apple"] .sm-prof-av { transition:transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s; outline:0; }
+  html[data-sm-mode="apple"] .sm-prof:hover .sm-prof-av { transform:scale(1.08); box-shadow:0 20px 40px rgba(0,0,0,.6), 0 0 0 4px rgba(255,255,255,.9); }
+  html[data-sm-mode="apple"] .sm-gate-btn { border-radius:999px; border:0; background:rgba(255,255,255,.12); color:#f5f5f7; letter-spacing:0; font-weight:600; }
+  html[data-sm-mode="apple"] .sm-gate-btn:hover, html[data-sm-mode="apple"] .sm-gate-btn.white { background:#f5f5f7; color:#000; }
+  html[data-sm-mode="apple"] .sm-offline { background:#1c1c1e; border-color:#3a3a3c; color:#f5f5f7; border-radius:14px; }
+  .sm-intro.apple { background:radial-gradient(ellipse 60% 50% at 50% 50%, #18181c 0%, #000 70%); overflow:hidden; }
+  /* Luzes coloridas atrás do vidro: é o que deixa o desfoque e o reflexo do Liquid Glass visíveis */
+  .sm-intro.apple::before { content:""; position:absolute; left:50%; top:50%; width:46rem; height:22rem; margin:-11rem 0 0 -23rem; border-radius:50%;
+    background:radial-gradient(circle at 20% 50%, rgba(10,132,255,.75), transparent 45%), radial-gradient(circle at 80% 40%, rgba(255,55,95,.6), transparent 45%),
+      radial-gradient(circle at 55% 75%, rgba(255,214,10,.45), transparent 45%);
+    filter:blur(40px); opacity:.85; animation:sm-apple-blobs var(--t, 2.2s) ease-in-out forwards; }
+  @keyframes sm-apple-blobs { 0% { transform:translateX(-18%) rotate(0deg) scale(.8); opacity:0; } 30% { opacity:.85; }
+    80% { opacity:.85; } 100% { transform:translateX(18%) rotate(40deg) scale(1.1); opacity:0; } }
+  .sm-apple-glass { position:relative; display:grid; place-items:center; padding:2.2rem 4.4rem; border-radius:999px; overflow:hidden;
+    background:rgba(255,255,255,.08); -webkit-backdrop-filter:blur(30px) saturate(180%); backdrop-filter:blur(30px) saturate(180%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.3), inset 0 0 0 1px rgba(255,255,255,.12), 0 30px 80px rgba(0,0,0,.6);
+    animation:sm-glass-in var(--t, 2.2s) cubic-bezier(.2,.8,.2,1) forwards; }
+  .sm-apple-glass::after { content:""; position:absolute; top:-50%; bottom:-50%; left:-40%; width:30%; transform:skewX(-18deg);
+    background:linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent); animation:sm-glass-sheen var(--t, 2.2s) ease-in-out forwards; }
+  .sm-intro.apple .sm-intro-word { color:#f5f5f7; font:600 clamp(2.6rem, 6vw, 5.4rem)/1 -apple-system, "SF Pro Display", Inter, "Segoe UI", sans-serif;
+    letter-spacing:-.03em; animation:none; opacity:1; }
+  @keyframes sm-glass-in { 0% { opacity:0; transform:scale(.7); filter:blur(10px); } 25% { opacity:1; transform:scale(1); filter:none; }
+    78% { opacity:1; transform:scale(1); } 100% { opacity:0; transform:scale(1.06); } }
+  @keyframes sm-glass-sheen { 0%, 25% { left:-40%; } 70%, 100% { left:120%; } }
+
   /* Filmes / Séries com seletor de gênero */
   .sm-genre-head { display:flex; align-items:center; gap:1.4rem; margin:0 var(--pad) 1.6rem; overflow:visible !important; }
   .sm-genre-head .sm-page-title { margin:0; }
@@ -1503,6 +1790,10 @@
       document.head.appendChild(h('link', { id: 'sm-font-disney', rel: 'stylesheet',
         href: 'https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800&display=swap' }));
     }
+    if (!document.getElementById('sm-font-apple')) {
+      document.head.appendChild(h('link', { id: 'sm-font-apple', rel: 'stylesheet',
+        href: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap' }));
+    }
   }
 
   // ===========================================================================
@@ -1614,6 +1905,8 @@
     root.style.setProperty('--sm-accent', MODES[state.mode].accent);
     if (MODES[state.mode].provider) root.dataset.smThemed = '';
     else delete root.dataset.smThemed;
+    if (MODES[state.mode].layout) root.dataset.smLayout = MODES[state.mode].layout;
+    else delete root.dataset.smLayout;
     if (state.showInDefault) root.dataset.smShowDefault = '';
     else delete root.dataset.smShowDefault;
   }
@@ -1649,12 +1942,17 @@
           <animate attributeName="r" values="2;46;60" keyTimes="0;.5;1" begin="1.3s" dur=".7s" fill="freeze"/>
           <animate attributeName="opacity" values="0;.95;0" keyTimes="0;.3;1" begin="1.3s" dur=".7s" fill="freeze"/></circle></svg>`;
     }
+    if (mode.layout === 'apple') {
+      overlay.classList.add('apple');
+      overlay.appendChild(h('div', { class: 'sm-apple-glass' }, h('div', { class: 'sm-intro-word', text: mode.splash })));
+      return overlay;
+    }
     overlay.appendChild(h('div', { class: 'sm-intro-word', text: mode.splash }));
     return overlay;
   }
 
   function simpleTransition(mode, reduced) {
-    const total = reduced ? 600 : mode.layout === 'disney' ? 2300 : 1500;
+    const total = reduced ? 600 : mode.layout === 'disney' ? 2300 : mode.layout === 'apple' ? 2200 : 1500;
     const overlay = buildIntro(mode);
     overlay.style.setProperty('--t', `${total}ms`);
     document.body.appendChild(overlay);
@@ -2066,11 +2364,13 @@
       item('Séries', 'tv', go('series'), state.page === 'series'),
     ];
     if (!isKids()) {
-      items.push(item('Originais', 'star', go('originals'), onOriginals));
+      if (mode.originalsNav) items.push(item('Originais', 'star', go('originals'), onOriginals));
       items.push(item('Novidades', 'sparkle', go('new'), state.page === 'new'));
     }
     const logo = h('div', { class: 'sm-rail-logo', title: 'Início', onclick: go('home') });
-    logo.innerHTML = '<svg viewBox="0 0 100 40" aria-hidden="true"><path d="M6 34 C 26 4, 74 4, 94 30" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>';
+    if (mode.layout === 'disney') {
+      logo.innerHTML = '<svg viewBox="0 0 100 40" aria-hidden="true"><path d="M6 34 C 26 4, 74 4, 94 30" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>';
+    }
     logo.appendChild(h('span', { text: mode.wordmark }));
     return h('nav', { class: 'sm-rail', 'aria-label': 'Menu' },
       logo,
@@ -2079,7 +2379,7 @@
   }
 
   function buildNav(mode) {
-    if (mode.layout === 'disney') return buildRail(mode);
+    if (mode.layout === 'disney' || mode.layout === 'apple') return buildRail(mode);
     const links = h('ul', { class: 'sm-links' },
       NAV_PAGES.filter(([key]) => !(isKids() && key === 'new')).map(([key, label]) =>
         h('li', null, h('a', { class: state.page === key ? 'active' : null, text: label, onclick: () => setPage(key) }))));
@@ -2466,10 +2766,85 @@
     })();
   }
 
+  // Apple TV: destaque em tela cheia (passa por baixo do menu de vidro). As artes trocam com um esmaecimento,
+  // o título entra com animação, e uma cápsula de vidro embaixo mostra o progresso até a próxima.
+  function buildBillboard(wrap, rows, sources) {
+    const hero = h('section', { class: 'sm-bill', 'aria-label': 'Destaques', 'aria-roledescription': 'carrossel' });
+    wrap.classList.add('sm-herowrap');
+    wrap.appendChild(hero);
+    let stopped = false;
+    let idx = 0;
+    heroCtl = {
+      destroy() { stopped = true; },
+      pause() { hero.classList.add('paused'); },
+      resume() { hero.classList.remove('paused'); },
+      onScroll(y) { hero.classList.toggle('offscreen', y > hero.offsetHeight * 0.7); },
+    };
+    (async () => {
+      const lists = await Promise.all(sources.map((src) => catalog(src.type, src.id).then((ms) => ms.slice(0, 6)).catch(() => [])));
+      const pool = [];
+      const seen = new Set();
+      for (let i = 0; i < 6 && pool.length < 8; i++) {
+        for (const l of lists) {
+          const m = l[i];
+          if (m?.background && !seen.has(m.id) && pool.length < 8) { seen.add(m.id); pool.push(m); }
+        }
+      }
+      if (stopped) return;
+      if (!pool.length) {
+        hero.remove();
+        rows.classList.add('flat');
+        rows.prepend(h('div', { class: 'sm-offline', text: offlineText() }));
+        return;
+      }
+      const n = pool.length;
+      const pager = h('div', { class: 'sm-bill-pager' });
+      const slides = pool.map((it, i) => {
+        const meta = [it.type === 'movie' ? 'Filme' : 'Série', ...(it.genres || []).slice(0, 2), it.releaseInfo].filter(Boolean).join(' · ');
+        const listBtn = h('button', { type: 'button', class: 'sm-glass-round', 'aria-label': 'Minha lista' });
+        const setList = () => listBtn.replaceChildren(icon(inMyList(it.id) ? 'check' : 'plus'));
+        setList();
+        listBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleMyList(it); setTimeout(setList, 400); });
+        const slide = h('div', { class: 'sm-bill-slide' },
+          h('div', { class: 'sm-bill-img', style: { backgroundImage: cssUrl(it.background) } }),
+          h('div', { class: 'sm-bill-info' },
+            h('div', { class: 'sm-bill-kicker', text: 'Original Apple TV' }),
+            logoOrTitle(it, 'sm-bill-logo', 'sm-bill-title'),
+            h('div', { class: 'sm-bill-meta', text: meta }),
+            it.description ? h('p', { class: 'sm-bill-desc', text: it.description }) : null,
+            h('div', { class: 'sm-bill-actions' },
+              h('button', { type: 'button', class: 'sm-pill', onclick: () => play(it) }, icon('play', true), 'Assistir'),
+              listBtn,
+              h('button', { type: 'button', class: 'sm-glass-round', 'aria-label': 'Mais informações', onclick: () => openModal(it) }, icon('info')))));
+        const fill = h('i');
+        fill.addEventListener('animationend', () => { if (!stopped && i === idx) go(idx + 1); });
+        pager.appendChild(h('button', { type: 'button', class: 'sm-bill-dot', 'aria-label': `Destaque ${i + 1}`, onclick: () => go(i) }, fill));
+        return slide;
+      });
+      function go(i) {
+        idx = (i + n) % n;
+        slides.forEach((el, j) => el.classList.toggle('on', j === idx));
+        [...pager.children].forEach((dt, j) => {
+          dt.classList.toggle('on', j === idx);
+          const f = dt.firstChild;
+          f.style.animation = 'none';
+          void f.offsetWidth;
+          f.style.animation = '';
+        });
+      }
+      hero.append(...slides, h('div', { class: 'sm-bill-shade' }),
+        h('button', { type: 'button', class: 'sm-bill-arrow l', 'aria-label': 'Anterior', onclick: () => go(idx - 1) }, icon('left')),
+        h('button', { type: 'button', class: 'sm-bill-arrow r', 'aria-label': 'Próximo', onclick: () => go(idx + 1) }, icon('right')),
+        pager);
+      go(0);
+    })();
+  }
+
   function buildHero(mode, wrap, rows, sourcesOverride) {
     const types = state.page === 'series' ? ['series'] : state.page === 'movies' ? ['movie'] : ['series', 'movie'];
     const sources = (sourcesOverride || (isKids() ? mode.kidsHero : mode.heroCatalogs)).filter((c) => types.includes(c.type));
     if (mode.layout === 'disney') return buildCarousel(wrap, rows, sources);
+    if (mode.layout === 'apple') return buildBillboard(wrap, rows, sources);
     const hero = h('section', { class: 'sm-hero', 'aria-label': 'Destaque' });
     wrap.appendChild(hero);
     let iframe = null;
@@ -2643,8 +3018,15 @@
     const dashes = h('div', { class: 'sm-dashes' });
     const head = h('div', { class: 'sm-row-head' },
       h('h2', { class: 'sm-row-title', text: title }),
-      opts.onExplore ? h('a', { class: 'sm-explore', onclick: opts.onExplore }, isDisney() ? 'VER TUDO' : 'Explorar tudo ›') : null,
+      opts.onExplore && !isApple() ? h('a', { class: 'sm-explore', onclick: opts.onExplore }, isDisney() ? 'VER TUDO' : 'Explorar tudo ›') : null,
       dashes);
+    // Apple TV: o título da fileira é o link ("Em alta ›").
+    if (isApple() && opts.onExplore) {
+      const t = head.querySelector('.sm-row-title');
+      t.classList.add('link');
+      t.appendChild(icon('right'));
+      t.addEventListener('click', opts.onExplore);
+    }
     const row = h('section', { class: 'sm-row' }, head, h('div', { class: 'sm-slider' }, left, track, right));
     const n = opts.rank ? 6 : 8;
     for (let i = 0; i < n; i++) track.appendChild(h('div', { class: `sm-card skeleton${opts.rank ? ' rank' : ''}` }));
@@ -2692,8 +3074,10 @@
   }
 
   function card(item, opts = {}) {
-    const el = h('div', { class: 'sm-card', tabindex: '0', role: 'button', 'aria-label': item.name,
-      style: { backgroundImage: cssUrl(cardImage(item)) } });
+    // Apple TV: pôster na vertical (como no tvOS 26), menos em "Continuar assistindo".
+    const portrait = isApple() && !opts.progress && item.poster && item.posterShape !== 'landscape';
+    const el = h('div', { class: portrait ? 'sm-card portrait' : 'sm-card', tabindex: '0', role: 'button', 'aria-label': item.name,
+      style: { backgroundImage: cssUrl(portrait ? tmdbSize(item.poster, 'w342') || item.poster : cardImage(item)) } });
     el.appendChild(logoOrTitle(item, 'sm-card-logo', 'sm-card-name'));
     if (item.epLabel) el.appendChild(h('div', { class: 'sm-card-ep', text: item.epLabel }));
     if (opts.progress && item.progress > 0) {
@@ -2728,7 +3112,20 @@
 
   function wireCard(el, item) {
     let timer = null;
-    if (isDisney()) {
+    if (isCustom()) {
+      // Apple TV: a capa inclina seguindo o mouse, com um brilho por cima (efeito de foco da Apple TV).
+      if (isApple()) {
+        el.addEventListener('mousemove', (e) => {
+          const r = el.getBoundingClientRect();
+          const x = (e.clientX - r.left) / r.width;
+          const y = (e.clientY - r.top) / r.height;
+          el.style.setProperty('--rx', `${((0.5 - y) * 9).toFixed(2)}deg`);
+          el.style.setProperty('--ry', `${((x - 0.5) * 11).toFixed(2)}deg`);
+          el.style.setProperty('--mx', `${(x * 100).toFixed(1)}%`);
+          el.style.setProperty('--my', `${(y * 100).toFixed(1)}%`);
+        });
+        el.addEventListener('mouseleave', () => { el.style.removeProperty('--rx'); el.style.removeProperty('--ry'); });
+      }
       el.addEventListener('click', () => openModal(item));
       el.addEventListener('keydown', (e) => { if (e.key === 'Enter') openModal(item); });
       return;
@@ -3104,7 +3501,7 @@
         h('span', { text: `Faltam ${Math.max(1, Math.round((ls.duration - ls.timeOffset) / 60000))} min` }))
       : null;
     const dialog = h('div', { class: 'sm-dialog', role: 'dialog', 'aria-modal': 'true', 'aria-label': item.name },
-      h('button', { type: 'button', class: 'sm-dlg-close', 'aria-label': isDisney() ? 'Voltar' : 'Fechar', onclick: closeModal }, icon(isDisney() ? 'left' : 'close')),
+      h('button', { type: 'button', class: 'sm-dlg-close', 'aria-label': isCustom() ? 'Voltar' : 'Fechar', onclick: closeModal }, icon(isCustom() ? 'left' : 'close')),
       h('div', { class: 'sm-dlg-hero', style: { backgroundImage: cssUrl(item.background || cardImage(item)) } },
         h('div', { class: 'sm-dlg-info' },
           logoOrTitle(item, 'sm-hero-logo', 'sm-hero-title', 'h2'),
@@ -3113,7 +3510,7 @@
             listBtn,
             thumbButton(item)),
           resume,
-          isDisney() ? h('div', { class: 'sm-dlg-sub' }) : null)),
+          isCustom() ? h('div', { class: 'sm-dlg-sub' }) : null)),
       body);
     const el = h('div', { id: 'sm-modal', onclick: (e) => { if (e.target === el) closeModal(); } }, dialog);
     document.body.appendChild(el);
@@ -3124,7 +3521,7 @@
     const d = await details(item.type, item.id);
     if (modalEl !== el) return;
     const info = { ...item, ...(d || {}) };
-    if (isDisney() && d?.trailer) {
+    if (isCustom() && d?.trailer) {
       dialog.querySelector('.sm-dlg-info .sm-btn-white')?.after(
         h('button', { type: 'button', class: 'sm-btn sm-btn-gray sm-btn-trailer', onclick: () => openTrailer(d.trailer, info.name) }, 'Trailer'));
       // Depois de alguns segundos a arte de fundo vira o trailer (sem som, em loop), como no app.
@@ -3167,17 +3564,17 @@
           info.tagline ? h('p', { class: 'sm-dlg-tagline', text: info.tagline }) : null,
           h('p', { class: 'sm-dlg-desc', text: info.description || '' })),
         side));
-    if (tabs) {
-      // Na Disney+, ano/duração/gêneros e a sinopse ficam embaixo dos botões; o resto vai para a aba Detalhes.
+    if (isCustom()) {
+      // Disney+/Apple TV: ano/duração/gêneros e a sinopse ficam embaixo dos botões; o resto vai para Detalhes/Informações.
       const sub = dialog.querySelector('.sm-dlg-sub');
       const bits = [info.year, info.seasonsCount ? (info.seasonsCount === 1 ? '1 temporada' : `${info.seasonsCount} temporadas`)
         : info.runtime && item.type === 'movie' ? fmtRuntime(info.runtime) : null, (info.genres || []).slice(0, 3).join(', ')].filter(Boolean);
       sub?.replaceChildren(
         h('div', { class: 'sm-dlg-bits' }, d?.certification ? certBadge(d.certification) : null, h('span', { text: bits.join(' • ') })),
         info.description ? h('p', { class: 'sm-dlg-sum', text: info.description }) : null);
-      body.replaceChildren(tabs);
+      body.replaceChildren(...(tabs ? [tabs] : []));
       addSection('det', 'DETALHES', h('div', { class: 'sm-dlg-section sm-det' },
-        h('div', null, h('h3', { class: 'sm-det-title', text: info.name }), h('p', { class: 'sm-dlg-desc', text: info.description || '' })),
+        h('div', null, h('h3', { class: 'sm-det-title', text: tabs ? info.name : 'Informações' }), h('p', { class: 'sm-dlg-desc', text: info.description || '' })),
         h('div', { class: 'sm-det-side' },
           info.runtime || info.seasonsCount ? h('div', null, h('span', { text: 'Duração' }),
             info.seasonsCount ? (info.seasonsCount === 1 ? '1 temporada' : `${info.seasonsCount} temporadas`) : fmtRuntime(info.runtime)) : null,
@@ -3236,7 +3633,7 @@
     const sims = profileFilter(await similar(mode.provider, item.type, item.id));
     if (modalEl !== el || !sims.length) return;
     addSection('sim', 'SUGESTÕES', h('div', { class: 'sm-dlg-section' },
-      h('h3', { text: 'Títulos semelhantes', style: { marginBottom: '1rem' } }),
+      h('h3', { text: isApple() ? 'Relacionados' : 'Títulos semelhantes', style: { marginBottom: '1rem' } }),
       h('div', { class: 'sm-similar' }, sims.slice(0, 9).map((s) =>
         h('div', { class: 'sm-sim', role: 'button', tabindex: '0', onclick: () => openModal(s) },
           h('div', { class: 'sm-sim-img', style: { backgroundImage: cssUrl(cardImage(s)) } }, icon('play', true),

@@ -9,7 +9,7 @@ const today = () => new Date().toISOString().slice(0, 10);
 // Fileiras de cada streaming, na ordem em que aparecem na Home.
 // kind: 'top10' (ranking oficial) ou 'discover' (TMDB filtrado pelo streaming).
 function rowsFor(p) {
-  const card = config.cardStyle;
+  const card = p.cardShape || config.cardStyle;
   const rows = [];
   if (p.hasOfficialTop10) {
     rows.push(
@@ -125,7 +125,7 @@ function originalMovieList(provider) {
     const params = { with_companies: o.companies, 'primary_release_date.gte': o.since, sort_by: 'popularity.desc',
       with_watch_providers: provider.tmdbProviderId, with_watch_monetization_types: 'flatrate|ads' };
     const items = await allPages('movie', params);
-    const checks = await mapLimit(items, 8, async (x) => {
+    const checks = o.allowTheatrical ? items.map(() => true) : await mapLimit(items, 8, async (x) => {
       const d = await tmdb(`/movie/${x.id}/release_dates`, { language: undefined }).catch(() => null);
       if (!d) return false;
       const types = (d.results || []).filter((r) => r.iso_3166_1 === 'US' || r.iso_3166_1 === config.region)
@@ -133,7 +133,7 @@ function originalMovieList(provider) {
       return types.length > 0 && !types.includes(3) && !types.includes(2); // 2 = cinema limitado, 3 = cinema
     });
     const keep = items.filter((_, i) => checks[i]);
-    const metas = await mapLimit(keep, 8, (item) => toMetaPreview(item, 'movie', config.cardStyle).catch(() => null));
+    const metas = await mapLimit(keep, 8, (item) => toMetaPreview(item, 'movie', provider.cardShape || config.cardStyle).catch(() => null));
     const seen = new Set();
     return metas.filter((m) => m && !seen.has(m.id) && seen.add(m.id));
   });

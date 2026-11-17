@@ -40,6 +40,19 @@ export const PROVIDERS = {
       { id: 'hulu', name: 'Hulu', movie: { with_companies: '127928|25|43' }, series: { with_networks: '88|453|1035' } },
     ],
   },
+  // Apple TV (o Apple TV+ passou a se chamar só "Apple TV" em out/2025). Catálogo quase todo original.
+  apple: {
+    key: 'apple',
+    label: 'Apple TV',
+    tmdbProviderId: 350,
+    tmdbNetworkId: 2552, // rede "Apple TV" = séries originais
+    hasOfficialTop10: false,
+    cardShape: 'poster', // no app (tvOS 26) as fileiras usam pôsteres na vertical
+    freshDays: { movie: 240, series: 180 }, // lança pouco: janela maior em "Lançamentos"
+    // Filmes originais = Apple Studios. Na Apple, até os que passaram nos cinemas (F1, Napoleão) são originais.
+    originalMovies: { companies: '194232', since: '2019-11-01', allowTheatrical: true },
+    upcoming: { days: 180, networks: '2552', movieCompanies: '194232' },
+  },
 };
 
 // Separador entre o nome do streaming e o nome da fileira.
