@@ -42,8 +42,11 @@ npm start
 
 - Use o botão **Modo** na barra superior, ou **Alt+M**, e escolha **Netflix** ou **Stremio padrão**.
   A escolha fica salva entre sessões.
-- Ao entrar no modo Netflix, toca uma vinheta. Se existir um arquivo `addon/intro/netflix.mp4` (ou `.webm`), ele é
-  tocado direto, em tela cheia e sem controles. Sem o arquivo, a vinheta oficial toca pelo player do YouTube.
+- Ao entrar no modo Netflix, toca uma vinheta, em tela cheia e sem controles. O plugin procura nesta ordem:
+  1. `addon/intro/netflix.mp4` (ou `.webm`) no PC, servido pelo addon local (essa pasta não vai para o GitHub);
+  2. `addon/intro-publica/netflix.mp4` (ou `.webm`) do repositório, publicada no GitHub Pages em `/intro/netflix.mp4`.
+     Use aqui só um vídeo próprio, que você tenha o direito de publicar;
+  3. sem nenhum dos dois, a vinheta oficial pelo player do YouTube.
   Para tocar sem som, rode no console `localStorage.setItem('streamingModes.introSound', 'false')`.
 - No modo Netflix, a Home é desenhada pelo plugin:
   - barra com Início, Séries, Filmes, Novidades e populares e Minha lista;

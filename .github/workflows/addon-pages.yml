@@ -41,6 +41,11 @@ jobs:
           REGION: BR
           LANGUAGE: pt-BR
         run: node scripts/build-static.mjs ../dist
+      # Intros próprias (addon/intro-publica/<modo>.mp4) ficam em /intro/<modo>.mp4 no Pages.
+      - name: Copiar intros públicas
+        run: |
+          mkdir -p dist/intro
+          cp addon/intro-publica/*.mp4 addon/intro-publica/*.webm dist/intro/ 2>/dev/null || true
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

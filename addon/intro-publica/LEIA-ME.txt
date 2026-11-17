@@ -1,0 +1,12 @@
+Intros públicas
+
+Coloque aqui a sua intro própria, com o nome do streaming:
+
+  netflix.mp4   (ou netflix.webm)
+
+Esta pasta vai para o GitHub e é publicada no GitHub Pages em /intro/netflix.mp4,
+então o plugin toca a intro mesmo com o addon do PC desligado.
+
+Use apenas um vídeo que você criou ou tem o direito de publicar
+(nada da Netflix: nem a vinheta, nem o "N", nem o som "ta-dum").
+Prefira arquivos pequenos (até uns 5 MB) para carregar rápido.

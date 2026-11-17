@@ -1,7 +1,7 @@
 /**
  * @name Streaming Modes
  * @description Transforma o Stremio no visual e nas recomendações de um streaming (Netflix primeiro). Alt+M abre o seletor de modo.
- * @version 0.2.1
+ * @version 0.2.2
  * @author Tec-Projetos
  * @updateUrl none
  */
@@ -1149,19 +1149,30 @@
     }, total + 50);
   }
 
-  // ---------- Vinheta local (arquivo em addon/intro/<modo>.mp4) ----------
+  // ---------- Vinheta em arquivo de vídeo ----------
+  // Ordem: arquivo do PC (addon/intro/<modo>.mp4, servido pelo addon local) e depois a intro pública no
+  // GitHub Pages (addon/intro-publica/<modo>.mp4 no repositório, publicada em /intro/<modo>.mp4).
   // Tocada num <video> comum: tela cheia, sem controles nem marcas. Verificada com antecedência para não atrasar o clique.
+  // localIntro[modo] guarda o endereço do vídeo encontrado, ou false.
   const localIntro = {};
   function checkLocalIntro(key) {
     if (!MODES[key]?.provider || key in localIntro) return;
     localIntro[key] = false;
-    fetch(`${state.addonUrl}/sm/intro/${key}`, { method: 'HEAD' })
-      .then((r) => { localIntro[key] = r.ok; })
-      .catch(() => {});
+    const remote = store.get('remoteAddonUrl');
+    const candidates = [`${state.addonUrl}/sm/intro/${key}`];
+    if (remote) candidates.push(`${remote}/intro/${key}.mp4`, `${remote}/intro/${key}.webm`);
+    (async () => {
+      for (const url of candidates) {
+        try {
+          const r = await fetch(url, { method: 'HEAD', cache: 'no-store' });
+          if (r.ok && /^video\//.test(r.headers.get('content-type') || 'video/')) { localIntro[key] = url; return; }
+        } catch { /* tenta o próximo */ }
+      }
+    })();
   }
 
   function localVideoTransition(mode) {
-    const video = h('video', { src: `${state.addonUrl}/sm/intro/${mode.key}`, preload: 'auto', playsinline: true });
+    const video = h('video', { src: localIntro[mode.key], preload: 'auto', playsinline: true });
     video.muted = store.get('introSound') === false;
     const overlay = h('div', { class: 'sm-intro-video', role: 'presentation' }, video);
     document.body.appendChild(overlay);
