@@ -47,7 +47,7 @@
         new: ['top10-series', 'top10-movies', 'recent-movies', 'recent-series', 'new-movies', 'new-series', 'trending-series', 'trending-movies'],
       },
       // Perfil Infantil: só fileiras feitas para crianças (o tipo da página filtra filmes/séries).
-      kidsPages: ['@continue', 'kids-anim-movies', 'kids-series', '@because0', 'kids-movies', 'kids-family-series', '@mylist'],
+      kidsPages: ['@continue', 'kids-originals', 'kids-anim-movies', 'kids-toons', '@because0', 'kids-preschool', 'kids-live-movies', 'kids-series', 'kids-movies', 'kids-family-series', '@mylist'],
       kidsHero: [
         { type: 'movie', id: 'netflix.kids-anim-movies' },
         { type: 'series', id: 'netflix.kids-series' },
@@ -145,7 +145,7 @@
       movies: ['@continue', 'originals-movies', 'new-movies', '@because1', 'trending-movies', '@genres', 'acclaimed-movies',
         'comedy-movies', 'animation-movies', 'docs', 'action-movies', 'scifi-movies', 'romance-movies', 'war-movies', 'kids-movies', 'all-movies'],
     },
-    kidsPages: ['@continue', 'kids-series', 'kids-anim-movies', '@because0', 'kids-movies', 'kids-family-series', '@mylist'],
+    kidsPages: ['@continue', 'kids-originals', 'kids-preschool', 'kids-anim-movies', '@because0', 'kids-toons', 'kids-series', 'kids-movies', 'kids-family-series', '@mylist'],
     kidsHero: [
       { type: 'series', id: 'apple.kids-series' },
       { type: 'movie', id: 'apple.kids-anim-movies' },
@@ -199,7 +199,7 @@
         'drama-series', 'comedy-series', 'crime-series', 'action-series', 'scifi-series', 'mystery-series', 'anime-series', 'kdrama-series',
         'spanish-series', 'br-series', 'docu-series', 'reality-series', 'kids-series', 'all-series'],
     },
-    kidsPages: ['@continue', 'kids-anim-movies', 'kids-series', '@because0', 'kids-movies', 'kids-family-series', '@mylist'],
+    kidsPages: ['@continue', 'kids-anim-movies', 'kids-toons', 'kids-originals', '@because0', 'kids-preschool', 'kids-live-movies', 'kids-series', 'kids-movies', 'kids-family-series', '@mylist'],
     kidsHero: [
       { type: 'movie', id: 'prime.kids-anim-movies' },
       { type: 'series', id: 'prime.kids-series' },
@@ -247,7 +247,7 @@
       movies: ['@continue', 'trending-movies', 'new-movies', '@because1', 'acclaimed-movies', 'brand-wb-movies', 'brand-dc-movies', 'brand-hbo-movies',
         'action-movies', 'comedy-movies', 'thriller-movies', 'horror-movies', 'scifi-movies', '@genres', 'docs', 'animation-movies', 'kids-movies', 'all-movies'],
     },
-    kidsPages: ['@continue', 'kids-series', 'kids-anim-movies', '@because0', 'brand-cn-series', 'kids-movies', 'kids-family-series', '@mylist'],
+    kidsPages: ['@continue', '@brands', 'kids-toons', 'brand-cn-series', '@because0', 'kids-originals', 'kids-preschool', 'kids-anim-movies', 'brand-sesame-series', 'kids-live-movies', 'kids-family-series', '@mylist'],
     kidsHero: [{ type: 'series', id: 'hbo.kids-series' }, { type: 'movie', id: 'hbo.kids-anim-movies' }],
     explore: [['series', 'drama-series', 'Drama'], ['series', 'crime-series', 'Policiais'], ['series', 'comedy-series', 'Comédia'],
       ['movie', 'action-movies', 'Ação'], ['movie', 'horror-movies', 'Terror'], ['movie', 'scifi-movies', 'Ficção científica'],
@@ -255,6 +255,7 @@
       ['movie', 'animation-movies', 'Animação'], ['series', 'kids-series', 'Infantis']],
   });
 
+  MODES.hbo.kidsBrands = ['cn', 'sesame', 'harrypotter']; // marcas em círculos no perfil Infantil
   MODES.hbo.rowTitles = { originals: 'Em destaque', 'trending-series': 'Séries em alta', 'trending-movies': 'Filmes em alta',
     'new-series': 'Novas séries', 'new-movies': 'Novos filmes', 'brand-hbo-series': 'HBO Originals', 'acclaimed-series': 'Aclamadas pela crítica' };
 
@@ -277,7 +278,7 @@
       movies: ['@continue', 'globofilmes', 'br-movies', 'trending-movies', '@because1', 'new-movies', 'comedy-movies', 'action-movies',
         'romance-movies', 'thriller-movies', '@genres', 'docs', 'kids-movies', 'all-movies'],
     },
-    kidsPages: ['@continue', 'kids-series', 'kids-anim-movies', '@because0', 'kids-movies', 'kids-family-series', '@mylist'],
+    kidsPages: ['@continue', 'kids-preschool', 'kids-toons', 'kids-anim-movies', '@because0', 'kids-originals', 'kids-live-movies', 'kids-series', 'kids-family-series', '@mylist'],
     kidsHero: [{ type: 'series', id: 'globoplay.kids-series' }, { type: 'movie', id: 'globoplay.kids-anim-movies' }],
     explore: [['series', 'novelas', 'Novelas'], ['series', 'tvglobo', 'TV Globo'], ['movie', 'globofilmes', 'Globo Filmes'],
       ['series', 'drama-series', 'Drama'], ['series', 'comedy-series', 'Humor'], ['series', 'crime-series', 'Policiais'],
@@ -300,7 +301,7 @@
         'anime-comedy', 'anime-drama', 'anime-mystery', 'kids-series', 'all-series'],
       movies: ['@continue', 'anime-movies', 'trending-movies', '@because1', 'animation-movies', 'acclaimed-movies', 'action-movies', 'all-movies'],
     },
-    kidsPages: ['@continue', 'kids-series', 'kids-anim-movies', '@because0', 'kids-family-series', '@mylist'],
+    kidsPages: ['@continue', 'kids-preschool', 'kids-series', 'kids-anim-movies', '@because0', 'kids-family-series', '@mylist'],
     kidsHero: [{ type: 'series', id: 'crunchyroll.kids-series' }, { type: 'movie', id: 'crunchyroll.kids-anim-movies' }],
     explore: [['series', 'simulcast', 'Simulcasts'], ['series', 'anime-action', 'Ação e aventura'], ['series', 'anime-fantasy', 'Fantasia'],
       ['series', 'anime-comedy', 'Comédia'], ['series', 'anime-drama', 'Drama'], ['series', 'anime-mystery', 'Mistério'],
@@ -316,7 +317,7 @@
   ];
 
   // remoteAddonUrl: cópia estática do addon no GitHub Pages, usada quando o addon do PC está desligado.
-  const DEFAULTS = { mode: 'stremio', addonUrl: 'http://127.0.0.1:7100', showInDefault: false, muted: true, allContent: false,
+  const DEFAULTS = { mode: 'stremio', addonUrl: 'http://127.0.0.1:7100', showInDefault: false, muted: true, allContent: false, binge: false,
     remoteAddonUrl: 'https://pabloruancoder.github.io/stremio-streaming-modes' };
 
   // ===========================================================================
@@ -559,7 +560,7 @@
   // ---------- Backup automático (perfis, avaliações, listas, históricos, lembretes) ----------
   // Guardado no addon do PC (addon/data/plugin-backup.json). Se o armazenamento do Stremio Enhanced for limpo,
   // os dados voltam sozinhos na próxima abertura. Também dá para exportar/importar um arquivo (menu do perfil).
-  const BACKUP_SKIP = /^(mode|addonUrl|remoteAddonUrl|muted|showInDefault|allContent)$/;
+  const BACKUP_SKIP = /^(mode|addonUrl|remoteAddonUrl|muted|showInDefault|allContent|binge)$/;
   function backupData() {
     const items = {};
     for (let i = 0; i < localStorage.length; i++) {
@@ -2447,6 +2448,19 @@
   .sm-notif-item.ep .sm-notif-text b::before { content:"NOVO EPISÓDIO"; display:block; margin-bottom:.15rem; font-size:.62rem; letter-spacing:.08em;
     color:var(--sm-accent, #e50914); font-weight:800; }
 
+  /* "Você ainda está assistindo?" */
+  .sm-still { position:absolute; inset:0; z-index:5; display:grid; place-items:center; background:rgba(0,0,0,.72); animation:sm-ddin .25s ease-out; }
+  .sm-still-card { display:flex; flex-direction:column; align-items:center; gap:.8rem; padding:2.2rem 2.6rem; border-radius:12px; background:rgba(20,20,24,.92);
+    box-shadow:0 20px 60px rgba(0,0,0,.6); text-align:center; }
+  .sm-still-title { font-size:1.7rem; font-weight:700; color:#fff; }
+  .sm-still-sub { font-size:1rem; color:#b3b3b3; }
+  .sm-still-actions { display:flex; gap:.8rem; margin-top:.6rem; }
+  .sm-still-go, .sm-still-back { padding:.75rem 1.5rem; border-radius:6px; font:700 1rem/1 inherit; cursor:pointer; border:0; }
+  .sm-still-go { background:#fff; color:#000; }
+  .sm-still-go:hover { background:#dcdcdc; }
+  .sm-still-back { background:rgba(255,255,255,.15); color:#fff; }
+  .sm-still-back:hover { background:rgba(255,255,255,.25); }
+
   /* Filmes / Séries com seletor de gênero */
   .sm-genre-head { display:flex; align-items:center; gap:1.4rem; margin:0 var(--pad) 1.6rem; overflow:visible !important; }
   .sm-genre-head .sm-page-title { margin:0; }
@@ -2792,6 +2806,14 @@
       h('h4', { text: 'Modo de streaming' }),
       items,
       h('div', { class: 'sm-sep' }),
+      (() => {
+        const cbB = h('input', { type: 'checkbox' });
+        cbB.checked = Boolean(store.get('binge'));
+        cbB.addEventListener('change', () => store.set('binge', cbB.checked));
+        return h('label', { class: 'sm-toggle sm-toggle-all' }, cbB,
+          h('span', null, h('b', { text: 'Modo maratona' }),
+            h('small', { text: 'Pula abertura e recapitulação sozinho e começa o próximo episódio em 5 segundos.' })));
+      })(),
       h('label', { class: 'sm-toggle sm-toggle-all' }, cbAll,
         h('span', null, h('b', { text: 'Mostrar conteúdo de todos os streamings' }),
           h('small', { text: 'Mantém o visual do modo escolhido, mas as fileiras trazem títulos de todos os streamings.' }))),
@@ -3170,7 +3192,8 @@
     return el;
   }
   function brandsRow(mode) {
-    const row = h('section', { class: 'sm-brands', 'aria-label': 'Marcas' }, mode.brands.map((b) => brandTile(b, mode)));
+    const list = isKids() && mode.kidsBrands ? mode.brands.filter((b) => mode.kidsBrands.includes(b.id)) : mode.brands;
+    const row = h('section', { class: 'sm-brands', 'aria-label': 'Marcas' }, list.map((b) => brandTile(b, mode)));
     if (mode.layout !== 'hbo') return row;
     // HBO Max: carrossel com setas nas laterais.
     const step = () => row.clientWidth * 0.8;
@@ -5411,6 +5434,15 @@
   }
 
   const introMarks = () => store.get('introMarks') || {};
+  // Início dos créditos aprendido por série: segundos antes do fim em que a pessoa costuma ir para o próximo episódio.
+  const outroMarks = () => store.get('outroMarks') || {};
+  // "Você ainda está assistindo?": conta os episódios que começaram sozinhos sem a pessoa mexer em nada.
+  let autoStreak = 0;
+  let lastAutoAt = 0;
+  let lastInteractAt = Date.now();
+  for (const ev of ['pointerdown', 'keydown', 'wheel']) window.addEventListener(ev, () => { lastInteractAt = Date.now(); }, { passive: true, capture: true });
+  let lastMoveMark = 0;
+  window.addEventListener('pointermove', () => { const n = Date.now(); if (n - lastMoveMark > 2000) { lastMoveMark = n; lastInteractAt = n; } }, { passive: true, capture: true });
 
   function createPlayerCtl(route) {
     const m = String(route.videoId || '').match(/^(tt\d+):(\d+):(\d+)$/);
@@ -5425,6 +5457,8 @@
     let lastTime = 0;
     let stopped = false;
     let skipBtn = null;
+    let skipLabel = '';
+    let autoSkipped = null;
     let nextCard = null;
 
     const findVideo = setInterval(() => {
@@ -5466,25 +5500,44 @@
       const mark = ep && introMarks()[ep.id];
       return mark ? [mark.start, mark.end] : null;
     }
+    // Qual trecho pode ser pulado agora: recapitulação, abertura ou (sem próximo episódio) créditos.
+    function skipSegment(t, d) {
+      const inside = (w) => w && t >= w[0] && t < w[1] - 1;
+      if (inside(skip?.recap)) return { win: skip.recap, label: 'Pular recapitulação', auto: true };
+      const intro = introWindow();
+      if (inside(intro)) return { win: intro, label: 'Pular abertura', auto: true };
+      if (!next && inside(skip?.outro) && skip.outro[1] < d - 5) return { win: skip.outro, label: 'Pular créditos', auto: false };
+      return null;
+    }
+    // Quando mostrar o próximo episódio: créditos do AniSkip, créditos aprendidos da série ou proporcional à duração.
+    function creditsAt(d) {
+      if (skip?.outro) return skip.outro[0];
+      const learned = ep && outroMarks()[ep.id];
+      if (learned) return d - learned;
+      return d - Math.min(90, Math.max(30, d * 0.033));
+    }
 
     function onTime() {
       if (!video || stopped) return;
       const t = video.currentTime;
       const d = video.duration || 0;
       if (!video.seeking) lastTime = t;
-      const intro = introWindow();
-      showSkip(Boolean(intro && t >= intro[0] && t < intro[1] - 1), intro);
-      // Fim do episódio: começo do encerramento (AniSkip) ou os últimos 30 s.
-      const endAt = skip?.outro ? skip.outro[0] : d - 30;
+      const seg = skipSegment(t, d);
+      // Modo maratona: abertura e recapitulação são puladas sozinhas (uma vez por trecho).
+      if (seg?.auto && store.get('binge') && autoSkipped !== seg.win) { autoSkipped = seg.win; video.currentTime = seg.win[1]; return; }
+      showSkip(Boolean(seg), seg?.win, seg?.label);
+      // Fim do episódio: começo dos créditos.
+      const endAt = creditsAt(d);
       const atEnd = next && d > 300 && t >= endAt && t < d - 0.5;
       showNext(Boolean(atEnd && !dismissed));
       if (!atEnd && t < endAt - 5) dismissed = false;
     }
 
-    function showSkip(on, intro) {
+    function showSkip(on, win, label = 'Pular abertura') {
+      if (on && skipBtn && skipLabel !== label) { skipBtn.remove(); skipBtn = null; }
       if (on && !skipBtn) {
-        skipBtn = h('button', { type: 'button', class: 'sm-skip', onclick: () => { if (video && intro) video.currentTime = intro[1]; } },
-          'Pular abertura');
+        skipLabel = label;
+        skipBtn = h('button', { type: 'button', class: 'sm-skip', onclick: () => { if (video && win) video.currentTime = win[1]; } }, label);
         root.appendChild(skipBtn);
         requestAnimationFrame(() => skipBtn?.classList.add('show'));
       } else if (!on && skipBtn) {
@@ -5495,8 +5548,22 @@
       }
     }
 
-    function goNext() {
+    function goNext(auto = false) {
       clearInterval(countdown);
+      if (!auto && video && ep && video.duration > 300) {
+        // Aprende onde começam os créditos desta série (pessoa foi para o próximo antes do fim).
+        const left = video.duration - video.currentTime;
+        if (left > 20 && left < 600 && !skip?.outro) {
+          const marks = outroMarks();
+          marks[ep.id] = Math.round(left);
+          store.set('outroMarks', marks);
+        }
+      }
+      if (auto) {
+        autoStreak = lastInteractAt < lastAutoAt ? autoStreak + 1 : 1;
+        lastAutoAt = Date.now();
+        if (autoStreak > 3) { askStillWatching(); return; }
+      } else autoStreak = 0;
       const native = [...document.querySelectorAll('[class*="control-bar-button"]')].find((b) => /next/i.test(b.getAttribute('title') || ''));
       if (native) native.click(); // usa a lógica do Stremio (mesma fonte, mesma qualidade)
       else if (next) location.hash = `#/detail/series/${ep.id}/${encodeURIComponent(next.id)}`;
@@ -5513,16 +5580,17 @@
               h('div', { class: 'sm-next-title', text: `T${next.season}:E${next.episode} · ${next.title}` }))),
           h('div', { class: 'sm-next-actions' },
             h('button', { type: 'button', class: 'sm-next-credits', onclick: () => { dismissed = true; showNext(false); } }, 'Assistir aos créditos'),
-            h('button', { type: 'button', class: 'sm-next-go', onclick: goNext }, fill, icon('play', true), h('span', { text: 'Próximo episódio' }))));
+            h('button', { type: 'button', class: 'sm-next-go', onclick: () => goNext(false) }, fill, icon('play', true), h('span', { text: 'Próximo episódio' }))));
         root.appendChild(nextCard);
         requestAnimationFrame(() => nextCard?.classList.add('show'));
-        // Contagem regressiva de 10 s (como na Netflix); depois toca o próximo.
+        // Contagem regressiva de 10 s (5 s no modo maratona); depois toca o próximo.
         const startAt = Date.now();
+        const total = store.get('binge') ? 5_000 : 10_000;
         clearInterval(countdown);
         countdown = setInterval(() => {
-          const pct = Math.min(1, (Date.now() - startAt) / 10_000);
+          const pct = Math.min(1, (Date.now() - startAt) / total);
           fill.style.width = `${pct * 100}%`;
-          if (pct >= 1) goNext();
+          if (pct >= 1) goNext(true);
         }, 100);
       } else if (!on && nextCard) {
         clearInterval(countdown);
@@ -5531,6 +5599,23 @@
         c.classList.remove('show');
         setTimeout(() => c.remove(), 250);
       }
+    }
+
+    // Depois de 3 episódios seguidos sem interação: pausa e pergunta, como na Netflix.
+    function askStillWatching() {
+      showNext(false);
+      dismissed = true;
+      video?.pause();
+      root.querySelector('.sm-still')?.remove();
+      const box = h('div', { class: 'sm-still', role: 'dialog', 'aria-label': 'Você ainda está assistindo?' },
+        h('div', { class: 'sm-still-card' },
+          h('div', { class: 'sm-still-title', text: 'Você ainda está assistindo?' }),
+          next ? h('div', { class: 'sm-still-sub', text: `${next.series || ''} · T${next.season}:E${next.episode}` }) : null,
+          h('div', { class: 'sm-still-actions' },
+            h('button', { type: 'button', class: 'sm-still-go', onclick: () => { box.remove(); autoStreak = 0; lastInteractAt = Date.now(); goNext(false); } },
+              'Continuar assistindo'),
+            h('button', { type: 'button', class: 'sm-still-back', onclick: () => { box.remove(); autoStreak = 0; history.back(); } }, 'Voltar'))));
+      root.appendChild(box);
     }
 
     return {

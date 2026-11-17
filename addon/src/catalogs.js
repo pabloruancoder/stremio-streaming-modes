@@ -91,6 +91,16 @@ function rowsFor(p) {
   }
   // Fileiras infantis próprias do streaming (Disney+: filmes Disney/Pixar livres e Disney Channel/Junior).
   for (const k of p.kidsRows || []) genre(k.id, k.type, k.name, k.params);
+  // Perfil Infantil em todos os modos: originais infantis, desenhos e filmes da família sem animação.
+  if (p.tmdbNetworkId) {
+    rows.push({ id: 'kids-originals', type: 'series', name: `Infantis só ${p.prep || 'na'} ${p.label}`, kind: 'discover', shape: card,
+      // Só a categoria Infantil (Kids): "animação" sozinha deixaria passar desenhos adultos (Big Mouth, Rick and Morty...).
+      params: { with_networks: p.tmdbNetworkId, with_genres: '10762', without_genres: '80,18,27,99,10768', sort_by: 'popularity.desc' },
+      noProviderFilter: true });
+  }
+  genre('kids-toons', 'series', 'Desenhos', { with_genres: '16,10762', without_genres: '80,18,27,10768' }); // animação E infantil
+  genre('kids-live-movies', 'movie', 'Filmes para a família', { with_genres: '10751', without_genres: '16,27,53,80', certification_country: 'BR', certification: 'L|10' });
+  genre('kids-preschool', 'series', 'Para os pequenos', { with_genres: '10762', without_genres: '10759,10765,9648,80,18' });
   // Fileiras próprias do streaming (Globoplay: novelas; Crunchyroll: simulcasts...). params pode ser função (datas).
   for (const k of p.extraRows || []) {
     rows.push({ id: k.id, type: k.type, name: k.name, kind: 'discover', shape: card,

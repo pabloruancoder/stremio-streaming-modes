@@ -87,15 +87,15 @@ export function skipTimes(imdb, season, episode, length) {
   const len = Math.round(Number(length) || 0);
   return cached(`skip:${imdb}:${season}:${episode}:${Math.round(len / 30)}`, DAY, async () => {
     const target = await malEpisode(imdb, season, episode).catch(() => null);
-    if (!target) return { intro: null, outro: null };
-    const url = `https://api.aniskip.com/v2/skip-times/${target.mal}/${target.ep}?types=op&types=ed&types=recap&episodeLength=${len}`;
+    if (!target) return { intro: null, outro: null, recap: null };
+    const url = `https://api.aniskip.com/v2/skip-times/${target.mal}/${target.ep}?types=op&types=ed&types=recap&types=mixed-op&types=mixed-ed&episodeLength=${len}`;
     const res = await fetch(url).catch(() => null);
-    if (!res?.ok) return { intro: null, outro: null };
+    if (!res?.ok) return { intro: null, outro: null, recap: null };
     const data = await res.json().catch(() => ({}));
     const pick = (type) => {
       const r = (data.results || []).find((x) => x.skipType === type);
       return r ? [r.interval.startTime, r.interval.endTime] : null;
     };
-    return { intro: pick('op') || pick('recap'), outro: pick('ed'), source: 'AniSkip' };
+    return { intro: pick('op') || pick('mixed-op'), recap: pick('recap'), outro: pick('ed') || pick('mixed-ed'), source: 'AniSkip' };
   });
 }
