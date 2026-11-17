@@ -203,6 +203,22 @@
       return remote();
     });
   }
+  // Testa o addon do PC agora (sem cache) e atualiza o estado usado pelo addon().
+  async function probeLocal() {
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), 2500);
+    try {
+      const r = await fetch(`${state.addonUrl}/manifest.json?v=${API_V}&t=${Date.now()}`, { signal: ctl.signal, cache: 'no-store' });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      localDownAt = 0;
+      return true;
+    } catch {
+      localDownAt = Date.now();
+      return false;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
   const offlineText = () => (localDown()
     ? 'Esta parte precisa do addon do PC ligado (abra o iniciar-stremio.bat). As fileiras continuam vindo do GitHub.'
     : `Não consegui falar com o addon em ${state.addonUrl}. Ele está rodando? Abra o iniciar-stremio.bat.`);
@@ -462,6 +478,14 @@
     border:1px solid rgba(255,255,255,.15); background:#0b0b0b; color:#fff; font:inherit; font-size:.85rem; }
   .sm-toggle { display:flex; align-items:center; gap:.5rem; padding:.45rem .7rem; font-size:.8rem; cursor:pointer; opacity:.85; }
   .sm-hint { padding:.2rem .7rem .4rem; font-size:.7rem; opacity:.45; }
+  .sm-status { display:flex; gap:.5rem; align-items:flex-start; padding:0 .7rem .5rem; font-size:.74rem; line-height:1.35; max-width:19rem; }
+  .sm-status-dot { flex:none; width:.55rem; height:.55rem; margin-top:.3rem; border-radius:50%; background:#888; }
+  .sm-status[data-state="ok"] .sm-status-dot { background:#46d369; }
+  .sm-status[data-state="remote"] .sm-status-dot { background:#f5b50a; }
+  .sm-status[data-state="off"] .sm-status-dot { background:#e50914; }
+  .sm-status[data-state="checking"] .sm-status-dot { animation:sm-status-pulse 1s ease-in-out infinite alternate; }
+  .sm-status[data-state="ok"] .sm-status-text { opacity:.85; }
+  @keyframes sm-status-pulse { from { opacity:.3; } to { opacity:1; } }
 
   /* ---------- Transição ---------- */
   /* Transição simples */
@@ -1087,14 +1111,36 @@
       state.addonUrl = input.value.trim().replace(/\/(manifest\.json)?$/, '') || DEFAULTS.addonUrl;
       store.set('addonUrl', state.addonUrl);
       requests.clear();
+      checkStatus();
       rebuildApp();
     });
+    // De onde as fileiras estão vindo agora: addon do PC ou cópia do GitHub.
+    const status = h('div', { class: 'sm-status', 'data-state': 'checking' },
+      h('span', { class: 'sm-status-dot' }), h('span', { class: 'sm-status-text', text: 'Verificando conexão…' }));
+    const setStatus = (st, text, title = '') => {
+      status.dataset.state = st;
+      status.title = title;
+      status.querySelector('.sm-status-text').textContent = text;
+    };
+    function checkStatus() {
+      setStatus('checking', 'Verificando conexão…');
+      probeLocal().then((ok) => {
+        if (ok) return setStatus('ok', 'Conectado ao addon do PC: tudo funcionando.');
+        if (store.get('remoteAddonUrl')) {
+          return setStatus('remote', 'Addon do PC desligado: fileiras vindo da cópia do GitHub. Busca, trailers e funções do player precisam do PC (abra o iniciar-stremio.bat).',
+            store.get('remoteAddonUrl'));
+        }
+        setStatus('off', 'Addon do PC desligado. Abra o iniciar-stremio.bat.');
+      });
+    }
+    checkStatus();
     const menu = h('div', { class: 'sm-menu', role: 'menu', onclick: (e) => e.stopPropagation() },
       h('h4', { text: 'Modo de streaming' }),
       items,
       h('div', { class: 'sm-sep' }),
       h('label', { class: 'sm-toggle' }, cb, 'Mostrar fileiras dos streamings no modo padrão'),
-      h('label', { class: 'sm-field' }, 'Endereço do addon', input),
+      h('label', { class: 'sm-field' }, 'Endereço do addon do PC', input),
+      status,
       h('div', { class: 'sm-hint', text: 'Atalho: Alt+M' }),
     );
     document.body.appendChild(menu);
