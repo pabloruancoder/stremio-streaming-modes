@@ -75,6 +75,13 @@ function rowsFor(p) {
   genre('kdrama-series', 'series', 'Séries coreanas', { with_original_language: 'ko' });
   genre('spanish-series', 'series', 'Séries espanholas e latinas', { with_original_language: 'es' });
   // Catálogo inteiro da Netflix no Brasil, do mais popular ao menos popular.
+  // Grátis e legal no Brasil (Pluto TV, Plex, Libreflix, TV Brasil Play), com ou sem anúncios. Iguais em todos os modos.
+  const FREE = { with_watch_providers: '300|538|544|2696', with_watch_monetization_types: 'free|ads', watch_region: 'BR', sort_by: 'popularity.desc' };
+  const anime = p.key === 'crunchyroll' ? { with_genres: 16, with_original_language: 'ja' } : {};
+  rows.push(
+    { id: 'free-movies', type: 'movie', name: 'Filmes grátis (Pluto TV, Plex e outros)', kind: 'discover', shape: card, limit: 300, params: { ...FREE, ...anime }, noProviderFilter: true },
+    { id: 'free-series', type: 'series', name: 'Séries grátis (Pluto TV, Plex e outros)', kind: 'discover', shape: card, limit: 300, params: { ...FREE, ...anime }, noProviderFilter: true },
+  );
   genre('all-movies', 'movie', 'Todos os filmes', {});
   genre('all-series', 'series', 'Todas as séries', {});
   // Páginas de marca (Disney+: Disney, Pixar, Marvel...): populares, lançamentos, mais bem avaliados e clássicos.
