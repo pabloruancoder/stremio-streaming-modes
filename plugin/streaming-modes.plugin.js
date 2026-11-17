@@ -52,6 +52,51 @@
         { type: 'series', id: 'netflix.kids-series' },
       ],
     },
+    disney: {
+      key: 'disney',
+      label: 'Disney+',
+      accent: '#1f80e0',
+      bg: '#0f1322',
+      splash: 'DISNEY+',
+      wordmark: 'STREMIO',
+      provider: 'disney',
+      prefix: 'Disney+ • ',
+      // A Disney+ não publica Top 10: o destaque sai do que está em alta.
+      heroCatalogs: [
+        { type: 'movie', id: 'disney.trending-movies' },
+        { type: 'series', id: 'disney.trending-series' },
+      ],
+      // Blocos de marca da tela inicial; cada um abre uma página com os filmes e séries daquela marca.
+      brands: [
+        { id: 'disney', name: 'Disney', colors: ['#0b1d63', '#2a6fdb'], font: 'italic 700 1em Georgia, "Times New Roman", serif' },
+        { id: 'pixar', name: 'PIXAR', colors: ['#0d3b66', '#3fa9f5'], font: '900 1em "Arial Black", Arial, sans-serif', spacing: '.08em' },
+        { id: 'marvel', name: 'MARVEL', colors: ['#8c0b10', '#ec1d24'], font: '900 1.05em Impact, "Arial Black", sans-serif', spacing: '.02em' },
+        { id: 'starwars', name: 'STAR WARS', colors: ['#050505', '#2b2b2b'], color: '#ffe81f', font: '900 .9em "Arial Black", Arial, sans-serif', spacing: '.12em' },
+        { id: 'natgeo', name: 'NATIONAL GEOGRAPHIC', colors: ['#141414', '#2e2a12'], color: '#fff', font: '700 .62em Arial, sans-serif', spacing: '.14em', frame: '#ffce00' },
+        { id: 'star', name: 'Star', colors: ['#3b0a57', '#c2185b'], font: '700 1.1em "Segoe UI", Arial, sans-serif', spacing: '.02em' },
+      ],
+      pages: {
+        home: ['@continue', '@brands', 'recent-movies', '@because0', 'originals', 'trending-movies', 'recent-series', '@soon',
+          'trending-series', '@mylist', '@because1', 'new-movies', 'new-series', 'brand-marvel-movies', 'brand-pixar-movies',
+          'brand-disney-movies', 'brand-starwars-series', 'acclaimed-movies', 'acclaimed-series', 'animation-movies',
+          'action-movies', 'comedy-movies', 'brand-star-series', 'drama-series', 'scifi-series', 'brand-natgeo-series',
+          'docs', 'kids-movies', 'all-series', 'all-movies'],
+        series: ['@continue', '@brands', 'recent-series', '@because0', 'originals', 'trending-series', 'new-series',
+          'acclaimed-series', 'brand-marvel-series', 'brand-starwars-series', 'brand-star-series', 'drama-series',
+          'comedy-series', 'action-series', 'scifi-series', 'mystery-series', 'crime-series', 'anime-series',
+          'docu-series', 'brand-natgeo-series', 'reality-series', 'all-series'],
+        movies: ['@continue', '@brands', 'recent-movies', '@because1', 'new-movies', 'trending-movies', 'acclaimed-movies',
+          'brand-marvel-movies', 'brand-pixar-movies', 'brand-disney-movies', 'brand-starwars-movies', 'brand-star-movies',
+          'animation-movies', 'action-movies', 'comedy-movies', 'scifi-movies', 'thriller-movies', 'horror-movies',
+          'romance-movies', 'brand-natgeo-movies', 'docs', 'all-movies'],
+        new: ['recent-movies', 'recent-series', 'new-movies', 'new-series', 'trending-series', 'trending-movies'],
+      },
+      kidsPages: ['@continue', 'kids-anim-movies', 'kids-series', '@because0', 'kids-movies', 'kids-family-series', '@mylist'],
+      kidsHero: [
+        { type: 'movie', id: 'disney.kids-anim-movies' },
+        { type: 'series', id: 'disney.kids-series' },
+      ],
+    },
   };
   const NAV_PAGES = [
     ['home', 'Início'],
@@ -92,7 +137,10 @@
     for (const [k, v] of Object.entries(attrs || {})) {
       if (v === undefined || v === null || v === false) continue;
       if (k === 'class') el.className = v;
-      else if (k === 'style' && typeof v === 'object') Object.assign(el.style, v);
+      else if (k === 'style' && typeof v === 'object') {
+        // Variáveis CSS (--x) só funcionam com setProperty.
+        for (const [sk, sv] of Object.entries(v)) sk.startsWith('--') ? el.style.setProperty(sk, sv) : (el.style[sk] = sv);
+      }
       else if (k.startsWith('on') && typeof v === 'function') el.addEventListener(k.slice(2), v);
       else if (k === 'text') el.textContent = v;
       else el.setAttribute(k, v === true ? '' : v);
@@ -192,9 +240,9 @@
   let localDownAt = 0;
   const localDown = () => Date.now() - localDownAt < 60_000; // tenta o PC de novo a cada minuto
   const STATIC_PATH = /^\/(manifest\.json|catalog\/(movie|series)\/[^/]+(\/skip=\d+)?\.json|sm\/upcoming\/[a-z]+\.json)$/;
-  function addon(path) {
+  function addon(path, remotePath) {
     const bare = path.split('?')[0];
-    const remote = () => getJSON(`${store.get('remoteAddonUrl')}${bare}`);
+    const remote = () => getJSON(`${store.get('remoteAddonUrl')}${remotePath || bare}`);
     const canRemote = STATIC_PATH.test(bare) && store.get('remoteAddonUrl');
     if (canRemote && localDown()) return remote();
     return getJSON(`${state.addonUrl}${path}${path.includes('?') ? '&' : '?'}v=${API_V}`).catch((err) => {
@@ -223,7 +271,8 @@
     ? 'Esta parte precisa do addon do PC ligado (abra o iniciar-stremio.bat). As fileiras continuam vindo do GitHub.'
     : `Não consegui falar com o addon em ${state.addonUrl}. Ele está rodando? Abra o iniciar-stremio.bat.`);
   const catalog = (type, id) => addon(`/catalog/${type}/${encodeURIComponent(id)}.json`).then((d) => d.metas || []);
-  const manifest = () => addon('/manifest.json');
+  // Na cópia do GitHub o manifest da raiz é só o da Netflix; a lista de todos os streamings fica em sm/catalogs.json.
+  const manifest = () => addon('/manifest.json', '/sm/catalogs.json');
   const details = (type, id) => addon(`/sm/details/${type}/${id}.json`).then((d) => d.details).catch(() => null);
   const season = (id, n) => addon(`/sm/season/${id}/${n}.json`).then((d) => d.episodes || []).catch(() => []);
   const similar = (provider, type, id) =>
@@ -457,6 +506,15 @@
   // CSS
   // ===========================================================================
   const CSS = `
+  /* ---------- Paleta de cada modo (Netflix é o padrão) ---------- */
+  :root {
+    --smc-accent:#e50914; --smc-accent-rgb:229,9,20; --smc-accent-dark:#8a0c12;
+    --smc-bg:#141414; --smc-bg-rgb:20,20,20; --smc-bg2:#181818; --smc-bg3:#262626;
+  }
+  html[data-sm-mode="disney"] {
+    --smc-accent:#1f80e0; --smc-accent-rgb:31,128,224; --smc-accent-dark:#0b3d91;
+    --smc-bg:#0f1322; --smc-bg-rgb:15,19,34; --smc-bg2:#161b2e; --smc-bg3:#222a42;
+  }
   /* ---------- Seletor de modo ---------- */
   .sm-switch { display:flex; align-items:center; gap:.5rem; height:2.4rem; padding:0 .9rem; margin-right:.5rem;
     border-radius:999px; border:1px solid rgba(255,255,255,.18); background:rgba(0,0,0,.35); color:#fff;
@@ -464,7 +522,7 @@
   .sm-switch:hover { background:rgba(255,255,255,.12); }
   .sm-switch .sm-dot { width:.55rem; height:.55rem; border-radius:50%; background:var(--sm-accent); box-shadow:0 0 8px var(--sm-accent); }
   .sm-switch .sm-ico { width:.8rem; height:.8rem; opacity:.75; }
-  .sm-menu { position:fixed; z-index:100002; min-width:15rem; padding:.4rem; border-radius:.5rem; background:rgba(20,20,20,.97);
+  .sm-menu { position:fixed; z-index:100002; min-width:15rem; padding:.4rem; border-radius:.5rem; background:rgba(var(--smc-bg-rgb),.97);
     border:1px solid rgba(255,255,255,.14); box-shadow:0 18px 50px rgba(0,0,0,.7); color:#eee; font:500 .92rem system-ui, sans-serif; }
   .sm-menu h4 { margin:.4rem .6rem .5rem; font-size:.7rem; letter-spacing:.08em; text-transform:uppercase; opacity:.55; }
   .sm-item { display:flex; align-items:center; gap:.7rem; width:100%; padding:.6rem .7rem; border:0; border-radius:.35rem;
@@ -482,7 +540,7 @@
   .sm-status-dot { flex:none; width:.55rem; height:.55rem; margin-top:.3rem; border-radius:50%; background:#888; }
   .sm-status[data-state="ok"] .sm-status-dot { background:#46d369; }
   .sm-status[data-state="remote"] .sm-status-dot { background:#f5b50a; }
-  .sm-status[data-state="off"] .sm-status-dot { background:#e50914; }
+  .sm-status[data-state="off"] .sm-status-dot { background:#e5323b; }
   .sm-status[data-state="checking"] .sm-status-dot { animation:sm-status-pulse 1s ease-in-out infinite alternate; }
   .sm-status[data-state="ok"] .sm-status-text { opacity:.85; }
   @keyframes sm-status-pulse { from { opacity:.3; } to { opacity:1; } }
@@ -517,35 +575,35 @@
   html[data-sm-mode="stremio"]:not([data-sm-show-default]) [data-board-row][data-sm-streamer]:not([data-sm-streamer=""]) { display:none !important; }
 
   /* ---------- Modo Netflix: páginas do Stremio (detalhes, player, busca) em preto e vermelho ---------- */
-  html[data-sm-mode="netflix"] {
-    --background-color-primary:#141414; --background-color-secondary:#262626; --modal-background-color:#181818;
-    --accent-color:#e50914; --accent-background-color:#e50914; --accent-foreground-color:#fff;
+  html[data-sm-themed] {
+    --background-color-primary:var(--smc-bg); --background-color-secondary:var(--smc-bg3); --modal-background-color:var(--smc-bg2);
+    --accent-color:var(--smc-accent); --accent-background-color:var(--smc-accent); --accent-foreground-color:#fff;
     --foreground-color-secondary:#b3b3b3; --surface-background-color:rgba(255,255,255,.06);
     --overlay-background-color:rgba(0,0,0,.6); --modal-backdrop-color:rgba(0,0,0,.7); --drop-shadow-color:#000;
-    --filters-color:#e50914; --outer-glow:0 0 15px rgba(229,9,20,.35);
+    --filters-color:var(--smc-accent); --outer-glow:0 0 15px rgba(var(--smc-accent-rgb),.35);
     /* nomes antigos (Stremio Web 5.x) */
-    --primary-background-color:#141414; --secondary-background-color:#181818; --primary-accent-color:#e50914;
+    --primary-background-color:var(--smc-bg); --secondary-background-color:var(--smc-bg2); --primary-accent-color:var(--smc-accent);
     --overlay-color:rgba(255,255,255,.06);
   }
-  html[data-sm-mode="netflix"] body { background:#141414 !important; }
+  html[data-sm-themed] body { background:var(--smc-bg) !important; }
 
   /* ---------- Player no estilo Netflix ---------- */
-  html[data-sm-mode="netflix"] [class*="control-bar-container"] { background:linear-gradient(0deg, rgba(0,0,0,.85) 0%, rgba(0,0,0,.4) 60%, transparent 100%) !important; }
+  html[data-sm-themed] [class*="control-bar-container"] { background:linear-gradient(0deg, rgba(0,0,0,.85) 0%, rgba(0,0,0,.4) 60%, transparent 100%) !important; }
   /* No Stremio: track = fundo, track-before = trecho já carregado, track-after = parte assistida */
-  html[data-sm-mode="netflix"] [class*="seek-bar-container"] [class*="track-after"] { background-color:#e50914 !important; }
-  html[data-sm-mode="netflix"] [class*="seek-bar-container"] [class*="track-before"] { background-color:rgba(255,255,255,.35) !important; }
-  html[data-sm-mode="netflix"] [class*="seek-bar-container"] [class*="track-"]:not([class*="track-before"]):not([class*="track-after"]) { background-color:rgba(255,255,255,.18) !important; opacity:1 !important; }
-  html[data-sm-mode="netflix"] [class*="seek-bar-container"] [class*="thumb-"] { background:#e50914 !important; box-shadow:0 0 0 3px rgba(229,9,20,.25) !important; }
-  html[data-sm-mode="netflix"] [class*="volume-slider"] [class*="track-after"] { background-color:#fff !important; }
-  html[data-sm-mode="netflix"] [class*="volume-slider"] [class*="thumb-"] { background:#fff !important; }
+  html[data-sm-themed] [class*="seek-bar-container"] [class*="track-after"] { background-color:var(--smc-accent) !important; }
+  html[data-sm-themed] [class*="seek-bar-container"] [class*="track-before"] { background-color:rgba(255,255,255,.35) !important; }
+  html[data-sm-themed] [class*="seek-bar-container"] [class*="track-"]:not([class*="track-before"]):not([class*="track-after"]) { background-color:rgba(255,255,255,.18) !important; opacity:1 !important; }
+  html[data-sm-themed] [class*="seek-bar-container"] [class*="thumb-"] { background:var(--smc-accent) !important; box-shadow:0 0 0 3px rgba(var(--smc-accent-rgb),.25) !important; }
+  html[data-sm-themed] [class*="volume-slider"] [class*="track-after"] { background-color:#fff !important; }
+  html[data-sm-themed] [class*="volume-slider"] [class*="thumb-"] { background:#fff !important; }
   /* Só os botões (o nome "control-bar-buttons-container" também contém "control-bar-button", por isso o hífen no fim) */
-  html[data-sm-mode="netflix"] [class*="control-bar-button-"] svg,
-  html[data-sm-mode="netflix"] [class*="player-nav"] svg { color:#fff !important; }
-  html[data-sm-mode="netflix"] [class*="control-bar-button-"] { opacity:.88; transition:opacity .15s; }
-  html[data-sm-mode="netflix"] [class*="control-bar-button-"]:hover { opacity:1; }
-  html[data-sm-mode="netflix"] [class*="player-title"] { font-weight:700 !important; font-size:1.05rem !important; }
+  html[data-sm-themed] [class*="control-bar-button-"] svg,
+  html[data-sm-themed] [class*="player-nav"] svg { color:#fff !important; }
+  html[data-sm-themed] [class*="control-bar-button-"] { opacity:.88; transition:opacity .15s; }
+  html[data-sm-themed] [class*="control-bar-button-"]:hover { opacity:1; }
+  html[data-sm-themed] [class*="player-title"] { font-weight:700 !important; font-size:1.05rem !important; }
   /* A janela "próximo vídeo" do Stremio é substituída pelo cartão abaixo */
-  html[data-sm-mode="netflix"] [class*="next-video-popup"] { display:none !important; }
+  html[data-sm-themed] [class*="next-video-popup"] { display:none !important; }
 
   #sm-player { position:fixed; inset:0; z-index:9800; pointer-events:none; font-family:"Netflix Sans","Helvetica Neue",Helvetica,Arial,sans-serif; }
   #sm-player > * { pointer-events:auto; }
@@ -554,7 +612,7 @@
     transition:opacity .25s, transform .25s, background .2s; backdrop-filter:blur(4px); }
   .sm-skip.show { opacity:1; transform:none; }
   .sm-skip:hover { background:#fff; color:#000; }
-  .sm-next { position:absolute; right:4.5vw; bottom:9.5rem; width:min(30rem, 90vw); padding:1rem; border-radius:8px; background:rgba(20,20,20,.88);
+  .sm-next { position:absolute; right:4.5vw; bottom:9.5rem; width:min(30rem, 90vw); padding:1rem; border-radius:8px; background:rgba(var(--smc-bg-rgb),.88);
     backdrop-filter:blur(10px); color:#fff; box-shadow:0 12px 40px rgba(0,0,0,.6); opacity:0; transform:translateY(10px); transition:opacity .3s, transform .3s; }
   .sm-next.show { opacity:1; transform:none; }
   .sm-next-info { display:flex; gap:.9rem; align-items:center; }
@@ -581,7 +639,7 @@
   .sm-av-add { background:transparent; border:2px solid #6d6d6d; color:#8c8c8c; }
   .sm-av-add .sm-ico { width:45% !important; height:45% !important; }
   .sm-pop-prof .sm-av { margin-right:.1rem; }
-  #sm-profiles { position:fixed; inset:0; z-index:9900; display:grid; place-items:center; background:#141414; color:#fff; overflow-y:auto;
+  #sm-profiles { position:fixed; inset:0; z-index:9900; display:grid; place-items:center; background:var(--smc-bg); color:#fff; overflow-y:auto;
     font-family:"Netflix Sans","Helvetica Neue",Helvetica,Arial,sans-serif; animation:sm-ddin .25s ease-out; }
   .sm-gate { display:flex; flex-direction:column; align-items:center; padding:3rem 4vw; }
   .sm-gate h1 { margin:0 0 2.2rem; font-size:clamp(2rem, 3.5vw, 3.5rem); font-weight:500; }
@@ -597,8 +655,8 @@
   .sm-gate-btn { padding:.6em 1.8em; border:1px solid #808080; background:transparent; color:#808080; font:inherit; font-size:1.1rem; letter-spacing:.15em;
     text-transform:uppercase; cursor:pointer; transition:color .15s, border-color .15s; }
   .sm-gate-btn:hover { color:#fff; border-color:#fff; }
-  .sm-gate-btn.white { background:#fff; color:#141414; border-color:#fff; font-weight:700; }
-  .sm-gate-btn.white:hover { background:#e50914; color:#fff; border-color:#e50914; }
+  .sm-gate-btn.white { background:#fff; color:var(--smc-bg); border-color:#fff; font-weight:700; }
+  .sm-gate-btn.white:hover { background:var(--smc-accent); color:#fff; border-color:var(--smc-accent); }
   .sm-gate-btn.danger:hover { color:#ff6b6b; border-color:#ff6b6b; }
   .sm-editor { align-items:stretch; max-width:44rem; width:100%; }
   .sm-editor h1 { font-size:clamp(1.8rem, 3vw, 3rem); margin-bottom:1.5rem; padding-bottom:1rem; border-bottom:1px solid #333; }
@@ -615,7 +673,7 @@
   .sm-edit-kids input { position:absolute; opacity:0; width:1px; height:1px; }
   .sm-kswitch { position:relative; flex:none; width:2.8rem; height:1.6rem; border-radius:999px; background:#555; transition:background .2s; }
   .sm-kswitch::after { content:""; position:absolute; top:.2rem; left:.2rem; width:1.2rem; height:1.2rem; border-radius:50%; background:#fff; transition:transform .2s; }
-  .sm-edit-kids input:checked + .sm-kswitch { background:#e50914; }
+  .sm-edit-kids input:checked + .sm-kswitch { background:var(--smc-accent); }
   .sm-edit-kids input:checked + .sm-kswitch::after { transform:translateX(1.2rem); }
   .sm-edit-kids input:focus-visible + .sm-kswitch { outline:2px solid #fff; outline-offset:2px; }
   .sm-edit-kids span { display:flex; flex-direction:column; }
@@ -662,7 +720,7 @@
   .sm-x-sound .sm-ico { width:55% !important; height:55% !important; }
 
   /* ===================== App Netflix ===================== */
-  #sm-app { position:fixed; inset:0; z-index:9000; overflow-y:auto; overflow-x:hidden; background:#141414; color:#fff;
+  #sm-app { position:fixed; inset:0; z-index:9000; overflow-y:auto; overflow-x:hidden; background:var(--smc-bg); color:#fff;
     font-family:"Netflix Sans","Helvetica Neue",Helvetica,Arial,sans-serif; -webkit-font-smoothing:antialiased;
     scrollbar-width:thin; scrollbar-color:#444 transparent; --pad:4vw; --gap:.4vw; --per:6; }
   #sm-app[hidden] { display:none; }
@@ -676,8 +734,8 @@
   /* Barra superior */
   .sm-nav { position:sticky; top:0; z-index:20; height:68px; margin-bottom:-68px; display:flex; align-items:center; gap:2.2rem;
     padding:0 var(--pad); background:linear-gradient(180deg, rgba(0,0,0,.7) 10%, transparent); transition:background-color .4s; }
-  .sm-nav.solid { background-color:#141414; }
-  .sm-wordmark { font:900 1.9rem/1 "Bebas Neue", Impact, "Arial Black", sans-serif; letter-spacing:.04em; color:#e50914;
+  .sm-nav.solid { background-color:var(--smc-bg); }
+  .sm-wordmark { font:900 1.9rem/1 "Bebas Neue", Impact, "Arial Black", sans-serif; letter-spacing:.04em; color:var(--smc-accent);
     cursor:pointer; user-select:none; }
   .sm-links { display:flex; gap:1.3rem; margin:0; padding:0; list-style:none; }
   .sm-links a { color:#e5e5e5; font-size:.88rem; text-decoration:none; cursor:pointer; transition:color .3s; }
@@ -702,7 +760,7 @@
   .sm-hero.playing .sm-hero-video { opacity:1; }
   .sm-hero-shade { position:absolute; inset:0; pointer-events:none;
     background:linear-gradient(77deg, rgba(0,0,0,.7) 0%, rgba(0,0,0,.15) 50%, transparent 85%),
-               linear-gradient(0deg, #141414 0%, #141414 4%, rgba(20,20,20,.7) 16%, transparent 38%); }
+               linear-gradient(0deg, var(--smc-bg) 0%, var(--smc-bg) 4%, rgba(var(--smc-bg-rgb),.7) 16%, transparent 38%); }
   .sm-hero-info { position:absolute; left:var(--pad); bottom:35%; width:36%; z-index:2; }
   .sm-hero-logo { display:block; width:100%; max-height:12vw; object-fit:contain; object-position:left bottom; margin-bottom:1.2vw;
     transform-origin:left bottom; transition:transform 1.3s cubic-bezier(.2,.8,.2,1); filter:drop-shadow(0 2px 10px rgba(0,0,0,.5)); }
@@ -711,7 +769,7 @@
   .sm-hero-badge { display:flex; align-items:center; gap:.7rem; margin-bottom:1vw; font-size:clamp(1rem, 1.6vw, 1.6rem); font-weight:700;
     text-shadow:1px 1px 4px rgba(0,0,0,.6); transition:opacity .6s; }
   .sm-top10 { display:inline-flex; flex-direction:column; align-items:center; justify-content:center; flex:none;
-    width:1.6em; height:1.75em; border-radius:2px; background:#e50914; font-size:1em; line-height:1; }
+    width:1.6em; height:1.75em; border-radius:2px; background:var(--smc-accent); font-size:1em; line-height:1; }
   .sm-top10 span { font-size:.3em; font-weight:900; letter-spacing:.06em; }
   .sm-top10 b { font-size:.72em; font-weight:900; letter-spacing:-.06em; margin-top:.02em; }
   .sm-hero-desc { margin:0 0 1.5vw; font-size:clamp(.9rem, 1.25vw, 1.4rem); line-height:1.35; text-shadow:2px 2px 4px rgba(0,0,0,.45);
@@ -752,12 +810,12 @@
     padding:0 var(--pad); scroll-padding:0 var(--pad); }
   .sm-track::-webkit-scrollbar { display:none; }
   .sm-arrow { position:absolute; top:0; bottom:0; z-index:4; width:calc(var(--pad) - var(--gap)); display:grid; place-items:center;
-    border:0; padding:0; color:#fff; background:rgba(20,20,20,.5); cursor:pointer; opacity:0; transition:opacity .2s, background .2s; }
+    border:0; padding:0; color:#fff; background:rgba(var(--smc-bg-rgb),.5); cursor:pointer; opacity:0; transition:opacity .2s, background .2s; }
   .sm-arrow.l { left:0; border-radius:0 4px 4px 0; }
   .sm-arrow.r { right:0; border-radius:4px 0 0 4px; }
   .sm-arrow .sm-ico { width:2.2vw !important; height:2.2vw !important; min-width:1.4rem; min-height:1.4rem; transition:transform .15s; }
   .sm-row:hover .sm-arrow:not([disabled]) { opacity:1; }
-  .sm-arrow:hover { background:rgba(20,20,20,.7); }
+  .sm-arrow:hover { background:rgba(var(--smc-bg-rgb),.7); }
   .sm-arrow:hover .sm-ico { transform:scale(1.25); }
   .sm-arrow[disabled] { display:none; }
 
@@ -773,7 +831,7 @@
   .sm-card-ep { position:absolute; z-index:2; right:6%; top:7%; padding:.12rem .4rem; border-radius:3px; background:rgba(0,0,0,.72);
     font-size:clamp(.58rem, .66vw, .78rem); font-weight:700; color:#fff; }
   .sm-card-progress { position:absolute; z-index:2; left:7%; right:7%; bottom:5%; height:3px; background:rgba(128,128,128,.7); }
-  .sm-card-progress i { display:block; height:100%; background:#e50914; }
+  .sm-card-progress i { display:block; height:100%; background:var(--smc-accent); }
   .sm-card.skeleton { background:#222; animation:sm-pulse 1.4s ease-in-out infinite; }
   .sm-card.skeleton::after { display:none; }
   @keyframes sm-pulse { 50% { opacity:.55; } }
@@ -798,7 +856,7 @@
   .sm-x-title { margin-bottom:auto; font-size:clamp(.85rem, 1.1vw, 1.25rem); font-weight:800; line-height:1.1; }
   .sm-x-badge { display:flex; align-items:center; gap:.4rem; font-size:clamp(.62rem, .72vw, .85rem); font-weight:700; }
   .sm-x-badge .sm-top10 { transform:scale(.8); transform-origin:left center; margin-right:-.3rem; }
-  .sm-x-badge.new { color:#e50914; letter-spacing:.02em; }
+  .sm-x-badge.new { color:var(--smc-accent); letter-spacing:.02em; }
   .sm-x .sm-meta { margin:0; gap:.4rem; font-size:clamp(.58rem, .66vw, .8rem); flex-wrap:nowrap; white-space:nowrap; overflow:hidden; }
   .sm-x .sm-cert { font-size:.85em; }
   .sm-x-desc { margin:0; font-size:clamp(.6rem, .7vw, .85rem); line-height:1.35; color:#d6d6d6;
@@ -887,7 +945,7 @@
     color:#d6d6d6; font:inherit; font-size:.95rem; text-align:left; cursor:pointer; }
   .sm-dd-item:hover, .sm-dd-item:focus-visible { background:rgba(255,255,255,.1); color:#fff; outline:none; }
   .sm-dd-item.on { color:#fff; font-weight:700; }
-  .sm-dd-check { flex:none; width:1.1rem; height:1.1rem; display:grid; place-items:center; color:var(--sm-accent, #e50914); }
+  .sm-dd-check { flex:none; width:1.1rem; height:1.1rem; display:grid; place-items:center; color:var(--smc-accent); }
   .sm-dd-check .sm-ico { width:1.1rem; height:1.1rem; }
   .sm-dd-name { flex:1; min-width:0; }
   .sm-dd-hint { flex:none; color:#8c8c8c; font-size:.85em; }
@@ -898,13 +956,13 @@
   .sm-ep.soon { opacity:.6; }
   .sm-ep-img .sm-card-progress { left:6%; right:6%; bottom:7%; height:3px; }
   .sm-ep-right { display:flex; align-items:center; gap:.6rem; flex:none; }
-  .sm-ep-tag { padding:.1rem .4rem; border-radius:3px; background:#e50914; color:#fff; font-size:.68rem; letter-spacing:.04em; }
+  .sm-ep-tag { padding:.1rem .4rem; border-radius:3px; background:var(--smc-accent); color:#fff; font-size:.68rem; letter-spacing:.04em; }
   .sm-ep-tag.soon { background:#424242; }
-  .sm-ep-cont { margin:-.1rem 0 .35rem; color:#e50914; font-size:.82rem; font-weight:700; }
+  .sm-ep-cont { margin:-.1rem 0 .35rem; color:var(--smc-accent); font-size:.82rem; font-weight:700; }
   .sm-resume { display:flex; align-items:center; gap:.8rem; margin-top:1rem; max-width:22rem; color:#ddd; font-size:.9rem; }
   .sm-resume .sm-card-progress { position:relative; inset:auto; flex:1; height:4px; border-radius:2px; overflow:hidden; }
   .sm-sim-rank { position:absolute; top:.4rem; right:.4rem; }
-  .sm-sim-new { position:absolute; left:0; bottom:.6rem; padding:.15rem .5rem; background:#e50914; color:#fff; font-size:.7rem; font-weight:800;
+  .sm-sim-new { position:absolute; left:0; bottom:.6rem; padding:.15rem .5rem; background:var(--smc-accent); color:#fff; font-size:.7rem; font-weight:800;
     letter-spacing:.04em; border-radius:0 3px 3px 0; }
 
   /* Barra: notificações e perfil */
@@ -912,13 +970,13 @@
   .sm-nav, .sm-nav-right, .sm-popwrap { overflow:visible !important; }
   .sm-bell { position:relative; }
   .sm-bell-count { position:absolute; top:.05rem; right:-.1rem; min-width:1.05rem; height:1.05rem; padding:0 .25rem; box-sizing:border-box;
-    border-radius:.6rem; background:#e50914; color:#fff; font-size:.65rem; font-weight:800; line-height:1.05rem; text-align:center; }
+    border-radius:.6rem; background:var(--smc-accent); color:#fff; font-size:.65rem; font-weight:800; line-height:1.05rem; text-align:center; }
   .sm-bell-count[hidden] { display:none; }
   .sm-profile { display:flex; align-items:center; gap:.4rem; padding:0; border:0; background:none; color:#fff; cursor:pointer; }
   .sm-profile > .sm-ico { width:1rem !important; height:1rem !important; transition:transform .2s; }
   .sm-profile[aria-expanded="true"] > .sm-ico { transform:rotate(180deg); }
   .sm-avatar { display:grid; place-items:center; width:2rem; height:2rem; border-radius:6px; font-weight:800; font-size:1rem;
-    background:linear-gradient(135deg, #e50914, #8a0c12); color:#fff; }
+    background:linear-gradient(135deg, var(--smc-accent), var(--smc-accent-dark)); color:#fff; }
   .sm-pop { position:absolute; right:0; top:calc(100% + .9rem); z-index:30; min-width:15rem; padding:.4rem; border-radius:10px;
     background:rgba(24,24,24,.97); backdrop-filter:blur(14px); border:1px solid rgba(255,255,255,.1); box-shadow:0 18px 50px rgba(0,0,0,.7);
     animation:sm-ddin .16s ease-out; }
@@ -937,7 +995,7 @@
     color:#ddd; font:inherit; text-align:left; cursor:pointer; position:relative; }
   .sm-notif-item:hover { background:rgba(255,255,255,.08); }
   .sm-notif-item.unread::after { content:""; position:absolute; right:.6rem; top:50%; width:.45rem; height:.45rem; margin-top:-.22rem;
-    border-radius:50%; background:#e50914; }
+    border-radius:50%; background:var(--smc-accent); }
   .sm-notif-img { flex:none; width:7.5rem; aspect-ratio:16/9; border-radius:4px; background:#2a2a2a center/cover; }
   .sm-notif-text { display:flex; flex-direction:column; gap:.2rem; min-width:0; padding-right:1rem; font-size:.85rem; }
   .sm-notif-text b { color:#fff; }
@@ -983,7 +1041,7 @@
     font:inherit; font-size:1.05rem; cursor:pointer; transition:background .15s, color .15s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .sm-sp-item b { color:#fff; font-weight:700; }
   .sm-sp-item:hover, .sm-sp-item:focus-visible { background:#2b2b2b; color:#fff; outline:none; }
-  .sm-sp-item.on { color:#fff; font-weight:700; box-shadow:inset 3px 0 0 var(--sm-accent, #e50914); }
+  .sm-sp-item.on { color:#fff; font-weight:700; box-shadow:inset 3px 0 0 var(--smc-accent); }
   .sm-sp-main { min-width:0; --per:4; }
   @media (min-width:1700px) { .sm-sp-main { --per:5; } }
   @media (max-width:1199px) { .sm-sp-main { --per:3; } }
@@ -1016,13 +1074,13 @@
   .sm-up-date { position:absolute; z-index:2; top:0; left:7%; display:flex; flex-direction:column; align-items:center; padding:.35rem .5rem .4rem;
     background:rgba(0,0,0,.72); border-radius:0 0 4px 4px; line-height:1; }
   .sm-up-date b { font-size:clamp(1rem, 1.4vw, 1.6rem); font-weight:800; }
-  .sm-up-date span { font-size:clamp(.55rem, .62vw, .72rem); font-weight:700; letter-spacing:.08em; color:#e50914; margin-top:.15rem; }
+  .sm-up-date span { font-size:clamp(.55rem, .62vw, .72rem); font-weight:700; letter-spacing:.08em; color:var(--smc-accent); margin-top:.15rem; }
   .sm-up .sm-card-logo { bottom:25%; max-height:28%; max-width:55%; }
   .sm-up .sm-card-name { bottom:24%; }
   .sm-up-label { position:absolute; z-index:2; left:7%; bottom:7%; font-size:clamp(.62rem, .72vw, .85rem); font-weight:700; color:#fff;
     text-shadow:0 1px 3px rgba(0,0,0,.9); }
   .sm-up-bell { position:absolute; z-index:3; right:5%; bottom:6%; display:grid; place-items:center; width:clamp(1.6rem, 1.9vw, 2.2rem);
-    height:clamp(1.6rem, 1.9vw, 2.2rem); padding:0; border:2px solid rgba(255,255,255,.7); border-radius:50%; background:rgba(20,20,20,.6);
+    height:clamp(1.6rem, 1.9vw, 2.2rem); padding:0; border:2px solid rgba(255,255,255,.7); border-radius:50%; background:rgba(var(--smc-bg-rgb),.6);
     color:#fff; cursor:pointer; opacity:.85; transition:opacity .2s, background .2s, transform .2s; }
   .sm-up-bell .sm-ico { width:55% !important; height:55% !important; }
   .sm-up:hover .sm-up-bell, .sm-up-bell.on { opacity:1; }
@@ -1034,6 +1092,27 @@
   .sm-up-when b { color:#46d369; }
   .sm-up-when span { color:#d2d2d2; }
   .sm-up-kind { padding:.1rem .45rem; border:1px solid rgba(255,255,255,.4); border-radius:3px; }
+  /* Blocos de marca (Disney+) */
+  .sm-brands { display:grid; grid-template-columns:repeat(6, 1fr); gap:var(--gap); margin:0 var(--pad) 3vw; }
+  .sm-brand { position:relative; aspect-ratio:16/9; display:grid; place-items:center; padding:0 .6rem; border:2px solid var(--bf);
+    border-radius:.6rem; background:linear-gradient(135deg, var(--b1), var(--b2)); color:#fff; cursor:pointer; overflow:hidden;
+    font-size:clamp(.9rem, 1.7vw, 2rem); box-shadow:0 18px 30px -12px rgba(0,0,0,.7);
+    transition:transform .25s cubic-bezier(.2,.8,.2,1), border-color .25s, box-shadow .25s; }
+  .sm-brand::after { content:""; position:absolute; inset:0; background:radial-gradient(ellipse at 30% 0%, rgba(255,255,255,.22), transparent 60%); pointer-events:none; }
+  .sm-brand:hover, .sm-brand:focus-visible { transform:scale(1.05); border-color:rgba(249,249,249,.85); outline:none;
+    box-shadow:0 26px 36px -14px rgba(0,0,0,.8); }
+  .sm-brand-name { position:relative; z-index:1; text-align:center; line-height:1.05; text-shadow:0 2px 10px rgba(0,0,0,.35); }
+  .sm-brand.big { width:min(17rem, 40vw); font-size:clamp(1.2rem, 2.4vw, 2.6rem); cursor:default; }
+  .sm-brand-head { margin-bottom:1rem; }
+  @media (max-width: 900px) { .sm-brands { grid-template-columns:repeat(3, 1fr); } }
+
+  /* Visual Disney+: fundo azul-marinho com brilho no topo e capas arredondadas */
+  html[data-sm-mode="disney"] #sm-app { background:radial-gradient(ellipse 120% 60% at 50% -10%, #1b2a55 0%, rgba(15,19,34,0) 60%), var(--smc-bg); }
+  html[data-sm-mode="disney"] .sm-wordmark { color:#fff; text-shadow:0 0 18px rgba(31,128,224,.75); }
+  html[data-sm-mode="disney"] .sm-card { border-radius:.5rem; }
+  html[data-sm-mode="disney"] .sm-card:not(.rank):not(.skeleton) { outline:2px solid transparent; outline-offset:-2px; transition:outline-color .2s; }
+  html[data-sm-mode="disney"] .sm-card:not(.rank):not(.skeleton):hover { outline-color:rgba(249,249,249,.8); }
+
   .sm-page-title { margin:0 var(--pad) 1.5rem; font-size:clamp(1.4rem, 2.4vw, 2.4rem); font-weight:700; }
   .sm-offline { margin:0 var(--pad) 2rem; padding:1rem 1.2rem; border-radius:4px; background:#2a1414; border:1px solid #7a1e1e; color:#ffd5d5; font-size:.95rem; }
   @media (max-width:760px) {
@@ -1162,6 +1241,8 @@
     const root = document.documentElement;
     root.dataset.smMode = state.mode;
     root.style.setProperty('--sm-accent', MODES[state.mode].accent);
+    if (MODES[state.mode].provider) root.dataset.smThemed = '';
+    else delete root.dataset.smThemed;
     if (state.showInDefault) root.dataset.smShowDefault = '';
     else delete root.dataset.smShowDefault;
   }
@@ -1435,11 +1516,51 @@
     if (state.page === 'search') return renderSearch();
     if (state.page === 'explore') return renderExplore();
     if (state.page === 'new') return renderNews();
+    if (state.page === 'brand') return renderBrand(mode);
     const heroWrap = h('div');
     const rows = h('div', { class: 'sm-rows' });
     app.append(heroWrap, rows);
     buildHero(mode, heroWrap, rows);
     buildRows(mode, rows);
+  }
+
+  // ---------- Marcas (Disney+: Disney, Pixar, Marvel...) ----------
+  function brandTile(b, big) {
+    const name = h('span', { class: 'sm-brand-name', text: b.name,
+      style: { font: b.font, letterSpacing: b.spacing || '0', color: b.color || '#fff' } });
+    return h(big ? 'div' : 'button', {
+      type: big ? null : 'button',
+      class: big ? 'sm-brand big' : 'sm-brand',
+      'aria-label': big ? null : b.name,
+      style: { '--b1': b.colors[0], '--b2': b.colors[1], '--bf': b.frame || 'rgba(249,249,249,.1)' },
+      onclick: big ? null : () => openBrand(b.id),
+    }, name);
+  }
+  function brandsRow(mode) {
+    return h('section', { class: 'sm-brands', 'aria-label': 'Marcas' }, mode.brands.map((b) => brandTile(b)));
+  }
+  function openBrand(id) {
+    hidePreview();
+    collapseCard();
+    if (state.page !== 'brand') state.brandPrev = state.page;
+    state.brand = id;
+    state.page = 'brand';
+    renderPage();
+    app.scrollTop = 0;
+  }
+  function renderBrand(mode) {
+    const b = (mode.brands || []).find((x) => x.id === state.brand);
+    if (!b) { state.page = 'home'; return renderPage(); }
+    const ids = [`brand-${b.id}-movies`, `brand-${b.id}-series`];
+    const heroWrap = h('div');
+    const rows = h('div', { class: 'sm-rows' },
+      h('div', { class: 'sm-explore-head sm-brand-head' },
+        h('button', { type: 'button', class: 'sm-back', 'aria-label': 'Voltar', title: 'Voltar',
+          onclick: () => setPage(state.brandPrev || 'home') }, icon('left')),
+        brandTile(b, true)));
+    app.append(heroWrap, rows);
+    buildHero(mode, heroWrap, rows, ids.map((id, i) => ({ type: i ? 'series' : 'movie', id: `${mode.provider}.${id}` })));
+    buildRows(mode, rows, ids);
   }
 
   // ---------- Barra superior ----------
@@ -1503,7 +1624,7 @@
       ts.slice(0, 3).forEach((it, i) => add('top', it, `Nº ${i + 1} em séries esta semana`, it.name));
       tm.slice(0, 3).forEach((it, i) => add('top', it, `Nº ${i + 1} em filmes esta semana`, it.name));
       for (let i = 0; i < 4; i++) {
-        add('new', nm[i], 'Chegou na Netflix', nm[i]?.name);
+        add('new', nm[i], `Chegou na ${mode.label}`, nm[i]?.name);
         add('new', ns[i], 'Nova série', ns[i]?.name);
       }
       return out.slice(0, 12);
@@ -1742,9 +1863,9 @@
   }
 
   // ---------- Destaque ----------
-  function buildHero(mode, wrap, rows) {
+  function buildHero(mode, wrap, rows, sourcesOverride) {
     const types = state.page === 'series' ? ['series'] : state.page === 'movies' ? ['movie'] : ['series', 'movie'];
-    const sources = (isKids() ? mode.kidsHero : mode.heroCatalogs).filter((c) => types.includes(c.type));
+    const sources = (sourcesOverride || (isKids() ? mode.kidsHero : mode.heroCatalogs)).filter((c) => types.includes(c.type));
     const hero = h('section', { class: 'sm-hero', 'aria-label': 'Destaque' });
     wrap.appendChild(hero);
     let iframe = null;
@@ -1840,9 +1961,9 @@
   }
 
   // ---------- Fileiras ----------
-  function buildRows(mode, container) {
+  function buildRows(mode, container, orderOverride) {
     loadRanks();
-    const order = isKids() ? mode.kidsPages : mode.pages[state.page] || mode.pages.home;
+    const order = orderOverride || (isKids() ? mode.kidsPages : mode.pages[state.page] || mode.pages.home);
     rowObserver = new IntersectionObserver((entries) => {
       for (const e of entries) {
         if (e.isIntersecting) {
@@ -1859,12 +1980,14 @@
       const typeFilter = state.page === 'series' ? 'series' : state.page === 'movies' ? 'movie' : null;
       for (const key of order) {
         let row = null;
-        if (key === '@continue') {
+        if (key === '@brands') {
+          if (mode.brands?.length) row = brandsRow(mode);
+        } else if (key === '@continue') {
           if (continueWatching().length || finishedEpisodes().length) {
             row = makeRow('Continuar assistindo', () => continueRow(typeFilter), { progress: true });
           }
         } else if (key === '@soon') {
-          row = makeRow('Em breve na Netflix', () => addon(`/sm/upcoming/${mode.provider}.json`).then((d) => d.items || []),
+          row = makeRow(`Em breve na ${mode.label}`, () => addon(`/sm/upcoming/${mode.provider}.json`).then((d) => d.items || []),
             { render: (it) => upcomingCard(it), onExplore: () => setPage('new') });
         } else if (key === '@mylist') {
           const items = myList().slice(0, 30).map(fromLibrary);
@@ -1987,7 +2110,7 @@
     t.setAttribute('text-anchor', 'end');
     // Estilo inline: o CSS global do Stremio sobrescreve os atributos de fonte do SVG.
     t.setAttribute('style', `font-family:"Arial Black",Impact,sans-serif;font-weight:900;font-size:190px;letter-spacing:${n === 10 ? -28 : 0}px`);
-    t.setAttribute('fill', '#141414');
+    t.setAttribute('fill', MODES[state.mode].bg || '#141414');
     t.setAttribute('stroke', '#595959');
     t.setAttribute('stroke-width', '5');
     t.textContent = String(n);
@@ -2805,7 +2928,7 @@
     const upRow = (title, test) => makeRow(title, () => soon.then((list) => list.filter((it) => test(daysUntil(it)))),
       { render: (it) => upcomingCard(it) });
 
-    add(makeRow('Novidades na Netflix', () =>
+    add(makeRow(`Novidades na ${mode.label}`, () =>
       Promise.all([catalog('series', `${p}.recent-series`), catalog('movie', `${p}.recent-movies`)].map((x) => x.catch(() => [])))
         .then(([sr, mv]) => {
           const out = [];

@@ -30,8 +30,8 @@ function rowsFor(p) {
       params: { sort_by: 'popularity.desc' } },
     { id: 'trending-movies', type: 'movie', name: 'Filmes em alta', kind: 'discover', shape: card, limit: 200,
       params: { sort_by: 'popularity.desc' } },
-    { id: 'new-movies', type: 'movie', name: 'Lançamentos', kind: 'fresh', shape: card, days: 30 },
-    { id: 'new-series', type: 'series', name: 'Séries novas', kind: 'fresh', shape: card, days: 60 },
+    { id: 'new-movies', type: 'movie', name: 'Lançamentos', kind: 'fresh', shape: card, days: p.freshDays?.movie || 30 },
+    { id: 'new-series', type: 'series', name: 'Séries novas', kind: 'fresh', shape: card, days: p.freshDays?.series || 60 },
     // Títulos que entraram na Netflix (inclusive filmes antigos licenciados agora). Calculado no build
     // estático comparando o catálogo completo com o da execução anterior; o servidor só repassa o arquivo.
     { id: 'recent-movies', type: 'movie', name: 'Filmes adicionados recentemente', kind: 'recent', shape: card },
@@ -74,6 +74,11 @@ function rowsFor(p) {
   // Catálogo inteiro da Netflix no Brasil, do mais popular ao menos popular.
   genre('all-movies', 'movie', 'Todos os filmes', {});
   genre('all-series', 'series', 'Todas as séries', {});
+  // Páginas de marca (Disney+: Disney, Pixar, Marvel...), uma fileira de filmes e uma de séries cada.
+  for (const b of p.brands || []) {
+    genre(`brand-${b.id}-movies`, 'movie', `${b.name}: filmes`, b.movie);
+    genre(`brand-${b.id}-series`, 'series', `${b.name}: séries`, b.series);
+  }
   return rows;
 }
 

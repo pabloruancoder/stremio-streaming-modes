@@ -33,10 +33,14 @@ const write = (rel, data) => {
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, JSON.stringify(data));
 };
+// Cada fileira vai para a raiz (usada pelo plugin e pelo manifest principal) e para a pasta do
+// streaming (<streaming>/catalog/...), que é a base do addon separado de cada um (<streaming>/manifest.json).
 const writeCatalog = (type, id, metas) => {
-  write(`catalog/${type}/${id}.json`, { metas: metas.slice(0, CHUNK) });
-  for (let skip = CHUNK; skip < metas.length; skip += CHUNK) {
-    write(`catalog/${type}/${id}/skip=${skip}.json`, { metas: metas.slice(skip, skip + CHUNK) });
+  for (const base of ['', `${id.split('.')[0]}/`]) {
+    write(`${base}catalog/${type}/${id}.json`, { metas: metas.slice(0, CHUNK) });
+    for (let skip = CHUNK; skip < metas.length; skip += CHUNK) {
+      write(`${base}catalog/${type}/${id}/skip=${skip}.json`, { metas: metas.slice(skip, skip + CHUNK) });
+    }
   }
 };
 
@@ -140,17 +144,24 @@ for (const p of Object.values(PROVIDERS)) {
   console.log(`em breve (${p.key})`.padEnd(32), String(items.length).padStart(5), 'títulos');
 }
 
-write('manifest.json', {
-  id: 'community.streaming-modes',
-  version: '0.3.0',
-  name: 'Streaming Modes',
-  description: `Catálogo completo da Netflix Brasil: Top 10 oficial, adicionados recentemente, lançamentos, em alta, gêneros e todos os filmes e séries. Atualizado em ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}.`,
+// Um addon por streaming (<streaming>/manifest.json). O da raiz continua sendo o da Netflix,
+// que é o endereço já instalado no celular e na TV.
+const updated = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+const manifestFor = (p, id) => ({
+  id,
+  version: '0.4.0',
+  name: p.key === 'netflix' ? 'Streaming Modes' : `Streaming Modes: ${p.label}`,
+  description: `Catálogo completo da ${p.label} Brasil: ${p.hasOfficialTop10 ? 'Top 10 oficial, ' : ''}adicionados recentemente, lançamentos, em alta, gêneros e todos os filmes e séries. Atualizado em ${updated}.`,
   resources: ['catalog'],
   types: ['movie', 'series'],
   idPrefixes: ['tt'],
-  catalogs: catalogs.map(({ id, type, name, extra }) => ({ id, type, name, extra })),
+  catalogs: catalogs.filter((c) => c.id.startsWith(`${p.key}.`)).map(({ id, type, name, extra }) => ({ id, type, name, extra })),
   behaviorHints: { configurable: false },
 });
+for (const p of Object.values(PROVIDERS)) write(`${p.key}/manifest.json`, manifestFor(p, `community.streaming-modes.${p.key}`));
+write('manifest.json', manifestFor(PROVIDERS.netflix, 'community.streaming-modes'));
+// Lista com as fileiras de todos os streamings (o plugin usa quando o addon do PC está desligado).
+write('sm/catalogs.json', { catalogs: catalogs.map(({ id, type, name, extra }) => ({ id, type, name, extra })) });
 write('.nojekyll', '');
 fs.writeFileSync(path.join(out, 'index.html'),
   '<!doctype html><meta charset="utf-8"><title>Streaming Modes</title><p>Addon do Stremio. Instale copiando o endereço desta página seguido de <code>manifest.json</code>.</p>');

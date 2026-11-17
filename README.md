@@ -1,14 +1,14 @@
 # Streaming Modes para Stremio
 
-Escolha um streaming (por enquanto, Netflix) e o Stremio muda de cara: transição animada,
-visual inspirado no serviço, banner com o Nº 1 do Top 10 e só as fileiras daquele streaming.
+Escolha um streaming (Netflix ou Disney+) e o Stremio muda de cara: transição animada,
+visual inspirado no serviço, banner de destaque e só as fileiras daquele streaming.
 Um clique volta para o Stremio padrão.
 
 O projeto tem duas partes:
 
 | Parte | O que faz | Onde funciona |
 |---|---|---|
-| `addon/` | Fileiras de cada streaming: Top 10 oficial do país, "Só na Netflix", em alta, lançamentos, aclamados e gêneros (só títulos disponíveis na Netflix BR) | Em qualquer Stremio (PC, celular, TV) |
+| `addon/` | Fileiras de cada streaming: Top 10 oficial do país, "Só na Netflix", em alta, lançamentos, aclamados e gêneros (só títulos disponíveis no streaming no Brasil). Na Disney+, também as marcas: Disney, Pixar, Marvel, Star Wars, National Geographic e Star | Em qualquer Stremio (PC, celular, TV) |
 | `plugin/` | Seletor de modo, transição, tema, banner de destaque e filtro das fileiras | Stremio Enhanced (desktop) |
 
 ## 1. Rodar o addon
@@ -120,7 +120,11 @@ menu **Modo** do plugin.
 2. Em `plugin/streaming-modes.plugin.js`, adicione uma entrada em `MODES` (cor e prefixo
    `"Nome • "`) e um bloco de CSS em `THEMES`.
 
-O Top 10 oficial só existe para a Netflix. Nos outros serviços, use as fileiras de popularidade.
+O Top 10 oficial só existe para a Netflix. Na Disney+ o destaque e as fileiras usam o que está em alta, e a Home
+tem os blocos de marca (cada um abre uma página com os filmes e as séries da marca).
+
+No GitHub Pages, o manifest da raiz é o da Netflix (o endereço já instalado). Cada streaming também tem o seu:
+`https://USUARIO.github.io/REPOSITORIO/disney/manifest.json` para a Disney+ (e `/netflix/manifest.json`).
 
 ## Limitações
 
