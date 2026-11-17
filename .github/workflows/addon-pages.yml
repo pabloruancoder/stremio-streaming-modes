@@ -1,10 +1,10 @@
-# Publica o addon como arquivos estáticos no GitHub Pages e atualiza a cada 6 horas.
+# Publica o addon (catálogo completo da Netflix BR) como arquivos estáticos no GitHub Pages e atualiza a cada 3 horas.
 # Precisa do segredo TMDB_READ_TOKEN (ou TMDB_API_KEY) em Settings > Secrets and variables > Actions.
 name: Addon no GitHub Pages
 
 on:
   schedule:
-    - cron: '17 */6 * * *' # a cada 6 horas
+    - cron: '17 */3 * * *' # a cada 3 horas (detecta o que entrou na Netflix desde a última vez)
   workflow_dispatch: {} # botão "Run workflow"
   push:
     branches: [main]
@@ -40,6 +40,8 @@ jobs:
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
           REGION: BR
           LANGUAGE: pt-BR
+          # Onde está a cópia publicada (lê dela o histórico de "adicionados recentemente").
+          PAGES_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
         run: node scripts/build-static.mjs ../dist
       # Intros próprias (addon/intro-publica/<modo>.mp4) ficam em /intro/<modo>.mp4 no Pages.
       - name: Copiar intros públicas

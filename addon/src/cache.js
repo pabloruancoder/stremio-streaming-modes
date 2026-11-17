@@ -16,6 +16,10 @@ export function cached(key, ttlMs, producer) {
 }
 
 // Mapa persistente em disco (ex.: TMDB id -> IMDb id), que nunca expira.
+// O que ainda não foi salvo é gravado na saída do processo (o build termina com process.exit).
+const pendingSaves = new Set();
+process.on('exit', () => { for (const flush of pendingSaves) flush(); });
+
 export function persistentMap(name) {
   const file = path.join(config.dataDir, `${name}.json`);
   let data = {};
@@ -25,12 +29,16 @@ export function persistentMap(name) {
     /* primeiro uso */
   }
   let timer = null;
+  const flush = () => {
+    clearTimeout(timer);
+    pendingSaves.delete(flush);
+    fs.mkdirSync(config.dataDir, { recursive: true });
+    fs.writeFileSync(file, JSON.stringify(data));
+  };
   const save = () => {
     clearTimeout(timer);
-    timer = setTimeout(() => {
-      fs.mkdirSync(config.dataDir, { recursive: true });
-      fs.writeFileSync(file, JSON.stringify(data));
-    }, 2000);
+    pendingSaves.add(flush);
+    timer = setTimeout(flush, 2000);
   };
   return {
     has: (k) => Object.prototype.hasOwnProperty.call(data, k),

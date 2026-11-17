@@ -11,6 +11,8 @@ export const config = {
   tmdbReadToken: process.env.TMDB_READ_TOKEN?.trim() || '',
   cardStyle: process.env.CARD_STYLE === 'poster' ? 'poster' : 'landscape',
   dataDir: path.join(root, 'data'),
+  // Cópia publicada no GitHub Pages: guarda o histórico de "adicionados recentemente".
+  pagesUrl: (process.env.PAGES_URL || 'https://pabloruancoder.github.io/stremio-streaming-modes').replace(/\/+$/, ''),
 };
 
 export const hasTmdb = () => Boolean(config.tmdbApiKey || config.tmdbReadToken);

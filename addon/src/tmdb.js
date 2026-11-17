@@ -7,6 +7,22 @@ const HOUR = 3600_000;
 
 const imdbIds = persistentMap('imdb-ids');
 
+// No máximo 16 requisições ao TMDB ao mesmo tempo (o build do catálogo completo faz milhares).
+const MAX_PARALLEL = 16;
+let running = 0;
+const waiting = [];
+async function slot(fn) {
+  if (running >= MAX_PARALLEL) await new Promise((r) => waiting.push(r));
+  running++;
+  try {
+    return await fn();
+  } finally {
+    running--;
+    waiting.shift()?.();
+  }
+}
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
 export async function tmdb(pathname, params = {}) {
   const url = new URL(BASE + pathname);
   for (const [k, v] of Object.entries({ language: config.language, ...params })) {
@@ -16,10 +32,17 @@ export async function tmdb(pathname, params = {}) {
   if (config.tmdbReadToken) headers.authorization = `Bearer ${config.tmdbReadToken}`;
   else url.searchParams.set('api_key', config.tmdbApiKey);
 
+  // Tenta de novo em limite de taxa (429), erro do servidor (5xx) ou falha de rede.
   for (let attempt = 0; ; attempt++) {
-    const res = await fetch(url, { headers });
-    if (res.status === 429 && attempt < 3) {
-      await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+    let res;
+    try {
+      res = await slot(() => fetch(url, { headers }));
+    } catch (err) {
+      if (attempt < 5) { await sleep(1000 * (attempt + 1)); continue; }
+      throw err;
+    }
+    if ((res.status === 429 || res.status >= 500) && attempt < 5) {
+      await sleep(1000 * (attempt + 1));
       continue;
     }
     if (!res.ok) throw new Error(`TMDB ${res.status} em ${pathname}`);

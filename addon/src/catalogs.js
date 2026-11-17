@@ -1,5 +1,5 @@
 import { config, hasTmdb } from './config.js';
-import { mapLimit } from './cache.js';
+import { cached, mapLimit } from './cache.js';
 import { discover, toMetaPreview } from './tmdb.js';
 import { top10Metas } from './top10.js';
 import { PROVIDERS, NAME_SEPARATOR } from './providers.js';
@@ -25,12 +25,17 @@ function rowsFor(p) {
     });
   }
   rows.push(
-    { id: 'trending-series', type: 'series', name: 'Séries em alta', kind: 'discover', shape: card,
+    // "Em alta" fica curto; o catálogo inteiro está em "Todos os filmes" / "Todas as séries".
+    { id: 'trending-series', type: 'series', name: 'Séries em alta', kind: 'discover', shape: card, limit: 200,
       params: { sort_by: 'popularity.desc' } },
-    { id: 'trending-movies', type: 'movie', name: 'Filmes em alta', kind: 'discover', shape: card,
+    { id: 'trending-movies', type: 'movie', name: 'Filmes em alta', kind: 'discover', shape: card, limit: 200,
       params: { sort_by: 'popularity.desc' } },
     { id: 'new-movies', type: 'movie', name: 'Lançamentos', kind: 'fresh', shape: card, days: 30 },
     { id: 'new-series', type: 'series', name: 'Séries novas', kind: 'fresh', shape: card, days: 60 },
+    // Títulos que entraram na Netflix (inclusive filmes antigos licenciados agora). Calculado no build
+    // estático comparando o catálogo completo com o da execução anterior; o servidor só repassa o arquivo.
+    { id: 'recent-movies', type: 'movie', name: 'Filmes adicionados recentemente', kind: 'recent', shape: card },
+    { id: 'recent-series', type: 'series', name: 'Séries adicionadas recentemente', kind: 'recent', shape: card },
     { id: 'acclaimed-movies', type: 'movie', name: 'Filmes aclamados pela crítica', kind: 'discover', shape: card,
       params: { sort_by: 'vote_average.desc', 'vote_count.gte': 1500 } },
     { id: 'acclaimed-series', type: 'series', name: 'Séries aclamadas pela crítica', kind: 'discover', shape: card,
@@ -54,6 +59,21 @@ function rowsFor(p) {
   genre('docs', 'movie', 'Documentários', { with_genres: 99 });
   genre('reality-series', 'series', 'Reality shows', { with_genres: 10764 });
   genre('br-series', 'series', 'Séries brasileiras', { with_origin_country: 'BR' });
+  genre('br-movies', 'movie', 'Filmes brasileiros', { with_origin_country: 'BR' });
+  genre('thriller-movies', 'movie', 'Filmes de suspense', { with_genres: 53 });
+  genre('animation-movies', 'movie', 'Filmes de animação', { with_genres: 16 });
+  genre('anime-movies', 'movie', 'Filmes de anime', { with_genres: 16, with_original_language: 'ja' });
+  genre('war-movies', 'movie', 'Filmes de guerra e história', { with_genres: '10752|36' });
+  genre('action-series', 'series', 'Séries de ação e aventura', { with_genres: 10759 });
+  genre('comedy-series', 'series', 'Séries de comédia', { with_genres: 35 });
+  genre('scifi-series', 'series', 'Séries de ficção científica e fantasia', { with_genres: 10765 });
+  genre('mystery-series', 'series', 'Séries de mistério', { with_genres: 9648 });
+  genre('docu-series', 'series', 'Séries documentais', { with_genres: 99 });
+  genre('kdrama-series', 'series', 'Séries coreanas', { with_original_language: 'ko' });
+  genre('spanish-series', 'series', 'Séries espanholas e latinas', { with_original_language: 'es' });
+  // Catálogo inteiro da Netflix no Brasil, do mais popular ao menos popular.
+  genre('all-movies', 'movie', 'Todos os filmes', {});
+  genre('all-series', 'series', 'Todas as séries', {});
   return rows;
 }
 
@@ -78,28 +98,93 @@ export function manifestCatalogs() {
 }
 
 const PAGE = 20;
+const MAX_PAGES = 500; // limite do /discover do TMDB (10.000 títulos)
+
+function discoverParams(provider, row) {
+  const params = typeof row.params === 'function' ? row.params() : { ...row.params };
+  if (!row.noProviderFilter) {
+    params.with_watch_providers = provider.tmdbProviderId;
+    params.with_watch_monetization_types = 'flatrate|ads';
+  }
+  return params;
+}
+
+// Fileiras calculadas só no build ("adicionados recentemente"): o servidor do PC lê a cópia do GitHub Pages.
+// Lá cada arquivo tem 100 títulos (catalog/<tipo>/<id>.json, catalog/<tipo>/<id>/skip=100.json...).
+async function publishedCatalog(type, id, skip) {
+  const chunk = Math.floor(skip / 100) * 100;
+  const url = `${config.pagesUrl}/catalog/${type}/${id}${chunk ? `/skip=${chunk}` : ''}.json`;
+  const data = await cached(`published:${url}`, 3600_000, async () => {
+    const res = await fetch(url);
+    if (res.status === 404) return { metas: [] };
+    if (!res.ok) throw new Error(`GitHub Pages ${res.status}`);
+    return res.json();
+  });
+  return (data.metas || []).slice(skip - chunk);
+}
+
+// Todas as páginas do /discover (usado pelo build estático).
+async function allPages(type, params, limit) {
+  const first = await discover(type, params, 1);
+  const cap = limit ? Math.ceil(limit / PAGE) + 1 : MAX_PAGES; // +1 página: alguns itens não têm IMDb
+  const total = Math.min(first.total_pages || 1, cap);
+  const rest = await mapLimit(Array.from({ length: total - 1 }, (_, i) => i + 2), 6, (p) =>
+    discover(type, params, p).catch((err) => {
+      console.warn(`  página ${p}: ${err.message}`);
+      return { results: [] };
+    }));
+  return [first, ...rest].flatMap((d) => d.results || []);
+}
+
+// A fileira inteira, sem limite de páginas: o build estático grava tudo em arquivos de 100.
+export async function fullCatalog(id) {
+  const entry = index.get(id);
+  if (!entry) return [];
+  const { provider, row } = entry;
+  if (row.kind === 'top10') return top10Metas(row.type, provider);
+  if (row.kind === 'recent' || !hasTmdb()) return [];
+  let items = row.kind === 'fresh'
+    ? localFirst(await allPages(row.type, freshParams(row.type, provider, row)))
+    : await allPages(row.type, discoverParams(provider, row), row.limit);
+  const seenTmdb = new Set();
+  items = items.filter((x) => !seenTmdb.has(x.id) && seenTmdb.add(x.id));
+  const metas = await mapLimit(items, 8, (item) => toMetaPreview(item, row.type, row.shape).catch(() => null));
+  const seen = new Set();
+  const list = metas.filter((m) => m && !seen.has(m.id) && seen.add(m.id));
+  return row.limit ? list.slice(0, row.limit) : list;
+}
+
+export const catalogKind = (id) => index.get(id)?.row.kind;
 
 // Estreias recentes no streaming. A popularidade do TMDB é mundial (um lançamento americano
 // chega a 20x a de um documentário brasileiro que está bombando aqui), então as produções do
 // país das últimas 3 semanas vêm primeiro e o resto segue por popularidade.
-async function freshReleases(type, provider, row, part = 0) {
+function freshParams(type, provider, row) {
   const since = new Date(Date.now() - row.days * 86400_000).toISOString().slice(0, 10);
   const dateKey = type === 'movie' ? 'primary_release_date' : 'first_air_date';
-  const params = {
+  return {
     sort_by: 'popularity.desc',
     [`${dateKey}.gte`]: since,
     [`${dateKey}.lte`]: today(),
     with_watch_providers: provider.tmdbProviderId,
     with_watch_monetization_types: 'flatrate|ads',
   };
-  const pages = await Promise.all([part * 2 + 1, part * 2 + 2].map((p) => discover(type, params, p).catch(() => ({ results: [] }))));
+}
+
+function localFirst(items) {
   const lang = config.language.slice(0, 2);
   const recent = new Date(Date.now() - 21 * 86400_000).toISOString().slice(0, 10);
   const isLocalNew = (x) =>
     (x.original_language === lang || (x.origin_country || []).includes(config.region)) &&
     (x.release_date || x.first_air_date || '') >= recent;
+  return [...items.filter(isLocalNew), ...items.filter((x) => !isLocalNew(x))];
+}
+
+async function freshReleases(type, provider, row, part = 0) {
+  const params = freshParams(type, provider, row);
+  const pages = await Promise.all([part * 2 + 1, part * 2 + 2].map((p) => discover(type, params, p).catch(() => ({ results: [] }))));
   const all = pages.flatMap((p) => p.results || []);
-  const ranked = part ? all : [...all.filter(isLocalNew), ...all.filter((x) => !isLocalNew(x))];
+  const ranked = part ? all : localFirst(all);
   const metas = await mapLimit(ranked, 8, (item) => toMetaPreview(item, type, row.shape).catch(() => null));
   return metas.filter(Boolean);
 }
@@ -117,21 +202,19 @@ export async function catalogHandler(type, id, extra) {
 
   if (!hasTmdb()) return { metas: [] };
 
+  if (row.kind === 'recent') return { metas: await publishedCatalog(type, id, skip), cacheMaxAge: 3600 };
+
   if (row.kind === 'fresh') {
-    const part = Math.floor(skip / 20);
-    if (part > 10) return { metas: [] };
+    const part = Math.floor((skip + 20) / 40); // cada parte junta 2 páginas (40 títulos)
+    if (part >= MAX_PAGES / 2) return { metas: [] };
     return { metas: await freshReleases(type, provider, row, part), cacheMaxAge: 3 * 3600 };
   }
 
   // Alguns itens são descartados por não terem IMDb id, então o "skip" do Stremio
   // fica um pouco abaixo de múltiplos de 20. Arredonda para a página certa.
   const page = Math.floor((skip + PAGE / 2) / PAGE) + 1;
-  if (page > 20) return { metas: [] };
-  const params = typeof row.params === 'function' ? row.params() : { ...row.params };
-  if (!row.noProviderFilter) {
-    params.with_watch_providers = provider.tmdbProviderId;
-    params.with_watch_monetization_types = 'flatrate|ads';
-  }
+  if (page > (row.limit ? Math.ceil(row.limit / PAGE) : MAX_PAGES)) return { metas: [] };
+  const params = discoverParams(provider, row);
   const data = await discover(type, params, page);
   const metas = await mapLimit(data.results || [], 8, (item) =>
     toMetaPreview(item, type, row.shape).catch(() => null),

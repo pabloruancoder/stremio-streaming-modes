@@ -32,15 +32,18 @@
         { type: 'movie', id: 'netflix.top10-movies', label: 'em filmes esta semana' },
       ],
       pages: {
-        home: ['@continue', 'top10-series', 'new-movies', '@because0', '@soon', 'originals', 'trending-series', '@mylist',
-          'top10-movies', '@because1', 'trending-movies', 'new-series', 'acclaimed-series', 'acclaimed-movies',
-          'br-series', 'action-movies', 'comedy-movies', 'drama-series', 'crime-series', 'horror-movies',
-          'scifi-movies', 'anime-series', 'romance-movies', 'kids-movies', 'reality-series', 'docs'],
-        series: ['@continue', 'top10-series', '@because0', 'originals', 'trending-series', 'new-series',
-          'acclaimed-series', 'br-series', 'drama-series', 'crime-series', 'anime-series', 'reality-series'],
-        movies: ['@continue', 'top10-movies', '@because1', 'new-movies', 'trending-movies', 'acclaimed-movies',
-          'action-movies', 'comedy-movies', 'horror-movies', 'scifi-movies', 'romance-movies', 'kids-movies', 'docs'],
-        new: ['top10-series', 'top10-movies', 'new-movies', 'new-series', 'trending-series', 'trending-movies'],
+        home: ['@continue', 'top10-series', 'recent-movies', '@because0', '@soon', 'originals', 'recent-series', 'trending-series', '@mylist',
+          'top10-movies', '@because1', 'new-movies', 'trending-movies', 'new-series', 'acclaimed-series', 'acclaimed-movies',
+          'br-series', 'action-movies', 'comedy-movies', 'drama-series', 'thriller-movies', 'crime-series', 'horror-movies',
+          'scifi-movies', 'kdrama-series', 'anime-series', 'romance-movies', 'comedy-series', 'br-movies', 'kids-movies',
+          'mystery-series', 'reality-series', 'docs', 'all-series', 'all-movies'],
+        series: ['@continue', 'top10-series', 'recent-series', '@because0', 'originals', 'trending-series', 'new-series',
+          'acclaimed-series', 'br-series', 'drama-series', 'crime-series', 'action-series', 'comedy-series', 'scifi-series',
+          'mystery-series', 'kdrama-series', 'spanish-series', 'anime-series', 'docu-series', 'reality-series', 'all-series'],
+        movies: ['@continue', 'top10-movies', 'recent-movies', '@because1', 'new-movies', 'trending-movies', 'acclaimed-movies',
+          'action-movies', 'comedy-movies', 'thriller-movies', 'horror-movies', 'scifi-movies', 'romance-movies', 'br-movies',
+          'animation-movies', 'anime-movies', 'war-movies', 'kids-movies', 'docs', 'all-movies'],
+        new: ['top10-series', 'top10-movies', 'recent-movies', 'recent-series', 'new-movies', 'new-series', 'trending-series', 'trending-movies'],
       },
       // Perfil Infantil: só fileiras feitas para crianças (o tipo da página filtra filmes/séries).
       kidsPages: ['@continue', 'kids-anim-movies', 'kids-series', '@because0', 'kids-movies', 'kids-family-series', '@mylist'],
@@ -188,7 +191,7 @@
   // Busca, recomendações personalizadas, trailers e dados do player precisam do addon do PC.
   let localDownAt = 0;
   const localDown = () => Date.now() - localDownAt < 60_000; // tenta o PC de novo a cada minuto
-  const STATIC_PATH = /^\/(manifest\.json|catalog\/(movie|series)\/[^/]+\.json|sm\/upcoming\/[a-z]+\.json)$/;
+  const STATIC_PATH = /^\/(manifest\.json|catalog\/(movie|series)\/[^/]+(\/skip=\d+)?\.json|sm\/upcoming\/[a-z]+\.json)$/;
   function addon(path) {
     const bare = path.split('?')[0];
     const remote = () => getJSON(`${store.get('remoteAddonUrl')}${bare}`);
@@ -1439,8 +1442,8 @@
     return Promise.all([
       catalog('series', `${p}.top10-series`).catch(() => []),
       catalog('movie', `${p}.top10-movies`).catch(() => []),
-      catalog('movie', `${p}.new-movies`).catch(() => []),
-      catalog('series', `${p}.new-series`).catch(() => []),
+      catalog('movie', `${p}.recent-movies`).catch(() => []),
+      catalog('series', `${p}.recent-series`).catch(() => []),
     ]).then(([ts, tm, nm, ns]) => {
       const out = [];
       const seen = new Set();
@@ -2674,9 +2677,11 @@
         h('button', { type: 'button', class: 'sm-back', 'aria-label': 'Voltar', title: 'Voltar (Esc)', onclick: back }, icon('left')),
         h('h1', { class: 'sm-page-title', text: ex.title })),
       grid));
-    infiniteGrid(grid, (page) =>
-      addon(`/catalog/${ex.type}/${encodeURIComponent(ex.id)}${page ? `/skip=${page * 20}` : ''}.json`)
-        .then((d) => ({ metas: d.metas || [], more: (d.metas || []).length > 0 })),
+    // skip = quantos títulos já vieram (o addon do PC entrega 20 por vez; a cópia do GitHub, 100 por arquivo).
+    let skip = 0;
+    infiniteGrid(grid, () =>
+      addon(`/catalog/${ex.type}/${encodeURIComponent(ex.id)}${skip ? `/skip=${skip}` : ''}.json`)
+        .then((d) => { const metas = d.metas || []; skip += metas.length; return { metas, more: metas.length > 0 }; }),
     { stop: () => state.page !== 'explore' || state.explore !== ex });
   }
 
@@ -2755,7 +2760,7 @@
       { render: (it) => upcomingCard(it) });
 
     add(makeRow('Novidades na Netflix', () =>
-      Promise.all([catalog('series', `${p}.new-series`), catalog('movie', `${p}.new-movies`)].map((x) => x.catch(() => [])))
+      Promise.all([catalog('series', `${p}.recent-series`), catalog('movie', `${p}.recent-movies`)].map((x) => x.catch(() => [])))
         .then(([sr, mv]) => {
           const out = [];
           for (let i = 0; i < Math.max(sr.length, mv.length); i++) { if (sr[i]) out.push(sr[i]); if (mv[i]) out.push(mv[i]); }

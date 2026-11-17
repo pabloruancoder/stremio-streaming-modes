@@ -95,7 +95,10 @@ No modo Netflix, o player do Stremio ganha:
 ## Fileiras no celular e na TV (addon online)
 
 - **GitHub Pages (grátis, sem servidor):** o workflow `.github/workflows/addon-pages.yml` gera as fileiras como arquivos
-  e publica no GitHub Pages a cada 6 horas. Precisa do segredo `TMDB_READ_TOKEN` (ou `TMDB_API_KEY`) no repositório e do
+  e publica no GitHub Pages a cada 3 horas. Cada fileira traz **todos** os títulos (o catálogo inteiro da Netflix BR,
+  ~8 mil filmes e séries, em arquivos de 100 que o Stremio carrega conforme você rola), e as fileiras
+  **Adicionados recentemente** mostram o que entrou na Netflix desde as execuções anteriores (inclusive filmes antigos
+  que acabaram de chegar). O histórico fica em `state/netflix.json` no próprio Pages. Precisa do segredo `TMDB_READ_TOKEN` (ou `TMDB_API_KEY`) no repositório e do
   Pages ativado com a fonte **GitHub Actions**. Instale `https://USUARIO.github.io/REPOSITORIO/manifest.json` no
   celular e na TV. Para gerar localmente: `node --env-file-if-exists=.env scripts/build-static.mjs` (na pasta `addon`).
   Busca, trailers, perfis e o player continuam usando o addon local no PC.
