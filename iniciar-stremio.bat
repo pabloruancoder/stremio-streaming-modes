@@ -13,11 +13,16 @@ if errorlevel 1 (
   echo Addon ja esta rodando.
 )
 
-rem 2) Stremio Service (necessario para assistir)
-tasklist /fi "imagename eq stremio-service.exe" | findstr /i stremio-service.exe >nul
+rem 2) Stremio Service (necessario para assistir). Confere a porta 11470 e nao so o processo:
+rem    as vezes o stremio-service.exe fica aberto com o servidor de streaming caido por dentro,
+rem    e ai todo video da "Video is not supported". Nesse caso, reinicia o servico.
+netstat -ano | findstr ":11470 " | findstr LISTENING >nul
 if errorlevel 1 (
+  taskkill /f /im stremio-service.exe >nul 2>&1
+  taskkill /f /im stremio-runtime.exe >nul 2>&1
   echo Ligando o Stremio Service...
   start "" "%LOCALAPPDATA%\Programs\StremioService\stremio-service.exe"
+  timeout /t 5 /nobreak >nul
 ) else (
   echo Stremio Service ja esta rodando.
 )
