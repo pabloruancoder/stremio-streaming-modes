@@ -23,6 +23,12 @@ export const PROVIDERS = {
     // Filmes originais: estúdios Disney (Disney, Pixar, Marvel, Lucasfilm, Animation, 20th Century, Searchlight,
     // National Geographic, Disney Television Animation, Disney Channel) lançados desde a estreia da Disney+.
     originalMovies: { companies: '2|3|420|1|6125|127928|43|7521|3475|670|114038', since: '2019-11-12' },
+    kidsRows: [
+      { id: 'kids-disney-movies', type: 'movie', name: 'Filmes Disney e Pixar para crianças',
+        params: { with_companies: '2|3|6125', certification_country: 'BR', certification: 'L|10' } },
+      { id: 'kids-disneyjr-series', type: 'series', name: 'Disney Channel e Disney Junior',
+        params: { with_networks: '54|281|44', without_genres: '80,27' } },
+    ],
     upcoming: { days: 180, networks: '2739|453|88|1035|43', movieCompanies: '2|3|420|1|127928|43|7521|6125' },
     // Marcas da tela inicial (filtros do TMDB dentro do catálogo da Disney+ Brasil). Fora dos EUA, Star virou Hulu (out/2025).
     brands: [

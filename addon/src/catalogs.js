@@ -77,11 +77,20 @@ function rowsFor(p) {
   // Catálogo inteiro da Netflix no Brasil, do mais popular ao menos popular.
   genre('all-movies', 'movie', 'Todos os filmes', {});
   genre('all-series', 'series', 'Todas as séries', {});
-  // Páginas de marca (Disney+: Disney, Pixar, Marvel...), uma fileira de filmes e uma de séries cada.
+  // Páginas de marca (Disney+: Disney, Pixar, Marvel...): populares, lançamentos, mais bem avaliados e clássicos.
+  const todayParam = (key) => () => ({ [key]: today() });
   for (const b of p.brands || []) {
     genre(`brand-${b.id}-movies`, 'movie', `${b.name}: filmes`, b.movie);
     genre(`brand-${b.id}-series`, 'series', `${b.name}: séries`, b.series);
+    const dated = (id, type, name, params, dateKey) => rows.push({ id, type, name, kind: 'discover', shape: card,
+      params: () => ({ ...params, ...todayParam(dateKey)() }) });
+    dated(`brand-${b.id}-new`, 'movie', `${b.name}: lançamentos`, { ...b.movie, sort_by: 'primary_release_date.desc' }, 'primary_release_date.lte');
+    dated(`brand-${b.id}-series-new`, 'series', `${b.name}: séries recentes`, { ...b.series, sort_by: 'first_air_date.desc' }, 'first_air_date.lte');
+    genre(`brand-${b.id}-top`, 'movie', `${b.name}: mais bem avaliados`, { ...b.movie, sort_by: 'vote_average.desc', 'vote_count.gte': 300 });
+    genre(`brand-${b.id}-classics`, 'movie', `${b.name}: clássicos`, { ...b.movie, 'primary_release_date.lte': '1999-12-31' });
   }
+  // Fileiras infantis próprias do streaming (Disney+: filmes Disney/Pixar livres e Disney Channel/Junior).
+  for (const k of p.kidsRows || []) genre(k.id, k.type, k.name, k.params);
   return rows;
 }
 

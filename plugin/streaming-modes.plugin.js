@@ -94,11 +94,30 @@
           'romance-movies', 'brand-natgeo-movies', 'docs', 'all-movies'],
         new: ['recent-movies', 'recent-series', 'new-movies', 'new-series', 'trending-series', 'trending-movies'],
       },
-      kidsPages: ['@continue', 'kids-anim-movies', 'kids-series', '@because0', 'kids-movies', 'kids-family-series', '@mylist'],
+      kidsPages: ['@continue', 'kids-disney-movies', 'kids-disneyjr-series', '@because0', 'kids-anim-movies', 'brand-pixar-movies',
+        'kids-series', 'kids-movies', 'kids-family-series', '@mylist'],
       kidsHero: [
-        { type: 'movie', id: 'disney.kids-anim-movies' },
-        { type: 'series', id: 'disney.kids-series' },
+        { type: 'movie', id: 'disney.kids-disney-movies' },
+        { type: 'series', id: 'disney.kids-disneyjr-series' },
       ],
+      // Filmes e Séries: um seletor de gênero e a grade com tudo daquele gênero (como no app).
+      genres: {
+        movie: [['all-movies', 'Todos os filmes'], ['originals-movies', 'Originais'], ['action-movies', 'Ação'], ['animation-movies', 'Animação'],
+          ['anime-movies', 'Anime'], ['comedy-movies', 'Comédia'], ['docs', 'Documentários'], ['kids-movies', 'Família'],
+          ['scifi-movies', 'Ficção científica e fantasia'], ['war-movies', 'Guerra e história'], ['acclaimed-movies', 'Aclamados pela crítica'],
+          ['romance-movies', 'Romance'], ['thriller-movies', 'Suspense'], ['horror-movies', 'Terror'], ['br-movies', 'Brasileiros']],
+        series: [['all-series', 'Todas as séries'], ['originals', 'Originais'], ['action-series', 'Ação e aventura'], ['anime-series', 'Anime'],
+          ['comedy-series', 'Comédia'], ['kdrama-series', 'Coreanas'], ['docu-series', 'Documentais'], ['drama-series', 'Drama'],
+          ['spanish-series', 'Espanholas e latinas'], ['scifi-series', 'Ficção científica e fantasia'], ['kids-series', 'Infantis'],
+          ['mystery-series', 'Mistério'], ['crime-series', 'Policiais'], ['reality-series', 'Reality shows'], ['br-series', 'Brasileiras'],
+          ['acclaimed-series', 'Aclamadas pela crítica']],
+      },
+      // Busca vazia: coleções para explorar (capas de gênero), como a tela "Explorar" do app.
+      explore: [['movie', 'action-movies', 'Ação'], ['movie', 'animation-movies', 'Animação'], ['movie', 'comedy-movies', 'Comédia'],
+        ['movie', 'scifi-movies', 'Ficção científica'], ['movie', 'horror-movies', 'Terror'], ['movie', 'romance-movies', 'Romance'],
+        ['movie', 'docs', 'Documentários'], ['movie', 'thriller-movies', 'Suspense'], ['series', 'drama-series', 'Séries de drama'],
+        ['series', 'comedy-series', 'Séries de comédia'], ['series', 'anime-series', 'Animes'], ['series', 'kdrama-series', 'Séries coreanas'],
+        ['series', 'reality-series', 'Reality shows'], ['movie', 'originals-movies', 'Filmes originais']],
     },
   };
   const NAV_PAGES = [
@@ -1237,6 +1256,37 @@
   .sm-brand-frame { flex:none; width:1.1em; height:1.6em; border:.28em solid #ffce00; box-sizing:border-box; }
   @media (max-width: 900px) { .sm-brands { grid-template-columns:repeat(3, minmax(0, 1fr)); } }
 
+  /* Filmes / Séries com seletor de gênero */
+  .sm-genre-head { display:flex; align-items:center; gap:1.4rem; margin:0 var(--pad) 1.6rem; overflow:visible !important; }
+  .sm-genre-head .sm-page-title { margin:0; }
+  .sm-genre-head .sm-dd-panel { left:0; right:auto; max-height:min(30rem, 65vh); }
+  html[data-sm-mode="disney"] .sm-genrepage .sm-grid { padding:0 var(--pad); }
+  html[data-sm-mode="disney"] .sm-genrepage, html[data-sm-mode="disney"] .sm-explorepage { overflow:visible !important; }
+
+  /* Busca vazia: Explorar */
+  .sm-xpl-wrap { overflow:visible !important; }
+  .sm-xpl-wrap .sm-brands { margin:0 0 2.4rem; }
+  .sm-xpl-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(13rem, 1fr)); gap:1.2rem; margin-bottom:2.6rem; overflow:visible !important; }
+  .sm-xpl { position:relative; aspect-ratio:16/9; display:flex; align-items:flex-end; padding:.9rem 1rem !important; border-radius:10px;
+    background:linear-gradient(rgb(48,50,62), rgb(30,31,42)) !important; color:#f9f9f9; cursor:pointer; overflow:hidden;
+    box-shadow:inset 0 0 0 3px rgba(249,249,249,.1), rgba(0,0,0,.69) 0 26px 30px -10px !important;
+    transition:transform .25s cubic-bezier(.25,.46,.45,.94), box-shadow .25s; animation:sm-pop-in .6s both; }
+  .sm-xpl-bg { position:absolute; inset:0; background:center/cover no-repeat; opacity:0; transition:opacity .6s; }
+  .sm-xpl.ready .sm-xpl-bg { opacity:1; }
+  .sm-xpl-bg::after { content:""; position:absolute; inset:0; background:linear-gradient(0deg, rgba(10,12,20,.85) 0%, rgba(10,12,20,.15) 65%); }
+  .sm-xpl-name { position:relative; z-index:2; font-size:1.1rem; font-weight:800; text-shadow:0 2px 10px rgba(0,0,0,.7); }
+  .sm-xpl:hover, .sm-xpl:focus-visible { transform:scale(1.05); outline:none;
+    box-shadow:inset 0 0 0 3px rgba(249,249,249,.85), rgba(0,0,0,.8) 0 40px 58px -16px, 0 0 30px rgba(120,170,255,.18) !important; }
+  .sm-xpl:hover .sm-shine::before { animation:sm-sheen 1s ease-out both; }
+
+  /* Trailer no fundo dos detalhes */
+  .sm-dlg-video { position:absolute; inset:0; z-index:0; overflow:hidden; opacity:0; transition:opacity 1.2s ease; pointer-events:none; }
+  .sm-dlg-video.on { opacity:1; }
+  .sm-dlg-video iframe { position:absolute; top:50%; left:50%; width:100%; height:100%; border:0; transform:translate(-50%, -50%) scale(1.35); }
+  html[data-sm-mode="disney"] .sm-dlg-hero::after { z-index:1; }
+  .sm-dlg-mute { position:absolute; z-index:3; right:calc(var(--pad, 3.2vw) + 1.6rem); bottom:3.8rem; }
+  .sm-dlg-mute[hidden] { display:none; }
+
   /* Página Originais */
   .sm-orig-head { position:relative; padding:2.6rem var(--pad) .4rem; }
   .sm-orig-kicker { font-size:.85rem; font-weight:800; letter-spacing:.32em; text-transform:uppercase; color:rgba(249,249,249,.7); }
@@ -1589,7 +1639,15 @@
       overlay.innerHTML = `<svg class="sm-arc" viewBox="0 0 400 140" aria-hidden="true"><defs><linearGradient id="sm-arc-g" x1="0" x2="1">
         <stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".45" stop-color="#fff"/><stop offset=".85" stop-color="#7fc4ff"/>
         <stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
-        <path d="M18 128 C 90 10, 310 10, 382 120" fill="none" stroke="url(#sm-arc-g)" stroke-width="3.2" stroke-linecap="round" pathLength="1"/></svg>`;
+        <radialGradient id="sm-spark-g"><stop offset="0" stop-color="#fff"/><stop offset=".35" stop-color="#cfe8ff"/><stop offset="1" stop-color="#7fc4ff" stop-opacity="0"/></radialGradient>
+        <path d="M18 128 C 90 10, 310 10, 382 120" fill="none" stroke="url(#sm-arc-g)" stroke-width="3.2" stroke-linecap="round" pathLength="1"/>
+        ${[0, 0.08, 0.16, 0.24, 0.32].map((d, i) => `<circle r="${i ? 2.6 - i * 0.4 : 9}" fill="url(#sm-spark-g)" opacity="${i ? 0.9 - i * 0.15 : 1}">
+          <animateMotion dur="1.35s" begin="${d}s" fill="freeze" calcMode="spline" keySplines=".55 .1 .3 1" keyTimes="0;1" keyPoints="0;1"
+            path="M18 128 C 90 10, 310 10, 382 120"/>
+          <animate attributeName="opacity" from="${i ? 0.9 - i * 0.15 : 1}" to="0" begin="${1.35 + d}s" dur=".5s" fill="freeze"/></circle>`).join('')}
+        <circle cx="382" cy="120" r="2" fill="url(#sm-spark-g)" opacity="0">
+          <animate attributeName="r" values="2;46;60" keyTimes="0;.5;1" begin="1.3s" dur=".7s" fill="freeze"/>
+          <animate attributeName="opacity" values="0;.95;0" keyTimes="0;.3;1" begin="1.3s" dur=".7s" fill="freeze"/></circle></svg>`;
     }
     overlay.appendChild(h('div', { class: 'sm-intro-word', text: mode.splash }));
     return overlay;
@@ -1846,6 +1904,7 @@
     if (state.page === 'new') return renderNews();
     if (state.page === 'brand') return renderBrand(mode);
     if (state.page === 'originals' && mode.layout === 'disney') return renderOriginals(mode);
+    if ((state.page === 'movies' || state.page === 'series') && mode.genres && !isKids()) return renderGenrePage(mode);
     const heroWrap = h('div');
     const rows = h('div', { class: 'sm-rows' });
     app.append(heroWrap, rows);
@@ -1891,7 +1950,10 @@
   function renderBrand(mode) {
     const b = (mode.brands || []).find((x) => x.id === state.brand);
     if (!b) { state.page = 'home'; return renderPage(); }
-    const ids = [`brand-${b.id}-movies`, `brand-${b.id}-series`];
+    const ids = [`brand-${b.id}-new`, `brand-${b.id}-movies`, `brand-${b.id}-series`, `brand-${b.id}-top`,
+      `brand-${b.id}-series-new`, `brand-${b.id}-classics`];
+    const titles = { [ids[0]]: 'Lançamentos', [ids[1]]: 'Filmes populares', [ids[2]]: 'Séries', [ids[3]]: 'Mais bem avaliados',
+      [ids[4]]: 'Séries recentes', [ids[5]]: 'Clássicos' };
     // Como no app: faixa grande com a capa de um título da marca ao fundo e o nome da marca no centro.
     const bg = h('div', { class: 'sm-bpage-bg' });
     const banner = h('section', { class: 'sm-bpage' }, bg, h('div', { class: 'sm-bpage-shade' }),
@@ -1900,12 +1962,56 @@
       h('div', { class: 'sm-bpage-name' }, brandName(b)));
     const rows = h('div', { class: 'sm-rows flat sm-bpage-rows' });
     app.append(banner, rows);
-    catalog('movie', `${mode.provider}.${ids[0]}`).then((ms) => {
+    catalog('movie', `${mode.provider}.${ids[1]}`).then((ms) => {
       const pick = ms.filter((m) => m.background).slice(0, 5);
       const m = pick[Math.floor(Math.random() * pick.length)];
       if (m) { bg.style.backgroundImage = cssUrl(m.background); banner.classList.add('ready'); }
     }).catch(() => {});
-    buildRows(mode, rows, ids);
+    buildRows(mode, rows, ids, titles);
+  }
+
+  // Filmes / Séries (Disney+): título, seletor de gênero e a grade com todos os títulos daquele gênero.
+  function renderGenrePage(mode) {
+    const page = state.page;
+    const type = page === 'movies' ? 'movie' : 'series';
+    const opts = mode.genres[type];
+    state.genreSel = state.genreSel || {};
+    const cur = opts.some(([id]) => id === state.genreSel[page]) ? state.genreSel[page] : opts[0][0];
+    const token = {};
+    state.genreToken = token;
+    const grid = h('div', { class: 'sm-grid sm-results' });
+    const select = dropdown(opts.map(([id, label]) => ({ value: id, label })), cur, (v) => {
+      state.genreSel[page] = v;
+      renderPage();
+    }, 'Gênero');
+    app.appendChild(h('div', { class: 'sm-rows flat sm-genrepage' },
+      h('div', { class: 'sm-genre-head' }, h('h1', { class: 'sm-page-title', text: page === 'movies' ? 'Filmes' : 'Séries' }), select),
+      grid));
+    let skip = 0;
+    const id = `${mode.provider}.${cur}`;
+    infiniteGrid(grid, () =>
+      addon(`/catalog/${type}/${encodeURIComponent(id)}${skip ? `/skip=${skip}` : ''}.json`)
+        .then((d) => { const metas = d.metas || []; skip += metas.length; return { metas, more: metas.length > 0 }; }),
+    { stop: () => state.page !== page || state.genreToken !== token });
+  }
+
+  // Coleções da busca vazia: blocos de marca e capas de gênero com a arte de um título de cada.
+  function exploreSection(mode) {
+    const tiles = mode.explore.map(([type, id, label]) => {
+      const bg = h('div', { class: 'sm-xpl-bg' });
+      const tile = h('button', { type: 'button', class: 'sm-xpl', 'aria-label': label,
+        onclick: () => openExplore({ type, id: `${mode.provider}.${id}` }, label) },
+        bg, h('div', { class: 'sm-shine' }), h('span', { class: 'sm-xpl-name', text: label }));
+      catalog(type, `${mode.provider}.${id}`).then((ms) => {
+        const m = ms.find((x) => x.background);
+        if (m) { bg.style.backgroundImage = cssUrl(tmdbSize(m.background, 'w780')); tile.classList.add('ready'); }
+      }).catch(() => {});
+      return tile;
+    });
+    return h('section', { class: 'sm-xpl-wrap' },
+      mode.brands?.length ? brandsRow(mode) : null,
+      h('h2', { class: 'sm-sp-title', text: 'Explorar' }),
+      h('div', { class: 'sm-xpl-grid' }, tiles));
   }
 
   // Página "Originais" (Disney+): cabeçalho, carrossel com séries e filmes originais e as fileiras de cada um.
@@ -1925,11 +2031,14 @@
   // Trailer em tela cheia (botão TRAILER da página de detalhes da Disney+).
   let trailerEl = null;
   function closeTrailer() {
-    trailerEl?.remove();
+    if (!trailerEl) return;
+    trailerEl.remove();
     trailerEl = null;
+    modalEl?.__bgTrailer?.play();
   }
   function openTrailer(key, title) {
     closeTrailer();
+    modalEl?.__bgTrailer?.pause();
     const k = encodeURIComponent(key);
     trailerEl = h('div', { id: 'sm-trailer', role: 'dialog', 'aria-label': `Trailer: ${title}` },
       h('iframe', { src: `https://www.youtube-nocookie.com/embed/${k}?autoplay=1&controls=1&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3`,
@@ -3018,6 +3127,34 @@
     if (isDisney() && d?.trailer) {
       dialog.querySelector('.sm-dlg-info .sm-btn-white')?.after(
         h('button', { type: 'button', class: 'sm-btn sm-btn-gray sm-btn-trailer', onclick: () => openTrailer(d.trailer, info.name) }, 'Trailer'));
+      // Depois de alguns segundos a arte de fundo vira o trailer (sem som, em loop), como no app.
+      const heroEl = dialog.querySelector('.sm-dlg-hero');
+      const k = encodeURIComponent(d.trailer);
+      const video = h('div', { class: 'sm-dlg-video' });
+      const mute = h('button', { type: 'button', class: 'sm-round sm-dlg-mute', 'aria-label': 'Som do trailer', hidden: true });
+      const cmd = (func) => video.firstChild?.contentWindow?.postMessage(JSON.stringify({ event: 'command', func, args: [] }), '*');
+      const setMute = () => mute.replaceChildren(icon(state.muted ? 'mute' : 'sound'));
+      setMute();
+      mute.addEventListener('click', () => { state.muted = !state.muted; store.set('muted', state.muted); cmd(state.muted ? 'mute' : 'unMute'); setMute(); });
+      heroEl?.prepend(video);
+      heroEl?.appendChild(mute);
+      el.__bgTrailer = { pause: () => cmd('pauseVideo'), play: () => cmd('playVideo') };
+      setTimeout(() => {
+        if (modalEl !== el) return;
+        const iframe = h('iframe', { tabindex: '-1', title: 'Trailer', allow: 'autoplay; encrypted-media',
+          src: `https://www.youtube-nocookie.com/embed/${k}?autoplay=1&mute=1&controls=0&loop=1&playlist=${k}&modestbranding=1&rel=0&iv_load_policy=3&playsinline=1&disablekb=1&enablejsapi=1&origin=${encodeURIComponent(location.origin)}` });
+        iframe.addEventListener('load', () => {
+          iframe.contentWindow?.postMessage(JSON.stringify({ event: 'listening', id: 1 }), '*');
+          // O YouTube mostra os controles nos primeiros segundos; o vídeo só aparece depois disso.
+          setTimeout(() => {
+            if (modalEl !== el) return;
+            video.classList.add('on');
+            mute.hidden = false;
+            if (!state.muted) cmd('unMute');
+          }, 3500);
+        });
+        video.appendChild(iframe);
+      }, 2500);
     }
     const side = h('div', { class: 'sm-dlg-side' },
       info.cast?.length ? h('div', null, h('span', { text: 'Elenco: ' }), info.cast.join(', ')) : null,
@@ -3289,7 +3426,10 @@
       // Sem texto: recomendações a partir do que você assiste, carregando mais ao descer.
       wrap.__title.textContent = '';
       const feed = h('div', { class: 'sm-feed' });
-      wrap.__results.replaceChildren(feed);
+      if (mode.explore && !isKids()) {
+        // Disney+: primeiro as coleções para explorar (marcas e gêneros), depois as recomendações.
+        wrap.__results.replaceChildren(exploreSection(mode), feed); // o feed já traz o título "Recomendados para você"
+      } else wrap.__results.replaceChildren(feed);
       loadForYou(wrap, feed, seq, mode);
       return;
     }
