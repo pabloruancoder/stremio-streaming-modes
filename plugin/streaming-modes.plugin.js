@@ -1319,6 +1319,9 @@
   html[data-sm-mode="disney"] .sm-dlg-body[data-tab="det"] > .sm-dlg-section[data-tab="det"] { display:grid; }
   html[data-sm-mode="disney"] .sm-dlg-section[data-tab] > h3, html[data-sm-mode="disney"] .sm-dlg-section[data-tab] .sm-dlg-section-head h3 { display:none; }
   html[data-sm-mode="disney"] .sm-dlg-section-head { justify-content:flex-start; }
+  /* Lista de temporadas: o botão fica à esquerda, então a lista abre para a direita (ancorada pela esquerda) */
+  html[data-sm-mode="disney"] .sm-dlg-section-head .sm-dd-panel { left:0; right:auto; background:rgba(35,38,51,.98); }
+  html[data-sm-mode="disney"] .sm-dd-btn { border-radius:6px; background:rgba(249,249,249,.08); border-color:rgba(249,249,249,.25); }
   html[data-sm-mode="disney"] .sm-dlg-body > .sm-det { grid-template-columns:1.4fr 1fr; gap:3rem; }
   @media (max-width:800px) { html[data-sm-mode="disney"] .sm-dlg-body > .sm-det { grid-template-columns:1fr; gap:1.5rem; } }
   .sm-det-title { margin:0 0 .8rem; font-size:1.6rem; font-weight:700; }

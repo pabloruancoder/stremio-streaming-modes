@@ -18,6 +18,9 @@ export const PROVIDERS = {
     tmdbNetworkId: 2739, // rede "Disney+" = séries originais
     hasOfficialTop10: false, // a Disney+ não publica ranking
     freshDays: { movie: 120, series: 90 }, // lança bem menos que a Netflix: janela maior em "Lançamentos"
+    // "Em breve": séries das redes que estão na Disney+ no Brasil (Disney+, Hulu, FX, FXX, National Geographic),
+    // estreias digitais e próximos filmes dos estúdios nos cinemas, nos próximos 6 meses.
+    upcoming: { days: 180, networks: '2739|453|88|1035|43', movieCompanies: '2|3|420|1|127928|43|7521|6125' },
     // Marcas da tela inicial (filtros do TMDB dentro do catálogo da Disney+ Brasil). Fora dos EUA, Star virou Hulu (out/2025).
     brands: [
       { id: 'disney', name: 'Disney', movie: { with_companies: '2|6125' }, series: { with_companies: '2|6125|3475|670' } },
