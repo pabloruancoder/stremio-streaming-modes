@@ -27,6 +27,7 @@
       wordmark: 'STREMIO',
       provider: 'netflix',
       prefix: 'Netflix • ',
+      top10: true, // ranking oficial (só a Netflix publica)
       heroCatalogs: [
         { type: 'series', id: 'netflix.top10-series', label: 'em séries esta semana' },
         { type: 'movie', id: 'netflix.top10-movies', label: 'em filmes esta semana' },
@@ -1118,6 +1119,13 @@
   @keyframes sm-aurora { from { transform:translate3d(-3%, -2%, 0) rotate(0deg); } to { transform:translate3d(3%, 2%, 0) rotate(6deg); } }
   html[data-sm-mode="disney"] #sm-app > :not(.sm-rail) { position:relative; z-index:1; }
 
+  /* O Stremio aplica overflow:hidden em todo elemento (*). Aqui o conteúdo precisa vazar da caixa:
+     nomes e degradê do menu, brilho do banner, blocos e capas que crescem, abas e páginas de detalhe. */
+  .sm-rail, .sm-rail-items, .sm-rail-item, .sm-rail-label, .sm-rail-bottom, .sm-rail-logo, .sm-rail .sm-popwrap,
+  .sm-carousel, .sm-car-stage, .sm-brands, .sm-tabs, .sm-tab, .sm-dlg-sub, .sm-dlg-bits, .sm-det, .sm-det-side,
+  html[data-sm-mode="disney"] .sm-row, html[data-sm-mode="disney"] .sm-slider, html[data-sm-mode="disney"] .sm-row-head,
+  html[data-sm-mode="disney"] .sm-rows, html[data-sm-mode="disney"] .sm-dlg-info, html[data-sm-mode="disney"] .sm-actions { overflow:visible !important; }
+
   /* Menu lateral: ícones; ao passar o mouse aparecem os nomes sobre um degradê escuro */
   .sm-rail { position:fixed; left:0; top:0; bottom:0; z-index:40; width:var(--rail); min-width:76px; display:flex; flex-direction:column; align-items:stretch;
     padding:1.3rem 0 1.2rem; box-sizing:border-box; }
@@ -1153,7 +1161,9 @@
   /* Carrossel de destaque */
   .sm-carousel { --car-gap:1.3vw; position:relative; padding:1.6rem var(--pad) 0; }
   .sm-car-glow { position:absolute; left:2%; right:2%; top:-6rem; height:calc(100% + 8rem); z-index:0; pointer-events:none;
-    background:center/cover no-repeat; filter:blur(70px) saturate(1.7); opacity:0; transform:scale(1.05); transition:opacity 1.4s ease; }
+    background:center/cover no-repeat; filter:blur(70px) saturate(1.7); opacity:0; transform:scale(1.05); transition:opacity 1.4s ease;
+    -webkit-mask-image:radial-gradient(ellipse 50% 50% at 50% 50%, #000 55%, transparent 100%); mask-image:radial-gradient(ellipse 50% 50% at 50% 50%, #000 55%, transparent 100%); }
+  .sm-herowrap { overflow:visible !important; }
   .sm-car-glow.show { opacity:.5; }
   /* Recorte dos slides: mostra as vizinhas só até a borda do conteúdo (não por baixo do menu) e deixa espaço para a sombra */
   .sm-car-view { position:relative; z-index:1; overflow:hidden; margin:-1rem calc(var(--pad) * -1) -2.6rem; padding:1rem var(--pad) 2.6rem; }
@@ -1176,7 +1186,6 @@
   .sm-car-logo { max-width:100%; max-height:55%; object-fit:contain; object-position:left center; filter:drop-shadow(0 2px 14px rgba(0,0,0,.55)); }
   .sm-car-title { font-size:clamp(1.6rem, 3vw, 3.2rem); font-weight:800; line-height:1.05; text-shadow:0 2px 14px rgba(0,0,0,.6); }
   .sm-car-meta { font-size:clamp(.8rem, .95vw, 1.05rem); font-weight:600; color:rgba(249,249,249,.88); text-shadow:0 1px 6px rgba(0,0,0,.6); }
-  .sm-car-slide .sm-car-info > * { opacity:0; }
   .sm-car-slide.on .sm-car-info > :first-child { animation:sm-rise-in .9s .25s cubic-bezier(.2,.8,.2,1) both; }
   .sm-car-slide.on .sm-car-info > :nth-child(2) { animation:sm-rise-in .9s .45s cubic-bezier(.2,.8,.2,1) both; }
   /* Reflexo de luz que atravessa o banner ao entrar e ao passar o mouse */
@@ -1193,12 +1202,12 @@
   .sm-car-arrow:hover .sm-ico { transform:scale(1.15); }
   .sm-carousel:hover .sm-car-arrow { opacity:1; }
   /* Pílula de progresso: o ponto atual vira uma barrinha que enche até a próxima troca */
-  .sm-car-dots { position:absolute; right:calc(var(--pad) + 1.5rem); bottom:1.1rem; z-index:3; display:flex; align-items:center; gap:.45rem; }
-  .sm-car-dot { position:relative; width:.5rem; height:.5rem; padding:0; border:0; border-radius:999px; background:rgba(249,249,249,.4); cursor:pointer;
+  .sm-car-dots { position:absolute; right:calc(var(--pad) + 1.5rem); bottom:calc(2.6rem + 1.2rem); z-index:3; display:flex; align-items:center; gap:.45rem; }
+  .sm-car-dot { position:relative; flex:none; width:.55rem; height:.55rem; box-shadow:0 0 0 1px rgba(0,0,0,.25), 0 1px 6px rgba(0,0,0,.6); padding:0; border:0; border-radius:999px; background:rgba(249,249,249,.6); cursor:pointer;
     overflow:hidden; transition:width .45s cubic-bezier(.2,.8,.2,1), background .3s; }
   .sm-car-dot:hover { background:rgba(249,249,249,.7); }
   .sm-car-dot i { position:absolute; left:0; top:0; bottom:0; width:0; background:#f9f9f9; border-radius:inherit; }
-  .sm-car-dot.on { width:2.2rem; background:rgba(249,249,249,.35); }
+  .sm-car-dot.on { width:2.2rem; background:rgba(249,249,249,.45); }
   .sm-car-dot.on i { animation:sm-dotfill 8s linear forwards; }
   .sm-carousel:hover .sm-car-dot.on i, .sm-carousel.paused .sm-car-dot.on i, .sm-carousel.offscreen .sm-car-dot.on i { animation-play-state:paused; }
   @keyframes sm-dotfill { from { width:0; } to { width:100%; } }
@@ -1207,7 +1216,7 @@
   @keyframes sm-sheen { 0% { transform:translateX(0) skewX(-12deg); opacity:0; } 15% { opacity:1; } 100% { transform:translateX(420%) skewX(-12deg); opacity:0; } }
 
   /* Blocos de marca */
-  .sm-brands { display:grid; grid-template-columns:repeat(6, 1fr); gap:var(--gap); margin:2.6rem var(--pad) 2.6rem; }
+  .sm-brands { display:grid; grid-template-columns:repeat(6, minmax(0, 1fr)); gap:var(--gap); margin:2.6rem var(--pad) 2.6rem; }
   .sm-brand { position:relative; aspect-ratio:16/9; display:grid; place-items:center; padding:0 .6rem; border:3px solid rgba(249,249,249,.1);
     border-radius:10px; background:linear-gradient(rgb(48,50,62), rgb(30,31,42)); color:#f9f9f9; cursor:pointer; overflow:hidden;
     font-size:clamp(.9rem, 1.6vw, 1.9rem); box-shadow:rgba(0,0,0,.69) 0 26px 30px -10px, rgba(0,0,0,.73) 0 16px 10px -10px;
@@ -1226,10 +1235,11 @@
   .sm-brand-name.box { padding:.08em .22em; border:.09em solid #f9f9f9; }
   .sm-brand-name.frame { text-align:left; }
   .sm-brand-frame { flex:none; width:1.1em; height:1.6em; border:.28em solid #ffce00; box-sizing:border-box; }
-  @media (max-width: 900px) { .sm-brands { grid-template-columns:repeat(3, 1fr); } }
+  @media (max-width: 900px) { .sm-brands { grid-template-columns:repeat(3, minmax(0, 1fr)); } }
 
   /* Página da marca */
-  .sm-bpage { position:relative; height:min(46vw, 70vh); min-height:18rem; display:grid; place-items:center; overflow:hidden; }
+  .sm-bpage { position:relative; height:min(46vw, 70vh); min-height:18rem; display:grid; place-items:center; overflow:hidden;
+    -webkit-mask-image:linear-gradient(180deg, #000 62%, transparent 100%); mask-image:linear-gradient(180deg, #000 62%, transparent 100%); }
   .sm-bpage-bg { position:absolute; inset:0; background:center 25%/cover no-repeat; opacity:0; transform:scale(1.06); transition:opacity 1s, transform 6s ease-out; }
   .sm-bpage.ready .sm-bpage-bg { opacity:1; transform:scale(1); }
   .sm-bpage-shade { position:absolute; inset:0; background:radial-gradient(ellipse at center, rgba(15,17,26,.25), rgba(15,17,26,.75) 75%),
@@ -1304,19 +1314,44 @@
   .sm-tab[aria-selected="true"] { color:#f9f9f9; }
   .sm-tab[aria-selected="true"]::after { content:""; position:absolute; left:0; right:0; bottom:-2px; height:2px; background:#f9f9f9; }
   html[data-sm-mode="disney"] .sm-dlg-body[data-tab] > .sm-dlg-section[data-tab] { display:none; margin-top:0; }
-  html[data-sm-mode="disney"] .sm-dlg-body[data-tab="eps"] > [data-tab="eps"],
-  html[data-sm-mode="disney"] .sm-dlg-body[data-tab="sim"] > [data-tab="sim"],
-  html[data-sm-mode="disney"] .sm-dlg-body[data-tab="det"] > [data-tab="det"] { display:block; }
+  html[data-sm-mode="disney"] .sm-dlg-body[data-tab="eps"] > .sm-dlg-section[data-tab="eps"],
+  html[data-sm-mode="disney"] .sm-dlg-body[data-tab="sim"] > .sm-dlg-section[data-tab="sim"] { display:block; }
+  html[data-sm-mode="disney"] .sm-dlg-body[data-tab="det"] > .sm-dlg-section[data-tab="det"] { display:grid; }
   html[data-sm-mode="disney"] .sm-dlg-section[data-tab] > h3, html[data-sm-mode="disney"] .sm-dlg-section[data-tab] .sm-dlg-section-head h3 { display:none; }
   html[data-sm-mode="disney"] .sm-dlg-section-head { justify-content:flex-start; }
-  html[data-sm-mode="disney"] .sm-dlg-body[data-tab="det"] > .sm-det { display:grid; grid-template-columns:1.4fr 1fr; gap:3rem; }
+  html[data-sm-mode="disney"] .sm-dlg-body > .sm-det { grid-template-columns:1.4fr 1fr; gap:3rem; }
+  @media (max-width:800px) { html[data-sm-mode="disney"] .sm-dlg-body > .sm-det { grid-template-columns:1fr; gap:1.5rem; } }
   .sm-det-title { margin:0 0 .8rem; font-size:1.6rem; font-weight:700; }
   .sm-det-side { display:grid; gap:1rem; font-size:.95rem; color:#f9f9f9; }
   .sm-det-side span { display:block; margin-bottom:.15rem; color:rgba(249,249,249,.6); font-size:.85rem; font-weight:600; }
-  html[data-sm-mode="disney"] .sm-ep { border-radius:8px; }
-  html[data-sm-mode="disney"] .sm-ep-img, html[data-sm-mode="disney"] .sm-sim, html[data-sm-mode="disney"] .sm-sim-img { border-radius:8px; }
-  html[data-sm-mode="disney"] .sm-sim { background:transparent; }
-  html[data-sm-mode="disney"] .sm-match { color:#f9f9f9; }
+  /* Episódios em grade de miniaturas (imagem em cima; número, título, duração e sinopse embaixo) */
+  html[data-sm-mode="disney"] .sm-dlg-section[data-tab="eps"] > div:last-child { display:grid; grid-template-columns:repeat(auto-fill, minmax(17rem, 1fr));
+    gap:2.2rem 1.6rem; overflow:visible !important; }
+  html[data-sm-mode="disney"] .sm-ep { grid-template-columns:auto 1fr; grid-template-rows:auto auto; gap:.8rem .5rem; align-items:start;
+    padding:0; border:0; border-radius:0; background:none !important; cursor:pointer; overflow:visible !important; }
+  html[data-sm-mode="disney"] .sm-ep > .sm-ep-img { grid-column:1 / -1; grid-row:1; border-radius:8px;
+    box-shadow:inset 0 0 0 3px rgba(249,249,249,.1), rgba(0,0,0,.69) 0 26px 30px -10px; transition:transform .25s cubic-bezier(.25,.46,.45,.94), box-shadow .25s; }
+  html[data-sm-mode="disney"] .sm-ep:hover > .sm-ep-img { transform:scale(1.04); box-shadow:inset 0 0 0 3px rgba(249,249,249,.85), rgba(0,0,0,.8) 0 40px 58px -16px; }
+  html[data-sm-mode="disney"] .sm-ep > .sm-ep-num { grid-column:1; grid-row:2; font-size:1rem; font-weight:700; color:#f9f9f9; text-align:left; }
+  html[data-sm-mode="disney"] .sm-ep > .sm-ep-num::after { content:"."; }
+  html[data-sm-mode="disney"] .sm-ep > div:last-child { grid-column:2; grid-row:2; min-width:0; }
+  html[data-sm-mode="disney"] .sm-ep-top { margin-bottom:.4rem; font-size:1rem; }
+  html[data-sm-mode="disney"] .sm-ep-right { font-weight:600; color:rgba(249,249,249,.7); font-size:.88rem; }
+  html[data-sm-mode="disney"] .sm-ep-desc { color:rgba(249,249,249,.75); font-size:.88rem; }
+  html[data-sm-mode="disney"] .sm-ep.hl > .sm-ep-img { box-shadow:inset 0 0 0 3px rgba(249,249,249,.6), rgba(0,0,0,.69) 0 26px 30px -10px; }
+  html[data-sm-mode="disney"] .sm-ep-img .sm-ico { opacity:0; transition:opacity .2s; background:rgba(0,0,0,.45); }
+  html[data-sm-mode="disney"] .sm-ep:hover .sm-ep-img .sm-ico { opacity:1; }
+  /* Sugestões: só as miniaturas, em grade, como no app */
+  html[data-sm-mode="disney"] .sm-similar { grid-template-columns:repeat(auto-fill, minmax(15rem, 1fr)); gap:1.6rem; overflow:visible !important; }
+  html[data-sm-mode="disney"] .sm-sim { background:none; border-radius:8px; overflow:visible !important; }
+  html[data-sm-mode="disney"] .sm-sim-img { border-radius:8px; box-shadow:inset 0 0 0 3px rgba(249,249,249,.1), rgba(0,0,0,.69) 0 26px 30px -10px;
+    transition:transform .25s cubic-bezier(.25,.46,.45,.94), box-shadow .25s; }
+  html[data-sm-mode="disney"] .sm-sim:hover .sm-sim-img { transform:scale(1.05); box-shadow:inset 0 0 0 3px rgba(249,249,249,.85), rgba(0,0,0,.8) 0 40px 58px -16px; }
+  html[data-sm-mode="disney"] .sm-sim-img .sm-ico { opacity:0; transition:opacity .2s; }
+  html[data-sm-mode="disney"] .sm-sim:hover .sm-sim-img .sm-ico { opacity:1; }
+  html[data-sm-mode="disney"] .sm-sim-body { display:none; }
+  html[data-sm-mode="disney"] .sm-match, html[data-sm-mode="disney"] .sm-hd { display:none; }
+  .sm-det-side .sm-cert { display:inline-block; width:auto; }
 
   /* Perfis: avatares redondos */
   html[data-sm-mode="disney"] .sm-av, html[data-sm-mode="disney"] .sm-prof-av, html[data-sm-mode="disney"] .sm-prof-edit,
@@ -2255,10 +2290,10 @@
         glowFront.classList.remove('show');
         glowFront = back;
       }
-      hero.append(glowA, glowB, h('div', { class: 'sm-car-view' }, stage),
+      wrap.classList.add('sm-herowrap');
+      hero.append(glowA, glowB, h('div', { class: 'sm-car-view' }, stage, dots),
         h('button', { type: 'button', class: 'sm-car-arrow l', 'aria-label': 'Anterior', onclick: () => go(idx - 1) }, icon('left')),
-        h('button', { type: 'button', class: 'sm-car-arrow r', 'aria-label': 'Próximo', onclick: () => go(idx + 1) }, icon('right')),
-        dots);
+        h('button', { type: 'button', class: 'sm-car-arrow r', 'aria-label': 'Próximo', onclick: () => go(idx + 1) }, icon('right')));
       go(0);
       requestAnimationFrame(() => hero.classList.add('ready'));
     })();
@@ -3385,9 +3420,9 @@
           return out;
         })));
     add(upRow('Chegando esta semana', (d) => d >= 0 && d <= 7));
-    add(makeRow('Top 10 séries no Brasil esta semana', () => catalog('series', `${p}.top10-series`), { rank: true }));
+    if (mode.top10) add(makeRow('Top 10 séries no Brasil esta semana', () => catalog('series', `${p}.top10-series`), { rank: true }));
     add(upRow('Chegando na próxima semana', (d) => d > 7 && d <= 14));
-    add(makeRow('Top 10 filmes no Brasil esta semana', () => catalog('movie', `${p}.top10-movies`), { rank: true }));
+    if (mode.top10) add(makeRow('Top 10 filmes no Brasil esta semana', () => catalog('movie', `${p}.top10-movies`), { rank: true }));
     add(upRow('Vale a espera', (d) => d > 14));
     add(makeRow('Bombando agora', () =>
       Promise.all([catalog('series', `${p}.trending-series`), catalog('movie', `${p}.trending-movies`)].map((x) => x.catch(() => [])))
