@@ -189,6 +189,28 @@ export function fullDetails(type, imdb) {
   });
 }
 
+// Último episódio já lançado de uma série (para o aviso "Novo episódio").
+export function latestEpisode(imdb) {
+  return cached(`latest:${imdb}`, 6 * HOUR, async () => {
+    const id = await tmdbIdFromImdb('series', imdb);
+    if (!id) return null;
+    const d = await tmdb(`/tv/${id}`);
+    const e = d.last_episode_to_air;
+    if (!e?.air_date) return null;
+    return {
+      id: imdb,
+      name: d.name,
+      season: e.season_number,
+      episode: e.episode_number,
+      title: e.name || '',
+      date: e.air_date,
+      still: e.still_path ? `${IMG}/w300${e.still_path}` : null,
+      background: d.backdrop_path ? `${IMG}/w1280${d.backdrop_path}` : undefined,
+      poster: d.poster_path ? `${IMG}/w500${d.poster_path}` : undefined,
+    };
+  });
+}
+
 export function seasonEpisodes(imdb, number) {
   return cached(`season:${imdb}:${number}`, DAY, async () => {
     const id = await tmdbIdFromImdb('series', imdb);

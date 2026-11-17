@@ -334,6 +334,7 @@
     set(key, value) {
       try {
         localStorage.setItem(`streamingModes.${key}`, JSON.stringify(value));
+        if (!BACKUP_SKIP.test(key) && key !== 'seenNotifs') scheduleBackup();
       } catch {
         /* ignora */
       }
@@ -555,6 +556,87 @@
       return n ? String(n).trim().split(/\s+/)[0] : '';
     } catch { return ''; }
   }
+  // ---------- Backup automático (perfis, avaliações, listas, históricos, lembretes) ----------
+  // Guardado no addon do PC (addon/data/plugin-backup.json). Se o armazenamento do Stremio Enhanced for limpo,
+  // os dados voltam sozinhos na próxima abertura. Também dá para exportar/importar um arquivo (menu do perfil).
+  const BACKUP_SKIP = /^(mode|addonUrl|remoteAddonUrl|muted|showInDefault|allContent)$/;
+  function backupData() {
+    const items = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (!k?.startsWith('streamingModes.')) continue;
+      const name = k.slice('streamingModes.'.length);
+      if (BACKUP_SKIP.test(name)) continue;
+      items[name] = localStorage.getItem(k);
+    }
+    return { v: 1, items };
+  }
+  function restoreData(data) {
+    if (!data?.items) return false;
+    for (const [name, value] of Object.entries(data.items)) {
+      try { localStorage.setItem(`streamingModes.${name}`, value); } catch { /* cheio */ }
+    }
+    return true;
+  }
+  let backupTimer = null;
+  let lastBackup = '';
+  // Enquanto confere se precisa restaurar, não salva nada (senão os perfis padrão sobrescreveriam o backup bom).
+  let backupReady = false;
+  function scheduleBackup() {
+    if (!backupReady) return;
+    clearTimeout(backupTimer);
+    backupTimer = setTimeout(() => {
+      const data = backupData();
+      const json = JSON.stringify(data);
+      if (json === lastBackup || !Object.keys(data.items).length) return;
+      fetch(`${state.addonUrl}/sm/backup.json`, { method: 'POST', body: json, headers: { 'content-type': 'application/json' } })
+        .then((r) => { if (r.ok) lastBackup = json; }).catch(() => {});
+    }, 4000);
+  }
+  // Primeira abertura (ou armazenamento limpo): sem perfis salvos e com backup no addon -> restaura e recarrega.
+  function restoreIfEmpty() {
+    // Verifica antes de qualquer coisa criar os perfis padrão.
+    if (localStorage.getItem('streamingModes.profiles')) {
+      backupReady = true;
+      scheduleBackup(); // backup inicial (e a cada abertura, se algo mudou)
+      return;
+    }
+    fetch(`${state.addonUrl}/sm/backup.json`, { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((data) => {
+      // No máximo uma restauração por sessão (evita recarregar sem parar se algo der errado).
+      let tried = false;
+      try { tried = sessionStorage.getItem('sm.restored') === '1'; sessionStorage.setItem('sm.restored', '1'); } catch { tried = true; }
+      if (!tried && data?.items?.profiles && restoreData(data)) {
+        console.info('[Streaming Modes] perfis e avaliações restaurados do backup do addon.');
+        location.reload();
+        return;
+      }
+      backupReady = true;
+    }).catch(() => { backupReady = true; });
+  }
+  function exportBackup() {
+    const blob = new Blob([JSON.stringify({ ...backupData(), exportedAt: new Date().toISOString() }, null, 1)], { type: 'application/json' });
+    const a = h('a', { href: URL.createObjectURL(blob), download: `streaming-modes-backup-${new Date().toISOString().slice(0, 10)}.json` });
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }
+  function importBackup() {
+    const input = h('input', { type: 'file', accept: 'application/json,.json', style: { display: 'none' } });
+    input.addEventListener('change', async () => {
+      try {
+        const data = JSON.parse(await input.files[0].text());
+        if (!restoreData(data)) throw new Error('arquivo inválido');
+        scheduleBackup();
+        location.reload();
+      } catch (err) {
+        alert(`Não consegui importar: ${err.message}`);
+      }
+    });
+    document.body.appendChild(input);
+    input.click();
+    setTimeout(() => input.remove(), 60000);
+  }
+
   function profiles() {
     let list = store.get('profiles');
     if (!Array.isArray(list) || !list.length) {
@@ -2360,6 +2442,11 @@
   .sm-pip-toast { position:fixed; z-index:100005; left:50%; bottom:7rem; transform:translateX(-50%); padding:.7rem 1.1rem; border-radius:8px;
     background:rgba(20,20,24,.95); color:#fff; font:600 .9rem/1.3 Inter, "Segoe UI", sans-serif; box-shadow:0 10px 30px rgba(0,0,0,.6); }
 
+  /* Notificação de novo episódio */
+  .sm-notif-item.ep .sm-notif-text b { color:#fff; }
+  .sm-notif-item.ep .sm-notif-text b::before { content:"NOVO EPISÓDIO"; display:block; margin-bottom:.15rem; font-size:.62rem; letter-spacing:.08em;
+    color:var(--sm-accent, #e50914); font-weight:800; }
+
   /* Filmes / Séries com seletor de gênero */
   .sm-genre-head { display:flex; align-items:center; gap:1.4rem; margin:0 var(--pad) 1.6rem; overflow:visible !important; }
   .sm-genre-head .sm-page-title { margin:0; }
@@ -3390,15 +3477,48 @@
   }
 
   // Notificações: o que está no Top 10 e o que acabou de chegar. Marca como visto ao abrir.
+  // Séries que a pessoa acompanha: na biblioteca/Minha lista ou assistidas nos últimos 4 meses.
+  function followedSeries() {
+    const since = new Date(Date.now() - 120 * 86400_000).toISOString();
+    const out = new Map();
+    for (const it of libraryItems()) {
+      if (it.type !== 'series' || !/^tt\d+$/.test(it._id)) continue;
+      const inList = !it.removed && !it.temp;
+      const recent = (it.state?.lastWatched || '') > since;
+      if (!inList && !recent) continue;
+      const m = String(it.state?.video_id || '').match(/:(\d+):(\d+)$/);
+      out.set(it._id, { id: it._id, name: it.name, season: m ? Number(m[1]) : 0, episode: m ? Number(m[2]) : 0, watched: Boolean(it.state?.lastWatched) });
+    }
+    if (!activeProfile().main) for (const x of myList()) if (x.type === 'series' && !out.has(x._id)) out.set(x._id, { id: x._id, name: x.name, season: 0, episode: 0 });
+    return [...out.values()].slice(0, 60);
+  }
+  // Episódios lançados nas últimas 3 semanas que vêm depois do último que a pessoa assistiu.
+  function newEpisodeNotifs() {
+    const followed = followedSeries();
+    if (!followed.length) return Promise.resolve([]);
+    const byId = new Map(followed.map((f) => [f.id, f]));
+    return getJSON(`${state.addonUrl}/sm/new-episodes.json?ids=${followed.map((f) => f.id).join(',')}`)
+      .then((d) => (d.episodes || []).filter((e) => {
+        const f = byId.get(e.id);
+        return f && (e.season > f.season || (e.season === f.season && e.episode > f.episode));
+      }).sort((a, b) => b.date.localeCompare(a.date)).map((e) => ({
+        key: `ep:${e.id}:${e.season}:${e.episode}`,
+        item: { id: e.id, type: 'series', name: e.name, background: e.still || e.background, poster: e.poster, videoId: `${e.id}:${e.season}:${e.episode}` },
+        text: `Novo episódio: ${e.name}`,
+        sub: `T${e.season}:E${e.episode}${e.title ? ` · ${e.title}` : ''}`,
+      }))).catch(() => []);
+  }
+
   function notifItems(mode) {
     const p = mode.provider;
     const ps = svc(mode);
     return Promise.all([
+      newEpisodeNotifs(),
       catalog('series', `${p}.top10-series`).catch(() => []),
       catalog('movie', `${p}.top10-movies`).catch(() => []),
       catalog('movie', `${ps}.recent-movies`).catch(() => []),
       catalog('series', `${ps}.recent-series`).catch(() => []),
-    ]).then(([ts, tm, nm, ns]) => {
+    ]).then(([eps, ts, tm, nm, ns]) => {
       const out = [];
       const seen = new Set();
       const add = (kind, it, text, sub) => {
@@ -3406,6 +3526,8 @@
         seen.add(it.id);
         out.push({ key: `${kind}:${it.id}`, item: it, text, sub });
       };
+      // Novos episódios primeiro (com a marca "NOVO EPISÓDIO").
+      for (const e of eps.slice(0, 6)) { if (!seen.has(e.item.id)) { seen.add(e.item.id); out.push({ ...e, ep: true }); } }
       const today = new Date().toISOString().slice(0, 10);
       for (const r of reminders()) if (r.date <= today) add('remind', r, 'Chegou! Você pediu para lembrar', r.name);
       ts.slice(0, 3).forEach((it, i) => add('top', it, `Nº ${i + 1} em séries esta semana`, it.name));
@@ -3438,7 +3560,7 @@
         const seen = seenKeys();
         if (!items.length) return list.replaceChildren(h('div', { class: 'sm-pop-empty', text: 'Nada novo por aqui.' }));
         list.replaceChildren(...items.map((x) =>
-          h('button', { type: 'button', class: seen.has(x.key) ? 'sm-notif-item' : 'sm-notif-item unread',
+          h('button', { type: 'button', class: `${seen.has(x.key) ? 'sm-notif-item' : 'sm-notif-item unread'}${x.ep ? ' ep' : ''}`,
             onclick: () => { closePop(); if (/^tt\d+$/.test(x.item.id)) openModal(x.item); else goSearch(x.item.name); } },
             h('div', { class: 'sm-notif-img', style: { backgroundImage: cssUrl(tmdbSize(x.item.background, 'w300') || cardImage(x.item)) } }),
             h('div', { class: 'sm-notif-text' },
@@ -3519,6 +3641,8 @@
         me.kids ? null : item('library', 'Biblioteca do Stremio', go('#/library')),
         me.kids ? null : item('puzzle', 'Addons', go('#/addons')),
         me.kids ? null : item('gear', 'Configurações', go('#/settings')),
+        me.kids ? null : item('down', 'Exportar perfis e avaliações', () => { closePop(); exportBackup(); }),
+        me.kids ? null : item('up', 'Importar perfis e avaliações', () => { closePop(); importBackup(); }),
         h('hr'),
         item('swap', 'Voltar ao Stremio padrão', () => { closePop(); switchMode('stremio'); })));
     });
@@ -5508,6 +5632,7 @@
   }
 
   function start() {
+    restoreIfEmpty();
     injectStyles();
     Object.keys(MODES).forEach(checkLocalIntro);
     applyRootAttrs();

@@ -4,7 +4,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { config, hasTmdb } from './src/config.js';
 import { manifestCatalogs, catalogHandler } from './src/catalogs.js';
-import { fullDetails, seasonEpisodes, similarOnProvider } from './src/tmdb.js';
+import { fullDetails, seasonEpisodes, similarOnProvider, latestEpisode } from './src/tmdb.js';
+import { mapLimit } from './src/cache.js';
 import { PROVIDERS } from './src/providers.js';
 import { searchOnProvider, searchMore } from './src/search.js';
 import { upcoming } from './src/news.js';
@@ -88,6 +89,29 @@ const server = http.createServer(async (req, res) => {
       const intro = introFile(x[1]);
       if (!intro) return send(res, 404, { error: 'sem vinheta local' });
       return sendVideo(req, res, intro);
+    }
+    // Novos episódios das séries que a pessoa acompanha: ?ids=tt1,tt2 (até 60).
+    if (pathname === '/sm/new-episodes.json') {
+      if (!hasTmdb()) return send(res, 200, { episodes: [] });
+      const ids = [...new Set((searchParams.get('ids') || '').split(',').filter((v) => /^tt\d+$/.test(v)))].slice(0, 60);
+      const since = new Date(Date.now() - 21 * 86400_000).toISOString().slice(0, 10);
+      const today = new Date().toISOString().slice(0, 10);
+      const list = await mapLimit(ids, 6, (id) => latestEpisode(id).catch(() => null));
+      return send(res, 200, { episodes: list.filter((e) => e && e.date >= since && e.date <= today) }, 3600);
+    }
+    // Backup dos perfis, avaliações, listas e históricos do plugin (addon/data/plugin-backup.json).
+    if (pathname === '/sm/backup.json') {
+      const file = path.join(config.dataDir, 'plugin-backup.json');
+      if (req.method === 'POST') {
+        let body = '';
+        for await (const chunk of req) { body += chunk; if (body.length > 5_000_000) break; }
+        const data = JSON.parse(body);
+        if (!data || typeof data !== 'object' || !data.items) return send(res, 400, { error: 'backup inválido' });
+        fs.mkdirSync(config.dataDir, { recursive: true });
+        fs.writeFileSync(file, JSON.stringify({ ...data, savedAt: new Date().toISOString() }));
+        return send(res, 200, { ok: true });
+      }
+      try { return send(res, 200, JSON.parse(fs.readFileSync(file, 'utf8'))); } catch { return send(res, 404, { error: 'sem backup' }); }
     }
     if ((x = pathname.match(/^\/sm\/details\/(movie|series)\/(tt\d+)\.json$/))) {
       if (!hasTmdb()) return send(res, 200, { details: null });
