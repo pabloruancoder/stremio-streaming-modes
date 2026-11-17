@@ -1,0 +1,9 @@
+Vinhetas locais (opcional)
+
+Coloque aqui um arquivo de vídeo com o nome do streaming para usar como vinheta ao trocar de modo:
+
+  netflix.mp4   (ou netflix.webm)
+
+Com o arquivo aqui, o plugin toca o vídeo direto, em tela cheia e sem os controles do YouTube.
+Sem o arquivo, ele usa a vinheta oficial pelo player do YouTube.
+Use apenas arquivos que você tenha o direito de usar.

@@ -1,0 +1,14 @@
+{
+  "name": "stremio-streaming-modes-addon",
+  "version": "0.1.0",
+  "description": "Addon do Stremio com catálogos por streaming (Netflix primeiro): Top 10 oficial, em alta, lançamentos, gêneros.",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=22.9"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.js",
+    "dev": "node --watch --env-file-if-exists=.env server.js"
+  }
+}

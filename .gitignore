@@ -1,0 +1,7 @@
+node_modules/
+addon/.env
+addon/data/
+addon/intro/*
+!addon/intro/LEIA-ME.txt
+dist/
+.claude/

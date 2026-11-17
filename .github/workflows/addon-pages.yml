@@ -1,0 +1,57 @@
+# Publica o addon como arquivos estáticos no GitHub Pages e atualiza a cada 6 horas.
+# Precisa do segredo TMDB_READ_TOKEN (ou TMDB_API_KEY) em Settings > Secrets and variables > Actions.
+name: Addon no GitHub Pages
+
+on:
+  schedule:
+    - cron: '17 */6 * * *' # a cada 6 horas
+  workflow_dispatch: {} # botão "Run workflow"
+  push:
+    branches: [main]
+    paths: ['addon/**', '.github/workflows/addon-pages.yml']
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # Guarda o cache de IDs (TMDB -> IMDb) entre execuções para gerar mais rápido.
+      - uses: actions/cache@v4
+        with:
+          path: addon/data
+          key: addon-data-${{ github.run_id }}
+          restore-keys: addon-data-
+      - name: Gerar fileiras
+        working-directory: addon
+        env:
+          TMDB_READ_TOKEN: ${{ secrets.TMDB_READ_TOKEN }}
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+          REGION: BR
+          LANGUAGE: pt-BR
+        run: node scripts/build-static.mjs ../dist
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

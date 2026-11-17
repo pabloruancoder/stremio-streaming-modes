@@ -1,0 +1,22 @@
+# Hospedagem do addon no Render (plano grátis). Uso: no painel do Render, "New > Blueprint" e aponte para este repositório.
+# As chaves do TMDB são pedidas na criação (sync: false) e não ficam no repositório.
+services:
+  - type: web
+    name: streaming-modes
+    runtime: node
+    plan: free
+    rootDir: addon
+    buildCommand: echo "sem dependências"
+    startCommand: node server.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: REGION
+        value: BR
+      - key: LANGUAGE
+        value: pt-BR
+      - key: TMDB_API_KEY
+        sync: false
+      - key: TMDB_READ_TOKEN
+        sync: false
