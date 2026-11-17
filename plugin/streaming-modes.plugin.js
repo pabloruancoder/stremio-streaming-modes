@@ -135,20 +135,21 @@
       { type: 'movie', id: 'apple.originals-movies' },
     ],
     pages: {
-      home: ['@continue', 'originals', 'recent-series', 'originals-movies', '@because0', 'trending-series', 'new-series', '@soon',
+      home: ['@continue', 'originals', 'recent-series', 'originals-movies', '@because0', 'trending-series', 'new-series', '@genres', '@soon',
         'acclaimed-series', 'drama-series', 'comedy-series', 'scifi-series', 'mystery-series', '@mylist', 'trending-movies', 'new-movies',
         'comedy-movies', 'crime-series', 'docu-series', 'docs', 'kids-series', 'all-series', 'all-movies'],
-      series: ['@continue', 'recent-series', 'originals', '@because0', 'new-series', 'trending-series', 'acclaimed-series', 'drama-series',
+      series: ['@continue', 'originals', 'new-series', '@because0', 'trending-series', '@genres', 'acclaimed-series', 'drama-series',
         'comedy-series', 'scifi-series', 'mystery-series', 'crime-series', 'action-series', 'docu-series', 'kids-series', 'all-series'],
-      movies: ['@continue', 'recent-movies', 'originals-movies', '@because1', 'new-movies', 'trending-movies', 'acclaimed-movies',
-        'comedy-movies', 'animation-movies', 'docs', 'action-movies', 'scifi-movies', 'romance-movies', 'kids-movies', 'all-movies'],
+      movies: ['@continue', 'originals-movies', 'new-movies', '@because1', 'trending-movies', '@genres', 'acclaimed-movies',
+        'comedy-movies', 'animation-movies', 'docs', 'action-movies', 'scifi-movies', 'romance-movies', 'war-movies', 'kids-movies', 'all-movies'],
     },
     kidsPages: ['@continue', 'kids-series', 'kids-anim-movies', '@because0', 'kids-movies', 'kids-family-series', '@mylist'],
     kidsHero: [
       { type: 'series', id: 'apple.kids-series' },
       { type: 'movie', id: 'apple.kids-anim-movies' },
     ],
-    genres: {
+    // Sem "genres": na Apple TV não há grade com seletor; Filmes/Séries são fileiras e os gêneros viram blocos (@genres).
+    genresUnused: {
       movie: [['all-movies', 'Todos os filmes'], ['originals-movies', 'Apple Original Films'], ['comedy-movies', 'Comédia'],
         ['animation-movies', 'Animação'], ['docs', 'Documentários'], ['kids-movies', 'Família'], ['action-movies', 'Ação'],
         ['scifi-movies', 'Ficção científica'], ['romance-movies', 'Romance'], ['war-movies', 'Guerra e história'],
@@ -159,8 +160,9 @@
     },
     explore: [['series', 'drama-series', 'Drama'], ['series', 'comedy-series', 'Comédia'], ['series', 'scifi-series', 'Ficção científica'],
       ['series', 'mystery-series', 'Mistério'], ['series', 'crime-series', 'Policiais'], ['series', 'docu-series', 'Documentais'],
-      ['movie', 'originals-movies', 'Apple Original Films'], ['movie', 'animation-movies', 'Animação'], ['series', 'kids-series', 'Infantis'],
-      ['movie', 'docs', 'Documentários']],
+      ['series', 'kids-series', 'Infantis'], ['movie', 'originals-movies', 'Apple Original Films'], ['movie', 'comedy-movies', 'Comédias'],
+      ['movie', 'animation-movies', 'Animação'], ['movie', 'docs', 'Documentários'], ['movie', 'scifi-movies', 'Ficção científica'],
+      ['movie', 'war-movies', 'Guerra e história'], ['movie', 'kids-movies', 'Família']],
   };
   MODES.disney.originalsNav = true;
 
@@ -1329,7 +1331,8 @@
   html[data-sm-mode="apple"] .sm-rail { top:1rem; bottom:1rem; left:1rem; width:var(--rail); min-width:0; padding:1.1rem 0 1rem; border-radius:1.6rem;
     background:var(--glass); -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur);
     box-shadow:inset 0 1px 0 var(--glass-hi), inset 0 0 0 1px rgba(255,255,255,.08), 0 24px 60px rgba(0,0,0,.55);
-    transition:width .35s cubic-bezier(.2,.8,.2,1); overflow:hidden !important; }
+    transition:width .35s cubic-bezier(.2,.8,.2,1); overflow:visible !important; }
+  html[data-sm-mode="apple"] .sm-rail-item { overflow:hidden !important; }
   html[data-sm-mode="apple"] .sm-rail:hover, html[data-sm-mode="apple"] .sm-rail:focus-within { width:15.5rem; }
   html[data-sm-mode="apple"] .sm-rail::before { display:none; }
   html[data-sm-mode="apple"] .sm-rail-logo { width:var(--rail); margin:.2rem 0 1.6rem; align-items:center; }
@@ -1433,6 +1436,7 @@
     --s:1.07; z-index:3; box-shadow:0 28px 46px rgba(0,0,0,.7); outline:none; }
   html[data-sm-mode="apple"] .sm-card:not(.rank):not(.skeleton):hover::after { opacity:1; }
   html[data-sm-mode="apple"] .sm-track > .sm-card.portrait { flex-basis:var(--cwp); height:calc(var(--cwp) * 1.5); }
+  html[data-sm-mode="apple"] .sm-track > .sm-card.skeleton:not(.rank) { flex-basis:var(--cwp); height:calc(var(--cwp) * 1.5); }
   html[data-sm-mode="apple"] .sm-card.portrait > .sm-card-logo, html[data-sm-mode="apple"] .sm-card.portrait > .sm-card-name { display:none; }
   html[data-sm-mode="apple"] .sm-card.portrait::before { display:none; }
   html[data-sm-mode="apple"] .sm-card.skeleton { background:linear-gradient(110deg, #141416 30%, #232326 50%, #141416 70%); background-size:250% 100%;
@@ -1498,6 +1502,11 @@
   html[data-sm-mode="apple"] .sm-sim:hover .sm-sim-img { transform:scale(1.05); }
   html[data-sm-mode="apple"] .sm-sim-body { display:none; }
   html[data-sm-mode="apple"] .sm-dlg-cols, html[data-sm-mode="apple"] .sm-match, html[data-sm-mode="apple"] .sm-hd { display:none; }
+
+  /* Fileira "Gêneros": blocos largos com a arte e o nome do gênero */
+  .sm-track > .sm-xpl { flex:0 0 var(--cw); height:calc(var(--cw) * 9 / 16); aspect-ratio:auto; animation:none; }
+  html[data-sm-mode="apple"] .sm-track > .sm-xpl { flex-basis:calc(var(--cwp) * 1.6); height:calc(var(--cwp) * .9); }
+  html[data-sm-mode="apple"] .sm-xpl-name { font-size:1.15rem; }
 
   /* Elenco e equipe: fotos redondas numa fileira */
   .sm-cast { display:flex; gap:1.6rem; overflow-x:auto !important; overflow-y:visible !important; padding:.4rem .2rem 1rem; scrollbar-width:none; }
@@ -2341,18 +2350,20 @@
   }
 
   // Coleções da busca vazia: blocos de marca e capas de gênero com a arte de um título de cada.
+  // Bloco de gênero com a arte de um título daquele gênero (busca vazia e fileira "Gêneros").
+  function genreTile(mode, type, id, label) {
+    const bg = h('div', { class: 'sm-xpl-bg' });
+    const tile = h('button', { type: 'button', class: 'sm-xpl', 'aria-label': label,
+      onclick: () => openExplore({ type, id: `${mode.provider}.${id}` }, label) },
+      bg, h('div', { class: 'sm-shine' }), h('span', { class: 'sm-xpl-name', text: label }));
+    catalog(type, `${mode.provider}.${id}`).then((ms) => {
+      const m = ms.find((x) => x.background);
+      if (m) { bg.style.backgroundImage = cssUrl(tmdbSize(m.background, 'w780')); tile.classList.add('ready'); }
+    }).catch(() => {});
+    return tile;
+  }
   function exploreSection(mode) {
-    const tiles = mode.explore.map(([type, id, label]) => {
-      const bg = h('div', { class: 'sm-xpl-bg' });
-      const tile = h('button', { type: 'button', class: 'sm-xpl', 'aria-label': label,
-        onclick: () => openExplore({ type, id: `${mode.provider}.${id}` }, label) },
-        bg, h('div', { class: 'sm-shine' }), h('span', { class: 'sm-xpl-name', text: label }));
-      catalog(type, `${mode.provider}.${id}`).then((ms) => {
-        const m = ms.find((x) => x.background);
-        if (m) { bg.style.backgroundImage = cssUrl(tmdbSize(m.background, 'w780')); tile.classList.add('ready'); }
-      }).catch(() => {});
-      return tile;
-    });
+    const tiles = mode.explore.map(([type, id, label]) => genreTile(mode, type, id, label));
     return h('section', { class: 'sm-xpl-wrap' },
       mode.brands?.length ? brandsRow(mode) : null,
       h('h2', { class: 'sm-sp-title', text: 'Explorar' }),
@@ -3060,7 +3071,12 @@
       const typeFilter = state.page === 'series' ? 'series' : state.page === 'movies' ? 'movie' : null;
       for (const key of order) {
         let row = null;
-        if (key === '@brands') {
+        if (key === '@genres') {
+          const list = (mode.explore || []).filter(([t]) => !typeFilter || t === typeFilter);
+          if (list.length) {
+            row = makeRow('Gêneros', () => Promise.resolve(list), { render: ([t, id, label]) => genreTile(mode, t, id, label) });
+          }
+        } else if (key === '@brands') {
           if (mode.brands?.length) row = brandsRow(mode);
         } else if (key === '@continue') {
           if (continueWatching().length || finishedEpisodes().length) {
