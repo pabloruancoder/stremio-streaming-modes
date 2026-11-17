@@ -2916,11 +2916,33 @@
   function openBrand(id) {
     hidePreview();
     collapseCard();
+    state.brandFromSearch = null;
+    if (searchQuery() !== null) {
+      // Aberta pela busca: sai da rota da busca, senão ela reassume a tela na hora.
+      state.brandFromSearch = location.hash;
+      state.brandPrev = 'search';
+      state.brand = id;
+      state.page = 'brand';
+      location.hash = '#/';
+      renderPage();
+      app.scrollTop = 0;
+      return;
+    }
     if (state.page !== 'brand') state.brandPrev = state.page;
     state.brand = id;
     state.page = 'brand';
     renderPage();
     app.scrollTop = 0;
+  }
+  function leaveBrand() {
+    state.brandFilter = 'all';
+    if (state.brandPrev === 'search' && state.brandFromSearch) {
+      const hash = state.brandFromSearch;
+      state.brandFromSearch = null;
+      location.hash = hash;
+      return;
+    }
+    setPage(state.brandPrev || 'home');
   }
   // HBO Max: "Categorias" com as marcas em círculos e os gêneros em blocos.
   function renderCategories(mode) {
@@ -2948,7 +2970,7 @@
     const chip = (key, label) => h('button', { type: 'button', class: `sm-hbo-chip${filter === key ? ' on' : ''}`,
       onclick: () => { state.brandFilter = key; renderPage(); } }, label);
     const head = h('header', { class: 'sm-hbo-cathead', style: { '--tint': BRAND_TINT[b.id] || '#333' } },
-      h('button', { type: 'button', class: 'sm-hbo-back', 'aria-label': 'Voltar', onclick: () => { state.brandFilter = 'all'; setPage(state.brandPrev || 'home'); } }, icon('left')),
+      h('button', { type: 'button', class: 'sm-hbo-back', 'aria-label': 'Voltar', onclick: leaveBrand }, icon('left')),
       h('h1', { class: 'sm-hbo-cattitle', text: b.name.replace('\n', ' ') }),
       h('div', { class: 'sm-hbo-chips' }, chip('all', 'Destaques'), chip('series', 'Séries'), chip('movies', 'Filmes')));
     const rows = h('div', { class: 'sm-rows flat sm-hbo-catrows' });
@@ -2968,7 +2990,7 @@
     const bg = h('div', { class: 'sm-bpage-bg' });
     const banner = h('section', { class: 'sm-bpage' }, bg, h('div', { class: 'sm-bpage-shade' }),
       h('button', { type: 'button', class: 'sm-back', 'aria-label': 'Voltar', title: 'Voltar',
-        onclick: () => setPage(state.brandPrev || 'home') }, icon('left')),
+        onclick: leaveBrand }, icon('left')),
       h('div', { class: 'sm-bpage-name' }, brandName(b)));
     const rows = h('div', { class: 'sm-rows flat sm-bpage-rows' });
     app.append(banner, rows);
