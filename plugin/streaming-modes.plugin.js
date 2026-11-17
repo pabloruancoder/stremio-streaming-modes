@@ -221,12 +221,20 @@
       { type: 'movie', id: 'hbo.brand-wb-movies', kicker: 'Warner Bros.' }],
     navPages: [['home', 'Início'], ['series', 'Séries'], ['movies', 'Filmes'], ['new', 'Novidades'], ['mylist', 'Minha lista']],
     // Marcas (página "Categorias" do app)
+    // Mesma ordem das capturas oficiais do app (carrossel de círculos).
     brands: [
       { id: 'hbo', name: 'HBO', font: '900 1.5em "Arial Black", Arial, sans-serif', spacing: '.02em' },
-      { id: 'dc', name: 'DC', font: '900 1.6em Impact, "Arial Black", sans-serif', box: true },
-      { id: 'wb', name: 'WARNER BROS.', font: '800 .78em Georgia, serif', spacing: '.06em' },
+      { id: 'maxorig', name: 'max\nORIGINALS', font: '800 1.05em Inter, Arial, sans-serif', spacing: '-.02em' },
+      { id: 'id', name: 'ID', font: '900 1.7em "Arial Black", Arial, sans-serif', spacing: '-.04em' },
       { id: 'cn', name: 'CARTOON\nNETWORK', font: '900 .72em "Arial Black", Arial, sans-serif', spacing: '.02em' },
+      { id: 'tlc', name: 'TLC', font: '900 1.35em "Arial Black", Arial, sans-serif', spacing: '.04em' },
+      { id: 'dc', name: 'DC', font: '900 1.6em Impact, "Arial Black", sans-serif', box: true },
       { id: 'adultswim', name: '[adult swim]', font: '700 .82em "Courier New", monospace' },
+      { id: 'tcm', name: 'TCM', font: '900 1.3em Georgia, serif', spacing: '.02em' },
+      { id: 'sesame', name: 'SESAME\nWORKSHOP', font: '900 .72em "Arial Black", Arial, sans-serif' },
+      { id: 'hgtv', name: 'HGTV', font: '900 1.2em "Arial Black", Arial, sans-serif' },
+      { id: 'harrypotter', name: 'Harry\nPotter', font: 'italic 700 1em Georgia, serif' },
+      { id: 'wb', name: 'WARNER BROS.', font: '800 .78em Georgia, serif', spacing: '.06em' },
       { id: 'discovery', name: 'Discovery', font: '700 1.05em Georgia, serif', spacing: '.01em' },
     ],
     pages: {
@@ -1326,7 +1334,7 @@
     padding:1.3rem 0 1.2rem; box-sizing:border-box; }
   .sm-rail::before { content:""; position:absolute; left:0; top:0; bottom:0; width:max(26rem, 34vw); z-index:-1; pointer-events:none; opacity:0;
     background:linear-gradient(90deg, rgba(10,11,16,.97) 0%, rgba(10,11,16,.88) 45%, rgba(10,11,16,0) 100%); transition:opacity .3s ease; }
-  .sm-rail:hover::before, .sm-rail:focus-within::before { opacity:1; }
+  .sm-rail:hover::before, .sm-rail:has(:focus-visible)::before { opacity:1; }
   .sm-rail-logo { display:flex; flex-direction:column; align-items:center; gap:.1rem; margin:0 auto 2.4rem; color:#f9f9f9; cursor:pointer; user-select:none; }
   .sm-rail-logo svg { width:3rem; height:1.2rem; overflow:visible; filter:drop-shadow(0 0 6px rgba(127,196,255,.85)); }
   .sm-rail-logo svg path { stroke-dasharray:1; stroke-dashoffset:0; animation:sm-arc-glow 6s ease-in-out infinite; }
@@ -1338,7 +1346,7 @@
   .sm-rail-item .sm-ico { width:1.55rem !important; height:1.55rem !important; flex:none; transition:transform .2s; }
   .sm-rail-label { font-size:1.15rem; font-weight:600; letter-spacing:.01em; opacity:0; transform:translateX(-.6rem); pointer-events:none;
     transition:opacity .25s ease, transform .25s ease; }
-  .sm-rail:hover .sm-rail-label, .sm-rail:focus-within .sm-rail-label { opacity:1; transform:none; pointer-events:auto; }
+  .sm-rail:hover .sm-rail-label, .sm-rail:has(:focus-visible) .sm-rail-label { opacity:1; transform:none; pointer-events:auto; }
   .sm-rail-item:hover, .sm-rail-item:focus-visible { color:#f9f9f9; outline:none; }
   .sm-rail-item:hover .sm-ico { transform:scale(1.08); }
   .sm-rail-item.active { color:#f9f9f9; }
@@ -1460,7 +1468,7 @@
     box-shadow:inset 0 1px 0 var(--glass-hi), inset 0 0 0 1px rgba(255,255,255,.08), 0 24px 60px rgba(0,0,0,.55);
     transition:width .35s cubic-bezier(.2,.8,.2,1); overflow:visible !important; }
   html[data-sm-mode="apple"] .sm-rail-item { overflow:hidden !important; }
-  html[data-sm-mode="apple"] .sm-rail:hover, html[data-sm-mode="apple"] .sm-rail:focus-within { width:15.5rem; }
+  html[data-sm-mode="apple"] .sm-rail:hover, html[data-sm-mode="apple"] .sm-rail:has(:focus-visible) { width:15.5rem; }
   html[data-sm-mode="apple"] .sm-rail::before { display:none; }
   html[data-sm-mode="apple"] .sm-rail-logo { width:var(--rail); margin:.2rem 0 1.6rem; align-items:center; }
   html[data-sm-mode="apple"] .sm-rail-logo span { margin:0; font:800 9px/1 Inter, "Segoe UI", sans-serif; letter-spacing:.06em; color:#f5f5f7; }
@@ -2061,8 +2069,18 @@
   .sm-hbo-menu .sm-ico { width:1rem !important; height:1rem !important; }
 
   /* Marcas em círculos */
-  html[data-sm-mode="hbo"] .sm-brands { display:flex; flex-wrap:nowrap; gap:1.2rem; margin:1.2rem var(--pad) 2rem; }
-  html[data-sm-mode="hbo"] .sm-brand { flex:none; width:clamp(5.5rem, 8vw, 8.5rem); aspect-ratio:1; border-radius:50% !important; padding:.5rem !important;
+  html[data-sm-mode="hbo"] .sm-brands { display:flex; flex-wrap:nowrap; gap:1.15vw; margin:.4rem 0 1.4rem; padding:.6rem var(--pad) 1rem;
+    overflow-x:auto !important; overflow-y:hidden !important; scrollbar-width:none; scroll-behavior:smooth; }
+  html[data-sm-mode="hbo"] .sm-brands::-webkit-scrollbar { display:none; }
+  .sm-brands-wrap { position:relative; overflow:visible !important; }
+  .sm-brand-arrow { position:absolute; top:0; bottom:1.4rem; z-index:4; width:var(--pad); display:grid; place-items:center; padding:0 !important; color:#fff;
+    cursor:pointer; opacity:0; transition:opacity .2s; }
+  .sm-brand-arrow.l { left:0; background:linear-gradient(90deg, rgba(8,9,12,.9), transparent) !important; }
+  .sm-brand-arrow.r { right:0; background:linear-gradient(270deg, rgba(8,9,12,.9), transparent) !important; }
+  .sm-brand-arrow[hidden] { display:none; }
+  .sm-brands-wrap:hover .sm-brand-arrow { opacity:1; }
+  .sm-brand-arrow .sm-ico { width:1.8rem !important; height:1.8rem !important; }
+  html[data-sm-mode="hbo"] .sm-brand { flex:none; width:calc((100vw - var(--railspace) - var(--pad) * 2 - 1.15vw * 8.5) / 9.5); aspect-ratio:1; border-radius:50% !important; padding:.5rem !important;
     border:0 !important; background:radial-gradient(circle at 50% 35%, #2b2e38, #121318 75%) !important; font-size:clamp(.8rem, 1.15vw, 1.25rem);
     box-shadow:inset 0 0 0 1px rgba(255,255,255,.12), 0 10px 24px rgba(0,0,0,.5) !important; animation:none; }
   html[data-sm-mode="hbo"] .sm-brand:hover, html[data-sm-mode="hbo"] .sm-brand:focus-visible { transform:scale(1.07);
@@ -2070,7 +2088,14 @@
   html[data-sm-mode="hbo"] .sm-brand-bg { border-radius:50%; }
   html[data-sm-mode="hbo"] .sm-brand .sm-shine { border-radius:50%; }
   html[data-sm-mode="hbo"] .sm-brand-name.box { border-width:.07em; }
-  html[data-sm-mode="hbo"] .sm-catpage .sm-brands { margin:0 0 2.2rem; flex-wrap:wrap; }
+  /* Categorias: tudo alinhado com o título; marcas em grade */
+  html[data-sm-mode="hbo"] .sm-catpage { padding:2.6rem var(--pad) 4rem !important; }
+  html[data-sm-mode="hbo"] .sm-catpage .sm-page-title { margin:0 0 1.6rem; }
+  html[data-sm-mode="hbo"] .sm-catpage .sm-sp-title { margin:0 0 .9rem; }
+  html[data-sm-mode="hbo"] .sm-catpage .sm-brands { display:grid; grid-template-columns:repeat(auto-fill, minmax(7.5rem, 1fr)); gap:1.2rem;
+    margin:0 0 2.4rem; padding:0; overflow:visible !important; }
+  html[data-sm-mode="hbo"] .sm-catpage .sm-brand { width:100%; }
+  html[data-sm-mode="hbo"] .sm-catpage .sm-xpl-grid { grid-template-columns:repeat(auto-fill, minmax(13rem, 1fr)); }
 
   /* Página de marca/categoria */
   .sm-hbo-cathead { position:relative; display:flex; flex-direction:column; align-items:center; gap:1.1rem; padding:2.2rem var(--pad) 2.2rem;
@@ -2877,7 +2902,16 @@
     return el;
   }
   function brandsRow(mode) {
-    return h('section', { class: 'sm-brands', 'aria-label': 'Marcas' }, mode.brands.map((b) => brandTile(b, mode)));
+    const row = h('section', { class: 'sm-brands', 'aria-label': 'Marcas' }, mode.brands.map((b) => brandTile(b, mode)));
+    if (mode.layout !== 'hbo') return row;
+    // HBO Max: carrossel com setas nas laterais.
+    const step = () => row.clientWidth * 0.8;
+    const l = h('button', { type: 'button', class: 'sm-brand-arrow l', 'aria-label': 'Anterior', onclick: () => row.scrollBy({ left: -step() }) }, icon('left'));
+    const r = h('button', { type: 'button', class: 'sm-brand-arrow r', 'aria-label': 'Próximo', onclick: () => row.scrollBy({ left: step() }) }, icon('right'));
+    const sync = () => { l.hidden = row.scrollLeft < 8; r.hidden = row.scrollLeft + row.clientWidth >= row.scrollWidth - 8; };
+    row.addEventListener('scroll', () => requestAnimationFrame(sync), { passive: true });
+    requestAnimationFrame(sync);
+    return h('div', { class: 'sm-brands-wrap' }, row, l, r);
   }
   function openBrand(id) {
     hidePreview();
@@ -2900,7 +2934,8 @@
 
   // HBO Max: página de marca/categoria como no app (título centralizado, fundo em degradê e as etiquetas
   // Destaques / Séries / Filmes, que filtram as fileiras).
-  const BRAND_TINT = { hbo: '#4b2a8a', dc: '#0a3d91', wb: '#1d4f8f', cn: '#5a5a5a', adultswim: '#3a3a3a', discovery: '#0d5b8c' };
+  const BRAND_TINT = { hbo: '#4b2a8a', maxorig: '#1f3b8a', id: '#7a1414', cn: '#5a5a5a', tlc: '#7a2a6e', dc: '#0a3d91', adultswim: '#3a3a3a',
+    tcm: '#5a4630', sesame: '#2f7a2a', hgtv: '#1f6b5a', harrypotter: '#5a4a1f', wb: '#1d4f8f', discovery: '#0d5b8c' };
   function renderHboBrand(mode, b) {
     const filter = state.brandFilter || 'all';
     const sets = {

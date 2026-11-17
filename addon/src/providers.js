@@ -80,6 +80,13 @@ export const PROVIDERS = {
     // Marcas (página "Categorias" do app): HBO, DC, Warner Bros., Cartoon Network, Adult Swim e Discovery.
     brands: [
       { id: 'hbo', name: 'HBO', movie: { with_companies: '7429|14914' }, series: { with_networks: '49' } },
+      { id: 'maxorig', name: 'Max Originals', movie: { 'vote_count.gte': 999999 }, series: { with_networks: '3186|6783|8304' } },
+      { id: 'id', name: 'Investigation Discovery', movie: { 'vote_count.gte': 999999 }, series: { with_networks: '244' } },
+      { id: 'tlc', name: 'TLC', movie: { 'vote_count.gte': 999999 }, series: { with_networks: '84' } },
+      { id: 'tcm', name: 'TCM', movie: { 'primary_release_date.lte': '1969-12-31' }, series: { 'vote_count.gte': 999999 } },
+      { id: 'sesame', name: 'Sesame Workshop', movie: { with_companies: '3673' }, series: { with_companies: '3673' } },
+      { id: 'hgtv', name: 'HGTV', movie: { 'vote_count.gte': 999999 }, series: { with_networks: '210' } },
+      { id: 'harrypotter', name: 'Harry Potter', movie: { with_companies: '437' }, series: { 'vote_count.gte': 999999 } },
       { id: 'dc', name: 'DC', movie: { with_companies: '9993|128064|184898|429' }, series: { with_companies: '9993|184898|429' } },
       { id: 'wb', name: 'Warner Bros.', movie: { with_companies: '174' }, series: { with_companies: '1957' } },
       { id: 'cn', name: 'Cartoon Network', movie: { with_companies: '7899|2785' }, series: { with_networks: '56' } },
