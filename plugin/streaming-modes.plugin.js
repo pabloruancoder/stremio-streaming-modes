@@ -316,7 +316,7 @@
   ];
 
   // remoteAddonUrl: cópia estática do addon no GitHub Pages, usada quando o addon do PC está desligado.
-  const DEFAULTS = { mode: 'stremio', addonUrl: 'http://127.0.0.1:7100', showInDefault: false, muted: true,
+  const DEFAULTS = { mode: 'stremio', addonUrl: 'http://127.0.0.1:7100', showInDefault: false, muted: true, allContent: false,
     remoteAddonUrl: 'https://pabloruancoder.github.io/stremio-streaming-modes' };
 
   // ===========================================================================
@@ -416,6 +416,29 @@
   const isGlobo = () => state.mode === 'globoplay';
   // Modos com interface própria (Disney+, Apple TV): sem prévia ao passar o mouse, detalhes em página inteira, trailer.
   const isCustom = () => isDisney() || isApple() || isPrime() || isHbo();
+  // Logos de cada streaming (os que o TMDB publica em "onde assistir"; carregados de lá, não ficam no projeto).
+  const TMDB_LOGO = (path) => `https://image.tmdb.org/t/p/w92${path}`;
+  const MODE_LOGOS = {
+    netflix: TMDB_LOGO('/rK1KljqmbvO9HQa1PBFLILWah72.png'), disney: TMDB_LOGO('/5eZ872CghnHFLB1j8grszbrx0dx.png'),
+    apple: TMDB_LOGO('/9icYBfYFcwgCbky5VdGUIKJ4C5i.png'), prime: TMDB_LOGO('/gMZdpavHmxFNnLpMHwVxfqeux2g.png'),
+    hbo: TMDB_LOGO('/skypuy7SXuugIQeYg0IglmzoKaS.png'), globoplay: TMDB_LOGO('/9A6Oxd3F7iXm7mds7CxYOBicojs.png'),
+    crunchyroll: TMDB_LOGO('/uFL3c4Cq8M6WoLymlC5Y8bmGytV.png'),
+  };
+  const modeIcon = (mode, cls = 'sm-mode-logo') => (MODE_LOGOS[mode.key]
+    ? h('img', { class: cls, src: MODE_LOGOS[mode.key], alt: '', referrerpolicy: 'no-referrer' })
+    : h('span', { class: 'sm-dot', style: { background: mode.accent } }));
+
+  // "Mostrar conteúdo de todos os streamings": as fileiras gerais (em alta, gêneros, lançamentos, todos...) vêm do
+  // catálogo que junta os 7 serviços; as próprias do tema (originais, marcas, novelas, simulcasts, Top 10) continuam.
+  const THEME_ONLY = new Set(['originals', 'originals-movies', 'novelas', 'tvglobo', 'globofilmes', 'simulcast', 'anime-action', 'anime-fantasy',
+    'anime-comedy', 'anime-drama', 'anime-mystery', 'kids-disney-movies', 'kids-disneyjr-series']);
+  const sharedKey = (key) => state.allContent && !THEME_ONLY.has(key) && !key.startsWith('brand-') && !key.startsWith('top10');
+  // Id do catálogo de uma fileira no modo atual ("netflix.action-movies" ou "all.action-movies").
+  const cid = (mode, key) => `${sharedKey(key) ? 'all' : mode.provider}.${key}`;
+  const remapId = (id) => { const i = id.indexOf('.'); const key = id.slice(i + 1); return sharedKey(key) ? `all.${key}` : id; };
+  // Busca, recomendações e estreias: de todos os streamings quando a opção está ligada.
+  const svc = (mode) => (state.allContent ? 'all' : mode.provider);
+
   const isBoardRoute = () => /^(#\/?)?$/.test(location.hash);
   // Texto buscado quando a rota é a busca do Stremio (#/search?search=...); null fora dela.
   const searchQuery = () => {
@@ -434,6 +457,7 @@
     mode: MODES[store.get('mode')] ? store.get('mode') : 'stremio',
     addonUrl: store.get('addonUrl'),
     showInDefault: store.get('showInDefault'),
+    allContent: store.get('allContent'),
     muted: store.get('muted'),
     page: 'home',
     transitioning: false,
@@ -2305,6 +2329,18 @@
   .sm-cr-season { display:flex; align-items:center; gap:.4rem; margin:0 var(--pad) 1.6rem; color:#fff; font-weight:700; font-size:.95rem; }
   .sm-cr-season .sm-ico { width:1rem !important; height:1rem !important; }
 
+  /* Logos dos streamings no seletor */
+  .sm-mode-logo { flex:none; width:1.45rem; height:1.45rem; border-radius:6px; object-fit:cover; box-shadow:0 1px 4px rgba(0,0,0,.4); }
+  .sm-mode-logo.sm { width:1.25rem; height:1.25rem; border-radius:5px; }
+  .sm-menu .sm-item { gap:.7rem; }
+  .sm-rail .sm-switch .sm-mode-logo { width:1.5rem; height:1.5rem; }
+  .sm-toggle-all { align-items:flex-start !important; }
+  .sm-toggle-all span { display:flex; flex-direction:column; gap:.2rem; }
+  .sm-toggle-all b { font-weight:700; }
+  .sm-toggle-all small { font-size:.72rem; opacity:.65; line-height:1.3; max-width:16rem; }
+  /* Com todos os streamings, o selo "Incluído no Prime" não vale para tudo */
+  html[data-sm-all] .sm-pv-check, html[data-sm-all] .sm-bill-info .sm-included, html[data-sm-all] .sm-pv-hover .sm-included { display:none; }
+
   /* Filmes / Séries com seletor de gênero */
   .sm-genre-head { display:flex; align-items:center; gap:1.4rem; margin:0 var(--pad) 1.6rem; overflow:visible !important; }
   .sm-genre-head .sm-page-title { margin:0; }
@@ -2575,7 +2611,8 @@
   function fillSwitcher(btn) {
     const mode = MODES[state.mode];
     btn.style.setProperty('--sm-accent', mode.accent);
-    btn.replaceChildren(h('span', { class: 'sm-dot' }), h('span', { text: mode.key === 'stremio' ? 'Modo' : mode.label }), icon('down'));
+    btn.replaceChildren(MODE_LOGOS[mode.key] ? modeIcon(mode, 'sm-mode-logo sm') : h('span', { class: 'sm-dot' }),
+      h('span', { text: mode.key === 'stremio' ? 'Modo' : mode.label }), icon('down'));
   }
   const refreshSwitchers = () => document.querySelectorAll('.sm-switch').forEach(fillSwitcher);
 
@@ -2593,7 +2630,7 @@
     const items = Object.values(MODES).map((mode) =>
       h('button', { type: 'button', class: 'sm-item', role: 'menuitemradio', 'aria-checked': String(mode.key === state.mode),
         onclick: () => switchMode(mode.key) },
-        h('span', { class: 'sm-dot', style: { background: mode.accent } }),
+        modeIcon(mode),
         h('span', { text: mode.label }),
         mode.key === state.mode ? h('span', { class: 'sm-check', text: '✓' }) : null),
     );
@@ -2603,6 +2640,15 @@
       state.showInDefault = cb.checked;
       store.set('showInDefault', cb.checked);
       applyRootAttrs();
+    });
+    const cbAll = h('input', { type: 'checkbox' });
+    cbAll.checked = state.allContent;
+    cbAll.addEventListener('change', () => {
+      state.allContent = cbAll.checked;
+      store.set('allContent', cbAll.checked);
+      applyRootAttrs();
+      closeMenu();
+      if (MODES[state.mode].provider) rebuildApp();
     });
     const input = h('input', { type: 'text', spellcheck: 'false' });
     input.value = state.addonUrl;
@@ -2637,6 +2683,9 @@
       h('h4', { text: 'Modo de streaming' }),
       items,
       h('div', { class: 'sm-sep' }),
+      h('label', { class: 'sm-toggle sm-toggle-all' }, cbAll,
+        h('span', null, h('b', { text: 'Mostrar conteúdo de todos os streamings' }),
+          h('small', { text: 'Mantém o visual do modo escolhido, mas as fileiras trazem títulos de todos os streamings.' }))),
       h('label', { class: 'sm-toggle' }, cb, 'Mostrar fileiras dos streamings no modo padrão'),
       h('label', { class: 'sm-field' }, 'Endereço do addon do PC', input),
       status,
@@ -2671,6 +2720,8 @@
     else delete root.dataset.smLayout;
     if (MODES[state.mode].portrait) root.dataset.smPortrait = '';
     else delete root.dataset.smPortrait;
+    if (state.allContent) root.dataset.smAll = '';
+    else delete root.dataset.smAll;
     if (state.showInDefault) root.dataset.smShowDefault = '';
     else delete root.dataset.smShowDefault;
   }
@@ -3148,7 +3199,7 @@
       h('div', { class: 'sm-genre-head' }, h('h1', { class: 'sm-page-title', text: page === 'movies' ? 'Filmes' : 'Séries' }), select),
       grid));
     let skip = 0;
-    const id = `${mode.provider}.${cur}`;
+    const id = cid(mode, cur);
     infiniteGrid(grid, () =>
       addon(`/catalog/${type}/${encodeURIComponent(id)}${skip ? `/skip=${skip}` : ''}.json`)
         .then((d) => { const metas = d.metas || []; skip += metas.length; return { metas, more: metas.length > 0 }; }),
@@ -3161,9 +3212,9 @@
   function genreTile(mode, type, id, label) {
     const bg = h('div', { class: 'sm-xpl-bg' });
     const tile = h('button', { type: 'button', class: 'sm-xpl', 'aria-label': label,
-      onclick: () => openExplore({ type, id: `${mode.provider}.${id}` }, label) },
+      onclick: () => openExplore({ type, id: cid(mode, id) }, label) },
       bg, h('div', { class: 'sm-shine' }), h('span', { class: 'sm-xpl-name', text: label }));
-    catalog(type, `${mode.provider}.${id}`).then((ms) => {
+    catalog(type, cid(mode, id)).then((ms) => {
       const withArt = ms.filter((x) => x.background);
       const m = withArt.find((x) => !usedTileArt.has(x.id)) || withArt[0];
       if (m) { usedTileArt.add(m.id); bg.style.backgroundImage = cssUrl(tmdbSize(m.background, 'w780')); tile.classList.add('ready'); }
@@ -3319,11 +3370,12 @@
   // Notificações: o que está no Top 10 e o que acabou de chegar. Marca como visto ao abrir.
   function notifItems(mode) {
     const p = mode.provider;
+    const ps = svc(mode);
     return Promise.all([
       catalog('series', `${p}.top10-series`).catch(() => []),
       catalog('movie', `${p}.top10-movies`).catch(() => []),
-      catalog('movie', `${p}.recent-movies`).catch(() => []),
-      catalog('series', `${p}.recent-series`).catch(() => []),
+      catalog('movie', `${ps}.recent-movies`).catch(() => []),
+      catalog('series', `${ps}.recent-series`).catch(() => []),
     ]).then(([ts, tm, nm, ns]) => {
       const out = [];
       const seen = new Set();
@@ -3833,7 +3885,8 @@
 
   function buildHero(mode, wrap, rows, sourcesOverride) {
     const types = state.page === 'series' ? ['series'] : state.page === 'movies' ? ['movie'] : ['series', 'movie'];
-    const sources = (sourcesOverride || (isKids() ? mode.kidsHero : mode.heroCatalogs)).filter((c) => types.includes(c.type));
+    const sources = (sourcesOverride || (isKids() ? mode.kidsHero : mode.heroCatalogs)).filter((c) => types.includes(c.type))
+      .map((c) => ({ ...c, id: remapId(c.id) }));
     if (!sources.length) { rows.classList.add('flat'); return; }
     if (mode.layout === 'disney') return buildCarousel(wrap, rows, sources);
     if (mode.layout === 'apple' || mode.layout === 'prime' || mode.layout === 'hbo') return buildBillboard(wrap, rows, sources);
@@ -3946,7 +3999,10 @@
 
     manifest().then((mf) => {
       const prefix = `${mode.provider}.`;
-      const byId = Object.fromEntries((mf.catalogs || []).filter((c) => c.id.startsWith(prefix)).map((c) => [c.id.slice(prefix.length), c]));
+      const own = Object.fromEntries((mf.catalogs || []).filter((c) => c.id.startsWith(prefix)).map((c) => [c.id.slice(prefix.length), c]));
+      const shared = Object.fromEntries((mf.catalogs || []).filter((c) => c.id.startsWith('all.')).map((c) => [c.id.slice(4), c]));
+      // Com "todos os streamings" ligado, as fileiras gerais usam o catálogo que junta todos.
+      const byId = new Proxy(own, { get: (t, k) => (typeof k === 'string' && sharedKey(k) && shared[k]) || t[k] });
       const seeds = profileSeeds();
       const typeFilter = state.page === 'series' ? 'series' : state.page === 'movies' ? 'movie' : null;
       for (const key of order) {
@@ -3963,7 +4019,8 @@
             row = makeRow('Continuar assistindo', () => continueRow(typeFilter), { progress: true });
           }
         } else if (key === '@soon') {
-          row = makeRow(`Em breve ${mode.prep || 'na'} ${mode.label}`, () => addon(`/sm/upcoming/${mode.provider}.json`).then((d) => d.items || []),
+          row = makeRow(state.allContent ? 'Em breve nos streamings' : `Em breve ${mode.prep || 'na'} ${mode.label}`,
+            () => addon(`/sm/upcoming/${svc(mode)}.json`).then((d) => d.items || []),
             { render: (it) => upcomingCard(it), onExplore: () => setPage('new') });
         } else if (key === '@mylist') {
           const items = myList().slice(0, 30).map(fromLibrary);
@@ -3976,7 +4033,7 @@
             const prefix = { loved: 'Porque você amou', liked: 'Porque você gostou de', watched: 'Porque você assistiu' };
             row = makeRow('Porque você assistiu', async () => {
               for (const s of candidates) {
-                const list = profileFilter(await similar(mode.provider, s.type, s._id));
+                const list = profileFilter(await similar(svc(mode), s.type, s._id));
                 if (list.length >= 4) {
                   row.querySelector('.sm-row-title').textContent = `${prefix[s.src] || prefix.watched} ${s.name}`;
                   return list;
@@ -3987,7 +4044,7 @@
           }
         } else if (byId[key] && !(isKids() && typeFilter && byId[key].type !== typeFilter)) {
           const c = byId[key];
-          const name = titles?.[key] || mode.rowTitles?.[key] || (c.name.startsWith(mode.prefix) ? c.name.slice(mode.prefix.length) : c.name);
+          const name = titles?.[key] || mode.rowTitles?.[key] || c.name.replace(/^.*? • /, '');
           const isTop = key.startsWith('top10');
           row = makeRow(name, () => catalog(c.type, c.id), {
             rank: isTop,
@@ -4366,7 +4423,7 @@
     if (existing?.dataset.seed === it.id) return;
     const mode = MODES[state.mode];
     const row = makeRow(`Porque você se interessou por ${it.name}`, async () => {
-      const list = await similar(mode.provider, it.type, it.id);
+      const list = await similar(svc(mode), it.type, it.id);
       return list.length >= 3 ? list : [];
     });
     row.classList.add('session', 'fresh');
@@ -4690,7 +4747,7 @@
       loadSeason();
     }
 
-    const sims = profileFilter(await similar(mode.provider, item.type, item.id));
+    const sims = profileFilter(await similar(svc(mode), item.type, item.id));
     if (modalEl !== el || !sims.length) return;
     addSection('sim', 'SUGESTÕES', h('div', { class: 'sm-dlg-section' },
       h('h3', { text: isApple() ? 'Relacionados' : 'Títulos semelhantes', style: { marginBottom: '1rem' } }),
@@ -4822,7 +4879,7 @@
       if (stopped()) return io.disconnect();
       busy = true;
       try {
-        const data = await addon(`/sm/foryou/${mode.provider}/${page}.json?seeds=${encodeURIComponent(seeds)}`);
+        const data = await addon(`/sm/foryou/${svc(mode)}/${page}.json?seeds=${encodeURIComponent(seeds)}`);
         page++;
         if (stopped()) return io.disconnect();
         if (data.done) { done = true; sentinel.remove(); io.disconnect(); return; }
@@ -4893,7 +4950,7 @@
 
     wrap.__title.textContent = `Resultados para "${q}"`;
     wrap.__results.replaceChildren(ghosts());
-    addon(`/sm/search/${mode.provider}.json?q=${encodeURIComponent(q)}`).then((data) => {
+    addon(`/sm/search/${svc(mode)}.json?q=${encodeURIComponent(q)}`).then((data) => {
       if (seq !== searchSeq || !app) return;
       const metas = profileFilter(data.metas || []);
       if (data.genre) wrap.__title.textContent = q;
@@ -4910,7 +4967,7 @@
       }
       const grid = h('div', { class: 'sm-grid sm-results' }, metas.map((it) => card(it)));
       wrap.__results.replaceChildren(grid);
-      infiniteGrid(grid, (page) => addon(`/sm/search/${mode.provider}/${page + 1}.json?q=${encodeURIComponent(q)}`),
+      infiniteGrid(grid, (page) => addon(`/sm/search/${svc(mode)}/${page + 1}.json?q=${encodeURIComponent(q)}`),
         { seen: metas.map((m) => m.id), stop: () => seq !== searchSeq });
     }).catch(() => {
       if (seq === searchSeq) wrap.__results.replaceChildren(offline());
@@ -5036,7 +5093,7 @@
       if (!sentinel.isConnected) { io.disconnect(); return; }
       busy = true;
       try {
-        const data = await addon(`/sm/foryou/${mode.provider}/${page++}.json?seeds=${encodeURIComponent(seeds)}`);
+        const data = await addon(`/sm/foryou/${svc(mode)}/${page++}.json?seeds=${encodeURIComponent(seeds)}`);
         if (!sentinel.isConnected) { io.disconnect(); return; }
         if (data.done) done = true;
         else {
@@ -5088,13 +5145,14 @@
     }, { root: app, rootMargin: '600px 0px' });
     const add = (row) => { rows.appendChild(row); rowObserver.observe(row); };
 
-    const soon = addon(`/sm/upcoming/${p}.json`).then((d) => d.items || []).catch(() => []);
+    const ps = svc(mode);
+    const soon = addon(`/sm/upcoming/${ps}.json`).then((d) => d.items || []).catch(() => []);
     const daysUntil = (it) => Math.round((new Date(`${it.date}T12:00:00`) - new Date(new Date().toDateString())) / 86400_000);
     const upRow = (title, test) => makeRow(title, () => soon.then((list) => list.filter((it) => test(daysUntil(it)))),
       { render: (it) => upcomingCard(it) });
 
-    add(makeRow(`Novidades ${mode.prep || 'na'} ${mode.label}`, () =>
-      Promise.all([catalog('series', `${p}.recent-series`), catalog('movie', `${p}.recent-movies`)].map((x) => x.catch(() => [])))
+    add(makeRow(state.allContent ? 'Novidades nos streamings' : `Novidades ${mode.prep || 'na'} ${mode.label}`, () =>
+      Promise.all([catalog('series', `${ps}.recent-series`), catalog('movie', `${ps}.recent-movies`)].map((x) => x.catch(() => [])))
         .then(([sr, mv]) => {
           const out = [];
           for (let i = 0; i < Math.max(sr.length, mv.length); i++) { if (sr[i]) out.push(sr[i]); if (mv[i]) out.push(mv[i]); }
@@ -5106,7 +5164,7 @@
     if (mode.top10) add(makeRow('Top 10 filmes no Brasil esta semana', () => catalog('movie', `${p}.top10-movies`), { rank: true }));
     add(upRow('Vale a espera', (d) => d > 14));
     add(makeRow('Bombando agora', () =>
-      Promise.all([catalog('series', `${p}.trending-series`), catalog('movie', `${p}.trending-movies`)].map((x) => x.catch(() => [])))
+      Promise.all([catalog('series', `${ps}.trending-series`), catalog('movie', `${ps}.trending-movies`)].map((x) => x.catch(() => [])))
         .then(([sr, mv]) => {
           const out = [];
           for (let i = 0; i < 20; i++) { if (sr[i]) out.push(sr[i]); if (mv[i]) out.push(mv[i]); }

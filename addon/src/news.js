@@ -65,7 +65,7 @@ async function upcomingItem(type, base, release) {
 
 export function upcoming(provider) {
   return cached(`upcoming:${provider.key}:${config.region}`, 6 * HOUR, async () => {
-    if (!provider.tmdbNetworkId) return [];
+    if (!provider.tmdbNetworkId && !provider.upcoming) return [];
     // provider.upcoming (opcional): redes extras, janela maior e filmes do estúdio (Disney+).
     const up = provider.upcoming || {};
     const until = day(up.days || 60);

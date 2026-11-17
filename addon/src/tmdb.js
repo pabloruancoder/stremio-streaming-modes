@@ -85,11 +85,13 @@ export function watchProviders(type, tmdbId) {
   );
 }
 
+// providerId pode ser um número ou uma lista "8|337|..." (qualquer um deles serve).
 export async function isOnProvider(type, tmdbId, providerId) {
   const data = await watchProviders(type, tmdbId);
   const region = data.results?.[config.region];
   const lists = [region?.flatrate, region?.ads, region?.free].filter(Boolean).flat();
-  return lists.some((p) => p.provider_id === providerId);
+  const ids = String(providerId).split('|').map(Number);
+  return lists.some((p) => ids.includes(p.provider_id));
 }
 
 const DAY = 24 * HOUR;

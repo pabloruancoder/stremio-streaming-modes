@@ -132,6 +132,17 @@ export const PROVIDERS = {
     ],
     upcoming: { days: 120, networks: '1112' },
   },
+  // "Todos os streamings": usado quando a opção "Mostrar conteúdo de todos os streamings" está ligada no plugin.
+  // As fileiras gerais (em alta, gêneros, lançamentos, todos os filmes...) juntam os 7 serviços.
+  all: {
+    key: 'all',
+    label: 'Todos os streamings',
+    prep: 'em',
+    tmdbProviderId: '8|337|350|119|1899|307|283',
+    hasOfficialTop10: false,
+    upcoming: { days: 120, networks: '213|2739|2552|1024|49|3186|6783|8304|3290',
+      movieCompanies: '178464|145174|2|3|420|1|194232|20580|210099|174|9993', langs: ['en', 'pt', 'es', 'ko', 'ja'] },
+  },
 };
 
 const dayISO = (offset) => new Date(Date.now() + offset * 86400_000).toISOString().slice(0, 10);
