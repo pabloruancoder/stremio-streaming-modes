@@ -364,6 +364,7 @@
   // Ícones fixos (SVG estático, sem dados externos).
   const SVG_NS = 'http://www.w3.org/2000/svg';
   const ICONS = {
+    pip: 'M3 5h18v14H3zM12.5 12h6v5h-6z',
     home: 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z',
     film: 'M4 4h16v16H4zM8 4v16M16 4v16M4 9h4M4 15h4M16 9h4M16 15h4',
     tv: 'M3 6h18v12H3zM8 21h8M8 2l4 4 4-4',
@@ -2352,6 +2353,12 @@
   .sm-toggle-all small { font-size:.72rem; opacity:.65; line-height:1.3; max-width:16rem; }
   /* Com todos os streamings, o selo "Incluído no Prime" não vale para tudo */
   html[data-sm-all] .sm-pv-check, html[data-sm-all] .sm-bill-info .sm-included, html[data-sm-all] .sm-pv-hover .sm-included { display:none; }
+
+  /* Janela flutuante */
+  .sm-pip-btn .sm-ico { width:1.7rem !important; height:1.7rem !important; color:#fff; }
+  .sm-pip-btn.on .sm-ico { color:var(--sm-accent, #7b5bf5); }
+  .sm-pip-toast { position:fixed; z-index:100005; left:50%; bottom:7rem; transform:translateX(-50%); padding:.7rem 1.1rem; border-radius:8px;
+    background:rgba(20,20,24,.95); color:#fff; font:600 .9rem/1.3 Inter, "Segoe UI", sans-serif; box-shadow:0 10px 30px rgba(0,0,0,.6); }
 
   /* Filmes / Séries com seletor de gênero */
   .sm-genre-head { display:flex; align-items:center; gap:1.4rem; margin:0 var(--pad) 1.6rem; overflow:visible !important; }
@@ -5427,6 +5434,62 @@
   // Loop principal
   // ===========================================================================
   let scheduled = false;
+  // ---------- Janela flutuante (Picture-in-Picture) ----------
+  // Botão na barra de controles do player (em todos os modos). O vídeo continua numa janelinha por cima das outras
+  // janelas do Windows, que dá para mover e redimensionar. Atalho: Alt+P.
+  const playerVideo = () => document.querySelector('[class*="video-container"] video') || document.querySelector('[class*="player-container"] video');
+  const pipSupported = () => Boolean(document.pictureInPictureEnabled) && typeof HTMLVideoElement.prototype.requestPictureInPicture === 'function';
+  async function togglePip() {
+    try {
+      if (document.pictureInPictureElement) { await document.exitPictureInPicture(); return; }
+      const v = playerVideo();
+      if (!v) return;
+      if (v.disablePictureInPicture) v.disablePictureInPicture = false;
+      await v.requestPictureInPicture();
+    } catch (err) {
+      console.warn('[Streaming Modes] janela flutuante:', err);
+      showPipError();
+    }
+  }
+  function showPipError() {
+    document.querySelector('.sm-pip-toast')?.remove();
+    const t = h('div', { class: 'sm-pip-toast', text: 'Não deu para abrir a janela flutuante com este vídeo.' });
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
+  function syncPipState() {
+    const on = Boolean(document.pictureInPictureElement);
+    document.querySelectorAll('.sm-pip-btn').forEach((b) => {
+      b.classList.toggle('on', on);
+      b.title = on ? 'Voltar o vídeo para a janela (Alt+P)' : 'Janela flutuante (Alt+P)';
+      b.setAttribute('aria-pressed', String(on));
+    });
+  }
+  function ensurePipButton() {
+    if (!/^#\/player\//.test(location.hash) || !pipSupported()) return;
+    const bar = document.querySelector('[class*="control-bar-buttons-container"]');
+    if (!bar || bar.querySelector('.sm-pip-btn')) return;
+    // Mesma aparência dos outros botões do Stremio (copia a classe de um deles).
+    const sample = [...bar.querySelectorAll('[class*="control-bar-button"]')].find((x) => x.querySelector('svg'));
+    const btn = h('div', { class: `${sample ? sample.className.replace(/\bdisabled\b/g, '') : ''} sm-pip-btn`, role: 'button', tabindex: '0',
+      title: 'Janela flutuante (Alt+P)', 'aria-label': 'Janela flutuante', 'aria-pressed': 'false' }, icon('pip'));
+    btn.addEventListener('click', (e) => { e.stopPropagation(); togglePip(); });
+    btn.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); togglePip(); } });
+    // Antes do botão de tela cheia (último botão), se houver.
+    const buttons = [...bar.children].filter((x) => /control-bar-button/.test(x.className));
+    const last = buttons[buttons.length - 1];
+    if (last) bar.insertBefore(btn, last); else bar.appendChild(btn);
+    syncPipState();
+  }
+  document.addEventListener('enterpictureinpicture', syncPipState, true);
+  document.addEventListener('leavepictureinpicture', syncPipState, true);
+  document.addEventListener('keydown', (e) => {
+    if (e.altKey && !e.ctrlKey && !e.shiftKey && (e.key === 'p' || e.key === 'P') && /^#\/player\//.test(location.hash)) {
+      e.preventDefault();
+      togglePip();
+    }
+  });
+
   function schedule() {
     if (scheduled) return;
     scheduled = true;
@@ -5437,6 +5500,7 @@
         ensureSwitchers();
         syncAppVisibility();
         syncPlayer();
+        ensurePipButton();
       } catch (err) {
         console.error('[Streaming Modes]', err);
       }
