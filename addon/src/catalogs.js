@@ -20,7 +20,7 @@ function rowsFor(p) {
   if (p.tmdbNetworkId) {
     rows.push({
       id: 'originals', type: 'series', name: `Só ${p.prep || 'na'} ${p.label}`, kind: 'discover', shape: 'poster',
-      params: { with_networks: p.tmdbNetworkId, sort_by: 'popularity.desc', 'first_air_date.gte': '2013-01-01', 'vote_count.gte': 30 },
+      params: { with_networks: p.tmdbNetworkId, sort_by: 'popularity.desc', 'first_air_date.gte': '2013-01-01', 'vote_count.gte': p.originalsMinVotes ?? 30 },
       noProviderFilter: true,
     });
   }
@@ -91,6 +91,11 @@ function rowsFor(p) {
   }
   // Fileiras infantis próprias do streaming (Disney+: filmes Disney/Pixar livres e Disney Channel/Junior).
   for (const k of p.kidsRows || []) genre(k.id, k.type, k.name, k.params);
+  // Fileiras próprias do streaming (Globoplay: novelas; Crunchyroll: simulcasts...). params pode ser função (datas).
+  for (const k of p.extraRows || []) {
+    rows.push({ id: k.id, type: k.type, name: k.name, kind: 'discover', shape: card,
+      params: typeof k.params === 'function' ? () => ({ sort_by: 'popularity.desc', ...k.params() }) : { sort_by: 'popularity.desc', ...k.params } });
+  }
   return rows;
 }
 

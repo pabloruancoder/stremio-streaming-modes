@@ -68,7 +68,65 @@ export const PROVIDERS = {
     // Em breve: só idiomas que costumam chegar ao Brasil (a Amazon tem muitos originais regionais).
     upcoming: { days: 180, networks: '1024', movieCompanies: '20580|210099', langs: ['en', 'pt', 'es', 'fr', 'it', 'de', 'ko'] },
   },
+  // HBO Max (voltou a se chamar assim em 2025, depois de "Max").
+  hbo: {
+    key: 'hbo',
+    label: 'HBO Max',
+    prep: 'na',
+    tmdbProviderId: 1899,
+    tmdbNetworkId: '49|3186|6783|8304', // HBO, HBO Max e Max = originais
+    hasOfficialTop10: false,
+    freshDays: { movie: 120, series: 60 },
+    // Marcas (página "Categorias" do app): HBO, DC, Warner Bros., Cartoon Network, Adult Swim e Discovery.
+    brands: [
+      { id: 'hbo', name: 'HBO', movie: { with_companies: '7429|14914' }, series: { with_networks: '49' } },
+      { id: 'dc', name: 'DC', movie: { with_companies: '9993|128064|184898|429' }, series: { with_companies: '9993|184898|429' } },
+      { id: 'wb', name: 'Warner Bros.', movie: { with_companies: '174' }, series: { with_companies: '1957' } },
+      { id: 'cn', name: 'Cartoon Network', movie: { with_companies: '7899|2785' }, series: { with_networks: '56' } },
+      { id: 'adultswim', name: 'Adult Swim', movie: { with_companies: '7899', 'vote_count.gte': 99999 }, series: { with_networks: '80' } },
+      { id: 'discovery', name: 'Discovery', movie: { with_genres: '99' }, series: { with_networks: '64|91|244|84' } },
+    ],
+    upcoming: { days: 180, networks: '49|3186|6783|8304', movieCompanies: '174|9993|184898|7429', langs: ['en', 'pt', 'es', 'fr', 'it', 'de', 'ko'] },
+  },
+  globoplay: {
+    key: 'globoplay',
+    label: 'Globoplay',
+    prep: 'no',
+    tmdbProviderId: 307,
+    tmdbNetworkId: '3290', // rede Globoplay = originais
+    originalsMinVotes: 0, // séries brasileiras têm poucos votos no TMDB
+    hasOfficialTop10: false,
+    freshDays: { movie: 120, series: 90 },
+    extraRows: [
+      { id: 'novelas', type: 'series', name: 'Novelas', params: { with_genres: '10766' } },
+      { id: 'tvglobo', type: 'series', name: 'Da TV Globo', params: { with_networks: '60' } },
+      { id: 'globofilmes', type: 'movie', name: 'Cinema brasileiro da Globo Filmes', params: { with_companies: '13969' } },
+    ],
+    upcoming: { days: 180, networks: '3290|60', langs: ['pt', 'en', 'es'] },
+  },
+  crunchyroll: {
+    key: 'crunchyroll',
+    label: 'Crunchyroll',
+    prep: 'na',
+    tmdbProviderId: 283,
+    tmdbNetworkId: '1112', // rede Crunchyroll = originais
+    hasOfficialTop10: false,
+    cardShape: 'poster', // anime em pôsteres verticais, como no app
+    freshDays: { movie: 180, series: 30 },
+    extraRows: [
+      // Simulcasts: animes com episódio saindo agora (dos últimos 10 dias aos próximos 7).
+      { id: 'simulcast', type: 'series', name: 'Simulcasts da temporada', params: () => ({ 'air_date.gte': dayISO(-10), 'air_date.lte': dayISO(7) }) },
+      { id: 'anime-action', type: 'series', name: 'Ação e aventura', params: { with_genres: '10759' } },
+      { id: 'anime-fantasy', type: 'series', name: 'Fantasia e ficção científica', params: { with_genres: '10765' } },
+      { id: 'anime-comedy', type: 'series', name: 'Comédia', params: { with_genres: '35' } },
+      { id: 'anime-drama', type: 'series', name: 'Drama', params: { with_genres: '18' } },
+      { id: 'anime-mystery', type: 'series', name: 'Mistério e suspense', params: { with_genres: '9648' } },
+    ],
+    upcoming: { days: 120, networks: '1112' },
+  },
 };
+
+const dayISO = (offset) => new Date(Date.now() + offset * 86400_000).toISOString().slice(0, 10);
 
 // Separador entre o nome do streaming e o nome da fileira.
 // O plugin usa esse prefixo para reconhecer as fileiras de cada modo, então não mude

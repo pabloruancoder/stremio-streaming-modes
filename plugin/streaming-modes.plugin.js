@@ -211,6 +211,82 @@
       ['series', 'reality-series', 'Reality shows'], ['series', 'kdrama-series', 'Séries coreanas'], ['series', 'br-series', 'Séries brasileiras']],
   };
 
+  MODES.apple.portrait = true;
+  const topNavMode = (o) => ({ layout: 'prime', wordmark: 'STREMIO', heroKicker: '', ...o });
+
+  MODES.hbo = topNavMode({
+    key: 'hbo', label: 'HBO Max', prep: 'na', accent: '#5468ff', bg: '#07080f', splash: 'HBO Max', provider: 'hbo', prefix: 'HBO Max • ',
+    heroCatalogs: [{ type: 'series', id: 'hbo.originals', kicker: 'Original HBO Max' }, { type: 'movie', id: 'hbo.trending-movies', kicker: '' },
+      { type: 'movie', id: 'hbo.brand-wb-movies', kicker: 'Warner Bros.' }],
+    navPages: [['home', 'Início'], ['series', 'Séries'], ['movies', 'Filmes'], ['new', 'Novidades'], ['mylist', 'Minha lista']],
+    // Marcas (página "Categorias" do app)
+    brands: [
+      { id: 'hbo', name: 'HBO', font: '900 1.5em "Arial Black", Arial, sans-serif', spacing: '.02em' },
+      { id: 'dc', name: 'DC', font: '900 1.6em Impact, "Arial Black", sans-serif', box: true },
+      { id: 'wb', name: 'WARNER BROS.', font: '800 .78em Georgia, serif', spacing: '.06em' },
+      { id: 'cn', name: 'CARTOON\nNETWORK', font: '900 .72em "Arial Black", Arial, sans-serif', spacing: '.02em' },
+      { id: 'adultswim', name: '[adult swim]', font: '700 .82em "Courier New", monospace' },
+      { id: 'discovery', name: 'Discovery', font: '700 1.05em Georgia, serif', spacing: '.01em' },
+    ],
+    pages: {
+      home: ['@continue', 'originals', '@brands', 'trending-series', '@because0', 'new-series', 'new-movies', '@soon', 'trending-movies',
+        'brand-hbo-series', 'acclaimed-series', 'brand-dc-movies', 'drama-series', 'crime-series', 'brand-wb-movies', 'comedy-series', '@genres',
+        '@because1', 'horror-movies', 'scifi-movies', 'brand-discovery-series', 'docs', 'reality-series', 'kids-series', '@mylist', 'all-series', 'all-movies'],
+      series: ['@continue', 'originals', 'trending-series', '@because0', 'new-series', 'brand-hbo-series', 'acclaimed-series', 'drama-series',
+        'crime-series', 'comedy-series', 'scifi-series', 'mystery-series', '@genres', 'brand-cn-series', 'brand-adultswim-series', 'reality-series',
+        'docu-series', 'kids-series', 'all-series'],
+      movies: ['@continue', 'trending-movies', 'new-movies', '@because1', 'acclaimed-movies', 'brand-wb-movies', 'brand-dc-movies', 'brand-hbo-movies',
+        'action-movies', 'comedy-movies', 'thriller-movies', 'horror-movies', 'scifi-movies', '@genres', 'docs', 'animation-movies', 'kids-movies', 'all-movies'],
+    },
+    kidsPages: ['@continue', 'kids-series', 'kids-anim-movies', '@because0', 'brand-cn-series', 'kids-movies', 'kids-family-series', '@mylist'],
+    kidsHero: [{ type: 'series', id: 'hbo.kids-series' }, { type: 'movie', id: 'hbo.kids-anim-movies' }],
+    explore: [['series', 'drama-series', 'Drama'], ['series', 'crime-series', 'Policiais'], ['series', 'comedy-series', 'Comédia'],
+      ['movie', 'action-movies', 'Ação'], ['movie', 'horror-movies', 'Terror'], ['movie', 'scifi-movies', 'Ficção científica'],
+      ['movie', 'thriller-movies', 'Suspense'], ['series', 'reality-series', 'Reality shows'], ['movie', 'docs', 'Documentários'],
+      ['movie', 'animation-movies', 'Animação'], ['series', 'kids-series', 'Infantis']],
+  });
+
+  MODES.globoplay = topNavMode({
+    key: 'globoplay', label: 'Globoplay', prep: 'no', accent: '#ff1e46', bg: '#0b0b0d', splash: 'Globoplay', provider: 'globoplay', prefix: 'Globoplay • ',
+    heroCatalogs: [{ type: 'series', id: 'globoplay.originals', kicker: 'Original Globoplay' }, { type: 'series', id: 'globoplay.novelas', kicker: 'Novela' },
+      { type: 'movie', id: 'globoplay.globofilmes', kicker: 'Globo Filmes' }],
+    navPages: [['home', 'Início'], ['series', 'Séries e novelas'], ['movies', 'Filmes'], ['new', 'Novidades'], ['mylist', 'Minha lista']],
+    pages: {
+      home: ['@continue', 'originals', 'novelas', '@because0', 'trending-series', 'tvglobo', 'new-series', '@soon', 'globofilmes', 'br-movies',
+        'trending-movies', 'comedy-series', 'drama-series', '@genres', 'reality-series', 'docu-series', 'kids-series', '@mylist', 'all-series', 'all-movies'],
+      series: ['@continue', 'novelas', 'originals', 'tvglobo', '@because0', 'trending-series', 'new-series', 'br-series', 'drama-series',
+        'comedy-series', 'crime-series', '@genres', 'reality-series', 'docu-series', 'kids-series', 'all-series'],
+      movies: ['@continue', 'globofilmes', 'br-movies', 'trending-movies', '@because1', 'new-movies', 'comedy-movies', 'action-movies',
+        'romance-movies', 'thriller-movies', '@genres', 'docs', 'kids-movies', 'all-movies'],
+    },
+    kidsPages: ['@continue', 'kids-series', 'kids-anim-movies', '@because0', 'kids-movies', 'kids-family-series', '@mylist'],
+    kidsHero: [{ type: 'series', id: 'globoplay.kids-series' }, { type: 'movie', id: 'globoplay.kids-anim-movies' }],
+    explore: [['series', 'novelas', 'Novelas'], ['series', 'tvglobo', 'TV Globo'], ['movie', 'globofilmes', 'Globo Filmes'],
+      ['series', 'drama-series', 'Drama'], ['series', 'comedy-series', 'Humor'], ['series', 'crime-series', 'Policiais'],
+      ['series', 'reality-series', 'Realities'], ['series', 'docu-series', 'Documentários'], ['movie', 'romance-movies', 'Romance'],
+      ['series', 'kids-series', 'Infantil']],
+  });
+
+  MODES.crunchyroll = topNavMode({
+    key: 'crunchyroll', label: 'Crunchyroll', prep: 'na', accent: '#f47521', bg: '#000000', splash: 'Crunchyroll', provider: 'crunchyroll',
+    prefix: 'Crunchyroll • ', portrait: true,
+    heroCatalogs: [{ type: 'series', id: 'crunchyroll.simulcast', kicker: 'Simulcast' }, { type: 'series', id: 'crunchyroll.trending-series', kicker: '' },
+      { type: 'movie', id: 'crunchyroll.anime-movies', kicker: 'Filme' }],
+    navPages: [['home', 'Início'], ['series', 'Animes'], ['movies', 'Filmes'], ['new', 'Novidades'], ['mylist', 'Minha lista']],
+    pages: {
+      home: ['@continue', 'simulcast', 'trending-series', '@because0', 'anime-action', 'anime-fantasy', '@genres', 'anime-comedy',
+        'acclaimed-series', 'anime-drama', 'anime-mystery', 'anime-movies', '@mylist', 'all-series', 'all-movies'],
+      series: ['@continue', 'simulcast', 'trending-series', '@because0', 'acclaimed-series', 'anime-action', 'anime-fantasy', '@genres',
+        'anime-comedy', 'anime-drama', 'anime-mystery', 'kids-series', 'all-series'],
+      movies: ['@continue', 'anime-movies', 'trending-movies', '@because1', 'animation-movies', 'acclaimed-movies', 'action-movies', 'all-movies'],
+    },
+    kidsPages: ['@continue', 'kids-series', 'kids-anim-movies', '@because0', 'kids-family-series', '@mylist'],
+    kidsHero: [{ type: 'series', id: 'crunchyroll.kids-series' }, { type: 'movie', id: 'crunchyroll.kids-anim-movies' }],
+    explore: [['series', 'simulcast', 'Simulcasts'], ['series', 'anime-action', 'Ação e aventura'], ['series', 'anime-fantasy', 'Fantasia'],
+      ['series', 'anime-comedy', 'Comédia'], ['series', 'anime-drama', 'Drama'], ['series', 'anime-mystery', 'Mistério'],
+      ['movie', 'anime-movies', 'Filmes de anime'], ['series', 'acclaimed-series', 'Mais bem avaliados']],
+  });
+
   const NAV_PAGES = [
     ['home', 'Início'],
     ['series', 'Séries'],
@@ -1654,187 +1730,237 @@
     --smc-accent:#1a98ff; --smc-accent-rgb:26,152,255; --smc-accent-dark:#0f6fc6;
     --smc-bg:#0f171e; --smc-bg-rgb:15,23,30; --smc-bg2:#1a242f; --smc-bg3:#252e39;
     --pv-gray:#8197a4; --glass-blur:blur(20px) saturate(160%);
+    --l-bg:#0f171e; --l-bg-rgb:15,23,30; --l-surf:#1a242f; --l-surf2:#252e39; --l-border:#33404d; --l-muted:#8197a4;
+    --l-accent:#1a98ff; --l-accent-rgb:26,152,255; --l-link:#79b8f3; --l-sec-rgb:66,82,96; --l-sec2-rgb:110,128,142; --l-intro:#16222d;
   }
-  html[data-sm-mode="prime"] #sm-app, html[data-sm-mode="prime"] #sm-modal, html[data-sm-mode="prime"] #sm-profiles,
-  html[data-sm-mode="prime"] .sm-menu, html[data-sm-mode="prime"] .sm-intro.prime, html[data-sm-mode="prime"] #sm-trailer {
+  html[data-sm-mode="hbo"] {
+    --smc-accent:#5468ff; --smc-accent-rgb:84,104,255; --smc-accent-dark:#2f3fc4; --smc-bg:#07080f; --smc-bg-rgb:7,8,15; --smc-bg2:#14172a; --smc-bg3:#1f2340;
+    --glass-blur:blur(20px) saturate(160%);
+    --l-bg:#07080f; --l-bg-rgb:7,8,15; --l-surf:#14172a; --l-surf2:#1f2340; --l-border:#2d3256; --l-muted:#9aa0c3;
+    --l-accent:#5468ff; --l-accent-rgb:84,104,255; --l-link:#9fa9ff; --l-sec-rgb:52,58,96; --l-sec2-rgb:82,90,140; --l-intro:#141a3a;
+  }
+  html[data-sm-mode="globoplay"] {
+    --smc-accent:#ff1e46; --smc-accent-rgb:255,30,70; --smc-accent-dark:#c4002a; --smc-bg:#0b0b0d; --smc-bg-rgb:11,11,13; --smc-bg2:#18181c; --smc-bg3:#24242a;
+    --glass-blur:blur(20px) saturate(160%);
+    --l-bg:#0b0b0d; --l-bg-rgb:11,11,13; --l-surf:#18181c; --l-surf2:#24242a; --l-border:#34343c; --l-muted:#a3a3ad;
+    --l-accent:#ff1e46; --l-accent-rgb:255,30,70; --l-link:#ff7a90; --l-sec-rgb:60,60,68; --l-sec2-rgb:92,92,104; --l-intro:#2a0a12;
+  }
+  html[data-sm-mode="crunchyroll"] {
+    --smc-accent:#f47521; --smc-accent-rgb:244,117,33; --smc-accent-dark:#c25510; --smc-bg:#000000; --smc-bg-rgb:0,0,0; --smc-bg2:#141519; --smc-bg3:#23252b;
+    --glass-blur:blur(20px) saturate(160%);
+    --l-bg:#000000; --l-bg-rgb:0,0,0; --l-surf:#141519; --l-surf2:#23252b; --l-border:#2f3138; --l-muted:#a0a0a0;
+    --l-accent:#f47521; --l-accent-rgb:244,117,33; --l-link:#ff9b5a; --l-sec-rgb:50,52,60; --l-sec2-rgb:80,82,92; --l-intro:#2a1406;
+  }
+  html[data-sm-layout="prime"] #sm-app, html[data-sm-layout="prime"] #sm-modal, html[data-sm-layout="prime"] #sm-profiles,
+  html[data-sm-layout="prime"] .sm-menu, html[data-sm-layout="prime"] .sm-intro.prime, html[data-sm-layout="prime"] #sm-trailer {
     font-family:"Amazon Ember", Inter, "Segoe UI", Arial, sans-serif; }
-  html[data-sm-mode="prime"] #sm-app { --railspace:0px; --pad:3vw; --gap:.9vw; background:#0f171e; color:#fff;
+  html[data-sm-mode="hbo"] #sm-app, html[data-sm-mode="hbo"] #sm-modal, html[data-sm-mode="globoplay"] #sm-app, html[data-sm-mode="globoplay"] #sm-modal,
+  html[data-sm-mode="crunchyroll"] #sm-app, html[data-sm-mode="crunchyroll"] #sm-modal { font-family:Inter, "Segoe UI", Arial, sans-serif; }
+  html[data-sm-layout="prime"] #sm-app { --railspace:0px; --pad:3vw; --gap:.9vw; background:var(--l-bg); color:#fff;
     --cw:calc((100vw - var(--pad) * 2 - var(--gap) * (var(--per) - 1)) / var(--per)); }
-  html[data-sm-mode="prime"] #sm-app > .sm-nav ~ * { position:relative; z-index:1; }
-  html[data-sm-mode="prime"] .sm-row, html[data-sm-mode="prime"] .sm-slider, html[data-sm-mode="prime"] .sm-row-head,
-  html[data-sm-mode="prime"] .sm-rows, html[data-sm-mode="prime"] .sm-dlg-info, html[data-sm-mode="prime"] .sm-actions,
-  html[data-sm-mode="prime"] .sm-bill-info, html[data-sm-mode="prime"] .sm-bill-actions, html[data-sm-mode="prime"] .sm-explorepage,
-  html[data-sm-mode="prime"] .sm-tabs, html[data-sm-mode="prime"] .sm-dlg-sub { overflow:visible !important; }
+  html[data-sm-layout="prime"] #sm-app > .sm-nav ~ * { position:relative; z-index:1; }
+  html[data-sm-layout="prime"] .sm-row, html[data-sm-layout="prime"] .sm-slider, html[data-sm-layout="prime"] .sm-row-head,
+  html[data-sm-layout="prime"] .sm-rows, html[data-sm-layout="prime"] .sm-dlg-info, html[data-sm-layout="prime"] .sm-actions,
+  html[data-sm-layout="prime"] .sm-bill-info, html[data-sm-layout="prime"] .sm-bill-actions, html[data-sm-layout="prime"] .sm-explorepage,
+  html[data-sm-layout="prime"] .sm-tabs, html[data-sm-layout="prime"] .sm-dlg-sub { overflow:visible !important; }
 
   /* Barra no topo: logo, abas em texto (a ativa em pílula branca), busca, perfil */
-  html[data-sm-mode="prime"] .sm-nav { height:72px; margin-bottom:-72px; gap:1.6rem; z-index:20;
-    background:linear-gradient(180deg, rgba(15,23,30,.92) 0%, rgba(15,23,30,.55) 60%, transparent); }
-  html[data-sm-mode="prime"] .sm-nav.solid { background-color:rgba(15,23,30,.97); -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur); }
-  html[data-sm-mode="prime"] .sm-wordmark { font:800 1.35rem/1 "Amazon Ember", Inter, Arial, sans-serif; letter-spacing:-.01em; color:#fff; text-transform:lowercase; }
-  html[data-sm-mode="prime"] .sm-links { gap:.3rem; }
-  html[data-sm-mode="prime"] .sm-links a { display:block; padding:.5rem .95rem; border-radius:999px; color:#fff; font-size:.98rem; font-weight:600;
+  html[data-sm-layout="prime"] .sm-nav { height:72px; margin-bottom:-72px; gap:1.6rem; z-index:20;
+    background:linear-gradient(180deg, rgba(var(--l-bg-rgb),.92) 0%, rgba(var(--l-bg-rgb),.55) 60%, transparent); }
+  html[data-sm-layout="prime"] .sm-nav.solid { background-color:rgba(var(--l-bg-rgb),.97); -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur); }
+  html[data-sm-layout="prime"] .sm-wordmark { font:800 1.35rem/1 "Amazon Ember", Inter, Arial, sans-serif; letter-spacing:-.01em; color:#fff; }
+  html[data-sm-mode="prime"] .sm-wordmark { text-transform:lowercase; }
+  html[data-sm-layout="prime"] .sm-links { gap:.3rem; }
+  html[data-sm-layout="prime"] .sm-links a { display:block; padding:.5rem .95rem; border-radius:999px; color:#fff; font-size:.98rem; font-weight:600;
     transition:background .2s, color .2s; }
-  html[data-sm-mode="prime"] .sm-links a:hover { background:rgba(255,255,255,.12); color:#fff; }
-  html[data-sm-mode="prime"] .sm-links a.active { background:#fff; color:#0f171e; font-weight:700; }
-  html[data-sm-mode="prime"] .sm-nav .sm-av-nav { border-radius:50%; }
-  html[data-sm-mode="prime"] .sm-pill, html[data-sm-mode="prime"] .sm-btn { white-space:nowrap; }
+  html[data-sm-layout="prime"] .sm-links a:hover { background:rgba(255,255,255,.12); color:#fff; }
+  html[data-sm-layout="prime"] .sm-links a.active { background:#fff; color:var(--l-bg); font-weight:700; }
+  html[data-sm-layout="prime"] .sm-nav .sm-av-nav { border-radius:50%; }
+  html[data-sm-layout="prime"] .sm-pill, html[data-sm-layout="prime"] .sm-btn { white-space:nowrap; }
   @media (max-width: 980px) {
-    html[data-sm-mode="prime"] .sm-nav { gap:.8rem; }
-    html[data-sm-mode="prime"] .sm-links { flex:1; min-width:0; overflow-x:auto !important; scrollbar-width:none; }
-    html[data-sm-mode="prime"] .sm-links::-webkit-scrollbar { display:none; }
-    html[data-sm-mode="prime"] .sm-links a { padding:.4rem .7rem; font-size:.88rem; white-space:nowrap; }
-    html[data-sm-mode="prime"] #sm-app .sm-switch > span:not(.sm-dot), html[data-sm-mode="prime"] #sm-app .sm-switch > .sm-ico { display:none; }
-    html[data-sm-mode="prime"] #sm-app .sm-switch { width:2rem; padding:0; justify-content:center; }
-    html[data-sm-mode="prime"] .sm-bill-info { width:auto; right:var(--pad); }
+    html[data-sm-layout="prime"] .sm-nav { gap:.8rem; }
+    html[data-sm-layout="prime"] .sm-links { flex:1; min-width:0; overflow-x:auto !important; scrollbar-width:none; }
+    html[data-sm-layout="prime"] .sm-links::-webkit-scrollbar { display:none; }
+    html[data-sm-layout="prime"] .sm-links a { padding:.4rem .7rem; font-size:.88rem; white-space:nowrap; }
+    html[data-sm-layout="prime"] #sm-app .sm-switch > span:not(.sm-dot), html[data-sm-layout="prime"] #sm-app .sm-switch > .sm-ico { display:none; }
+    html[data-sm-layout="prime"] #sm-app .sm-switch { width:2rem; padding:0; justify-content:center; }
+    html[data-sm-layout="prime"] .sm-bill-info { width:auto; right:var(--pad); }
   }
   @media (max-width: 600px) {
-    html[data-sm-mode="prime"] .sm-bill-desc { display:none; }
-    html[data-sm-mode="prime"] .sm-bill { min-height:22rem; }
+    html[data-sm-layout="prime"] .sm-bill-desc { display:none; }
+    html[data-sm-layout="prime"] .sm-bill { min-height:22rem; }
   }
-  html[data-sm-mode="prime"] #sm-app .sm-switch { background:rgba(255,255,255,.1); }
+  html[data-sm-layout="prime"] #sm-app .sm-switch { background:rgba(255,255,255,.1); }
 
   /* Destaque rotativo em tela cheia, com vídeo */
-  html[data-sm-mode="prime"] .sm-bill { height:min(80vh, 50vw); min-height:28rem; }
-  html[data-sm-mode="prime"] .sm-bill-slide::after { background:linear-gradient(90deg, rgba(15,23,30,.92) 0%, rgba(15,23,30,.55) 32%, rgba(15,23,30,0) 62%),
-    linear-gradient(0deg, #0f171e 0%, rgba(15,23,30,.55) 18%, rgba(15,23,30,0) 42%); }
-  html[data-sm-mode="prime"] .sm-bill-info { left:var(--pad); bottom:calc(6vw + 4rem); width:min(34rem, 40%); }
-  html[data-sm-mode="prime"] .sm-bill-title { font-weight:800; letter-spacing:-.015em; }
-  html[data-sm-mode="prime"] .sm-bill-meta { color:var(--pv-gray); font-weight:600; }
-  html[data-sm-mode="prime"] .sm-pill { height:3.1rem; padding:0 1.6rem 0 1.2rem !important; border-radius:8px !important; background:#fff !important; color:#0f171e;
+  html[data-sm-layout="prime"] .sm-bill { height:min(80vh, 50vw); min-height:28rem; }
+  html[data-sm-layout="prime"] .sm-bill-slide::after { background:linear-gradient(90deg, rgba(var(--l-bg-rgb),.92) 0%, rgba(var(--l-bg-rgb),.55) 32%, rgba(var(--l-bg-rgb),0) 62%),
+    linear-gradient(0deg, var(--l-bg) 0%, rgba(var(--l-bg-rgb),.55) 18%, rgba(var(--l-bg-rgb),0) 42%); }
+  html[data-sm-layout="prime"] .sm-bill-info { left:var(--pad); bottom:calc(6vw + 4rem); width:min(34rem, 40%); }
+  html[data-sm-layout="prime"] .sm-bill-title { font-weight:800; letter-spacing:-.015em; }
+  html[data-sm-layout="prime"] .sm-bill-meta { color:var(--l-muted); font-weight:600; }
+  html[data-sm-layout="prime"] .sm-pill { height:3.1rem; padding:0 1.6rem 0 1.2rem !important; border-radius:8px !important; background:#fff !important; color:var(--l-bg);
     font-weight:700; }
-  html[data-sm-mode="prime"] .sm-pill:hover { background:#e6e6e6 !important; transform:scale(1.03); }
-  html[data-sm-mode="prime"] .sm-glass-round { border-radius:8px !important; background:rgba(66,82,96,.6) !important; box-shadow:none !important; }
-  html[data-sm-mode="prime"] .sm-glass-round:hover { background:rgba(110,128,142,.75) !important; }
-  html[data-sm-mode="prime"] .sm-bill-arrow { border-radius:8px !important; background:rgba(15,23,30,.55) !important; box-shadow:none !important; }
-  html[data-sm-mode="prime"] .sm-bill-arrow.l { left:1rem; }
-  html[data-sm-mode="prime"] .sm-bill-pager { bottom:calc(6vw + 1.2rem); left:auto; right:var(--pad); transform:none; background:none; box-shadow:none !important;
+  html[data-sm-layout="prime"] .sm-pill:hover { background:#e6e6e6 !important; transform:scale(1.03); }
+  html[data-sm-layout="prime"] .sm-glass-round { border-radius:8px !important; background:rgba(var(--l-sec-rgb),.6) !important; box-shadow:none !important; }
+  html[data-sm-layout="prime"] .sm-glass-round:hover { background:rgba(var(--l-sec2-rgb),.75) !important; }
+  html[data-sm-layout="prime"] .sm-bill-arrow { border-radius:8px !important; background:rgba(var(--l-bg-rgb),.55) !important; box-shadow:none !important; }
+  html[data-sm-layout="prime"] .sm-bill-arrow.l { left:1rem; }
+  html[data-sm-layout="prime"] .sm-bill-pager { bottom:calc(6vw + 1.2rem); left:auto; right:var(--pad); transform:none; background:none; box-shadow:none !important;
     -webkit-backdrop-filter:none; backdrop-filter:none; padding:0 !important; }
-  html[data-sm-mode="prime"] .sm-bill-dot { width:1.4rem; height:.22rem; border-radius:2px !important; background:rgba(255,255,255,.3) !important; box-shadow:none; }
-  html[data-sm-mode="prime"] .sm-bill-dot.on { width:2.6rem; }
-  html[data-sm-mode="prime"] .sm-bill-mute { bottom:calc(6vw + 3rem); right:var(--pad); }
-  html[data-sm-mode="prime"] .sm-rows { margin-top:-6vw; padding-top:0; z-index:2 !important; }
-  html[data-sm-mode="prime"] .sm-rows.flat { margin-top:0; padding-top:96px; }
+  html[data-sm-layout="prime"] .sm-bill-dot { width:1.4rem; height:.22rem; border-radius:2px !important; background:rgba(255,255,255,.3) !important; box-shadow:none; }
+  html[data-sm-layout="prime"] .sm-bill-dot.on { width:2.6rem; }
+  html[data-sm-layout="prime"] .sm-bill-mute { bottom:calc(6vw + 3rem); right:var(--pad); }
+  html[data-sm-layout="prime"] .sm-rows { margin-top:-6vw; padding-top:0; z-index:2 !important; }
+  html[data-sm-layout="prime"] .sm-rows.flat { margin-top:0; padding-top:96px; }
   /* Selo "Incluído no Prime" */
   .sm-included { display:inline-flex; align-items:center; gap:.45rem; font-size:.95rem; font-weight:700; color:#fff; }
   .sm-included svg { width:1.15em; height:1.15em; flex:none; }
 
   /* Fileiras e capas: zoom com informações ao passar o mouse */
-  html[data-sm-mode="prime"] .sm-row { margin:0 0 1.2vw; }
-  html[data-sm-mode="prime"] .sm-row-head { margin-bottom:.1rem; }
-  html[data-sm-mode="prime"] .sm-row-title { font-size:clamp(1.05rem, 1.3vw, 1.4rem); font-weight:700; color:#fff; }
-  html[data-sm-mode="prime"] .sm-explore { margin-left:.6rem; color:#79b8f3; font-size:.88rem; font-weight:700; opacity:1; transform:none; }
-  html[data-sm-mode="prime"] .sm-explore:hover { color:#fff; text-decoration:underline; }
-  html[data-sm-mode="prime"] .sm-dashes { display:none; }
-  html[data-sm-mode="prime"] .sm-track { padding-top:1.4rem; padding-bottom:4.2rem; margin-bottom:-2.6rem; }
-  html[data-sm-mode="prime"] .sm-arrow { top:1.4rem; bottom:4.2rem; background:linear-gradient(90deg, rgba(15,23,30,.85), transparent) !important; }
-  html[data-sm-mode="prime"] .sm-arrow.r { background:linear-gradient(270deg, rgba(15,23,30,.85), transparent) !important; }
-  html[data-sm-mode="prime"] .sm-card:not(.rank) { border-radius:8px; overflow:hidden; transition:transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s; }
-  html[data-sm-mode="prime"] .sm-card:not(.rank):not(.skeleton):hover, html[data-sm-mode="prime"] .sm-card:not(.rank):focus-visible {
+  html[data-sm-layout="prime"] .sm-row { margin:0 0 1.2vw; }
+  html[data-sm-layout="prime"] .sm-row-head { margin-bottom:.1rem; }
+  html[data-sm-layout="prime"] .sm-row-title { font-size:clamp(1.05rem, 1.3vw, 1.4rem); font-weight:700; color:#fff; }
+  html[data-sm-layout="prime"] .sm-explore { margin-left:.6rem; color:var(--l-link); font-size:.88rem; font-weight:700; opacity:1; transform:none; }
+  html[data-sm-layout="prime"] .sm-explore:hover { color:#fff; text-decoration:underline; }
+  html[data-sm-layout="prime"] .sm-dashes { display:none; }
+  html[data-sm-layout="prime"] .sm-track { padding-top:1.4rem; padding-bottom:4.2rem; margin-bottom:-2.6rem; }
+  html[data-sm-layout="prime"] .sm-arrow { top:1.4rem; bottom:4.2rem; background:linear-gradient(90deg, rgba(var(--l-bg-rgb),.85), transparent) !important; }
+  html[data-sm-layout="prime"] .sm-arrow.r { background:linear-gradient(270deg, rgba(var(--l-bg-rgb),.85), transparent) !important; }
+  html[data-sm-layout="prime"] .sm-card:not(.rank) { border-radius:8px; overflow:hidden; transition:transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s; }
+  html[data-sm-layout="prime"] .sm-card:not(.rank):not(.skeleton):hover, html[data-sm-layout="prime"] .sm-card:not(.rank):focus-visible {
     transform:scale(1.14); z-index:4; box-shadow:0 18px 40px rgba(0,0,0,.65); outline:none; }
-  html[data-sm-mode="prime"] .sm-track > .sm-card:first-child:hover { transform-origin:left center; }
-  html[data-sm-mode="prime"] .sm-track > .sm-card:last-child:hover { transform-origin:right center; }
-  .sm-pv-check { position:absolute; z-index:2; left:.5rem; top:.5rem; width:1.15rem; height:1.15rem; border-radius:50%; background:#1a98ff;
+  html[data-sm-layout="prime"] .sm-track > .sm-card:first-child:hover { transform-origin:left center; }
+  html[data-sm-layout="prime"] .sm-track > .sm-card:last-child:hover { transform-origin:right center; }
+  .sm-pv-check { position:absolute; z-index:2; left:.5rem; top:.5rem; width:1.15rem; height:1.15rem; border-radius:50%; background:var(--l-accent);
     box-shadow:0 1px 4px rgba(0,0,0,.5); }
   .sm-pv-check::after { content:""; position:absolute; left:.3rem; top:.2rem; width:.32rem; height:.55rem; border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg); }
   .sm-pv-hover { position:absolute; z-index:3; inset:0; display:flex; flex-direction:column; justify-content:flex-end; gap:.3rem; padding:.7rem .75rem;
-    background:linear-gradient(0deg, rgba(15,23,30,.97) 0%, rgba(15,23,30,.75) 45%, rgba(15,23,30,0) 80%); opacity:0; transition:opacity .25s; pointer-events:none; }
+    background:linear-gradient(0deg, rgba(var(--l-bg-rgb),.97) 0%, rgba(var(--l-bg-rgb),.75) 45%, rgba(var(--l-bg-rgb),0) 80%); opacity:0; transition:opacity .25s; pointer-events:none; }
   .sm-card:hover > .sm-pv-hover, .sm-card:focus-visible > .sm-pv-hover { opacity:1; pointer-events:auto; }
   .sm-card:hover > .sm-card-logo, .sm-card:hover > .sm-card-name { opacity:0; }
   .sm-pv-row { display:flex; align-items:center; gap:.5rem; min-width:0; }
   .sm-pv-play { flex:none; display:grid; place-items:center; width:1.9rem; height:1.9rem; padding:0 !important; border-radius:50% !important;
-    background:#fff !important; color:#0f171e; cursor:pointer; transition:transform .2s; }
+    background:#fff !important; color:var(--l-bg); cursor:pointer; transition:transform .2s; }
   .sm-pv-play:hover { transform:scale(1.1); }
   .sm-pv-play .sm-ico { width:.9rem !important; height:.9rem !important; margin-left:.1rem; }
   .sm-pv-name { min-width:0; font-size:.85rem; font-weight:700; line-height:1.15; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .sm-pv-hover .sm-included { font-size:.68rem; }
-  .sm-pv-meta { font-size:.66rem; font-weight:600; color:var(--pv-gray); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  html[data-sm-mode="prime"] .sm-card.skeleton { background:linear-gradient(110deg, #1a242f 30%, #252e39 50%, #1a242f 70%); background-size:250% 100%;
+  .sm-pv-meta { font-size:.66rem; font-weight:600; color:var(--l-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  html[data-sm-layout="prime"] .sm-card.skeleton { background:linear-gradient(110deg, var(--l-surf) 30%, var(--l-surf2) 50%, var(--l-surf) 70%); background-size:250% 100%;
     animation:sm-skel 1.4s linear infinite; }
-  html[data-sm-mode="prime"] .sm-track > .sm-card:not(.skeleton) { animation:sm-pop-in .5s cubic-bezier(.2,.8,.2,1) backwards; }
-  html[data-sm-mode="prime"] .sm-card-progress { left:6%; right:6%; bottom:8%; height:4px; border-radius:2px; background:rgba(255,255,255,.3); overflow:hidden; }
-  html[data-sm-mode="prime"] .sm-card-progress i { background:#1a98ff; }
-  html[data-sm-mode="prime"] .sm-track > .sm-xpl { border-radius:8px; }
+  html[data-sm-layout="prime"] .sm-track > .sm-card:not(.skeleton) { animation:sm-pop-in .5s cubic-bezier(.2,.8,.2,1) backwards; }
+  html[data-sm-layout="prime"] .sm-card-progress { left:6%; right:6%; bottom:8%; height:4px; border-radius:2px; background:rgba(255,255,255,.3); overflow:hidden; }
+  html[data-sm-layout="prime"] .sm-card-progress i { background:var(--l-accent); }
+  html[data-sm-layout="prime"] .sm-track > .sm-xpl { border-radius:8px; }
 
   /* Detalhes em página inteira com abas (Episódios / Relacionados / Detalhes) */
-  html[data-sm-mode="prime"] #sm-modal { background:#0f171e; }
-  html[data-sm-mode="prime"] .sm-dialog { width:100%; min-height:100vh; margin:0; border-radius:0; background:transparent; box-shadow:none; transform:none; }
-  html[data-sm-mode="prime"] .sm-dlg-hero { position:relative; aspect-ratio:auto; min-height:max(34rem, 80vh); background-size:cover; background-position:center 20%; }
-  html[data-sm-mode="prime"] .sm-dlg-hero::after { z-index:1; background:linear-gradient(90deg, rgba(15,23,30,.97) 0%, rgba(15,23,30,.8) 30%, rgba(15,23,30,0) 65%),
-    linear-gradient(0deg, #0f171e 0%, rgba(15,23,30,0) 40%); }
-  html[data-sm-mode="prime"] .sm-dlg-info { left:3.4vw; bottom:3.2rem; width:min(36rem, 44%); }
-  html[data-sm-mode="prime"] .sm-dlg-info .sm-hero-logo { max-height:9rem; max-width:80%; margin-bottom:1.2rem; }
-  html[data-sm-mode="prime"] .sm-dlg-info .sm-actions { gap:.7rem; }
-  html[data-sm-mode="prime"] .sm-dlg-info .sm-btn { height:3.1rem; padding:0 1.5rem 0 1.2rem; border-radius:8px; font-weight:700; font-size:1rem; }
-  html[data-sm-mode="prime"] .sm-btn-white { background:#fff; color:#0f171e; }
-  html[data-sm-mode="prime"] .sm-btn-white:hover { background:#e6e6e6; }
-  html[data-sm-mode="prime"] .sm-btn-gray { background:rgba(66,82,96,.7); color:#fff; }
-  html[data-sm-mode="prime"] .sm-btn-gray:hover { background:rgba(110,128,142,.8); }
-  html[data-sm-mode="prime"] .sm-round { width:3.1rem; height:3.1rem; border:0; border-radius:8px; background:rgba(66,82,96,.7); color:#fff; }
-  html[data-sm-mode="prime"] .sm-round:hover { background:rgba(110,128,142,.8); }
-  html[data-sm-mode="prime"] .sm-btn:focus:not(:focus-visible), html[data-sm-mode="prime"] .sm-dlg-info .sm-btn-white:focus { outline:none; }
-  html[data-sm-mode="prime"] .sm-dlg-close { top:1.2rem; left:1.4rem; right:auto; width:2.8rem; height:2.8rem; border:0; border-radius:8px; background:rgba(15,23,30,.6); }
-  html[data-sm-mode="prime"] .sm-dlg-sub .sm-included { margin:1.1rem 0 .1rem; }
-  html[data-sm-mode="prime"] .sm-dlg-bits { color:var(--pv-gray); margin-top:.6rem; }
-  html[data-sm-mode="prime"] .sm-dlg-body { padding:0 3.4vw 4rem; }
-  html[data-sm-mode="prime"] .sm-tabs { gap:2rem; margin:0 0 1.8rem; border-bottom:1px solid rgba(255,255,255,.15); }
-  html[data-sm-mode="prime"] .sm-tab { padding:0 0 .8rem; font-size:1.1rem; font-weight:700; letter-spacing:0; color:var(--pv-gray); }
-  html[data-sm-mode="prime"] .sm-tab:hover, html[data-sm-mode="prime"] .sm-tab[aria-selected="true"] { color:#fff; }
-  html[data-sm-mode="prime"] .sm-tab[aria-selected="true"]::after { height:3px; bottom:-1px; border-radius:2px; background:#fff; }
-  html[data-sm-mode="prime"] .sm-dlg-body[data-tab] > .sm-dlg-section[data-tab] { display:none; margin-top:0; }
-  html[data-sm-mode="prime"] .sm-dlg-body[data-tab="eps"] > .sm-dlg-section[data-tab="eps"],
-  html[data-sm-mode="prime"] .sm-dlg-body[data-tab="sim"] > .sm-dlg-section[data-tab="sim"] { display:block; }
-  html[data-sm-mode="prime"] .sm-dlg-body[data-tab="det"] > .sm-dlg-section[data-tab="det"] { display:grid; grid-template-columns:1.4fr 1fr; gap:3rem; }
-  html[data-sm-mode="prime"] .sm-dlg-section[data-tab] > h3, html[data-sm-mode="prime"] .sm-dlg-section[data-tab] .sm-dlg-section-head h3 { display:none; }
-  html[data-sm-mode="prime"] .sm-dlg-section-head { justify-content:flex-start; }
-  html[data-sm-mode="prime"] .sm-dlg-section-head .sm-dd-panel { left:0; right:auto; background:#1a242f; border-radius:8px; }
-  html[data-sm-mode="prime"] .sm-dd-btn { border-radius:8px; background:#252e39; border-color:#33404d; }
-  html[data-sm-mode="prime"] .sm-ep { border-bottom-color:#25303b; border-radius:8px; }
-  html[data-sm-mode="prime"] .sm-ep:hover { background:#1a242f; }
-  html[data-sm-mode="prime"] .sm-ep.hl { background:#1a242f; }
-  html[data-sm-mode="prime"] .sm-ep-img { border-radius:8px; }
-  html[data-sm-mode="prime"] .sm-ep-desc { color:var(--pv-gray); }
-  html[data-sm-mode="prime"] .sm-similar { grid-template-columns:repeat(auto-fill, minmax(15rem, 1fr)); gap:1.2rem; overflow:visible !important; }
-  html[data-sm-mode="prime"] .sm-sim { background:none; border-radius:8px; overflow:visible !important; }
-  html[data-sm-mode="prime"] .sm-sim-img { border-radius:8px; transition:transform .3s; }
-  html[data-sm-mode="prime"] .sm-sim:hover .sm-sim-img { transform:scale(1.06); }
-  html[data-sm-mode="prime"] .sm-sim-body { padding:.6rem .1rem 0; }
-  html[data-sm-mode="prime"] .sm-sim-body p, html[data-sm-mode="prime"] .sm-sim .sm-meta { display:none; }
-  html[data-sm-mode="prime"] .sm-match, html[data-sm-mode="prime"] .sm-hd { display:none; }
-  html[data-sm-mode="prime"] .sm-det-side span { color:var(--pv-gray); }
+  html[data-sm-layout="prime"] #sm-modal { background:var(--l-bg); }
+  html[data-sm-layout="prime"] .sm-dialog { width:100%; min-height:100vh; margin:0; border-radius:0; background:transparent; box-shadow:none; transform:none; }
+  html[data-sm-layout="prime"] .sm-dlg-hero { position:relative; aspect-ratio:auto; min-height:max(34rem, 80vh); background-size:cover; background-position:center 20%; }
+  html[data-sm-layout="prime"] .sm-dlg-hero::after { z-index:1; background:linear-gradient(90deg, rgba(var(--l-bg-rgb),.97) 0%, rgba(var(--l-bg-rgb),.8) 30%, rgba(var(--l-bg-rgb),0) 65%),
+    linear-gradient(0deg, var(--l-bg) 0%, rgba(var(--l-bg-rgb),0) 40%); }
+  html[data-sm-layout="prime"] .sm-dlg-info { left:3.4vw; bottom:3.2rem; width:min(36rem, 44%); }
+  html[data-sm-layout="prime"] .sm-dlg-info .sm-hero-logo { max-height:9rem; max-width:80%; margin-bottom:1.2rem; }
+  html[data-sm-layout="prime"] .sm-dlg-info .sm-actions { gap:.7rem; }
+  html[data-sm-layout="prime"] .sm-dlg-info .sm-btn { height:3.1rem; padding:0 1.5rem 0 1.2rem; border-radius:8px; font-weight:700; font-size:1rem; }
+  html[data-sm-layout="prime"] .sm-btn-white { background:#fff; color:var(--l-bg); }
+  html[data-sm-layout="prime"] .sm-btn-white:hover { background:#e6e6e6; }
+  html[data-sm-layout="prime"] .sm-btn-gray { background:rgba(var(--l-sec-rgb),.7); color:#fff; }
+  html[data-sm-layout="prime"] .sm-btn-gray:hover { background:rgba(var(--l-sec2-rgb),.8); }
+  html[data-sm-layout="prime"] .sm-round { width:3.1rem; height:3.1rem; border:0; border-radius:8px; background:rgba(var(--l-sec-rgb),.7); color:#fff; }
+  html[data-sm-layout="prime"] .sm-round:hover { background:rgba(var(--l-sec2-rgb),.8); }
+  html[data-sm-layout="prime"] .sm-btn:focus:not(:focus-visible), html[data-sm-layout="prime"] .sm-dlg-info .sm-btn-white:focus { outline:none; }
+  html[data-sm-layout="prime"] .sm-dlg-close { top:1.2rem; left:1.4rem; right:auto; width:2.8rem; height:2.8rem; border:0; border-radius:8px; background:rgba(var(--l-bg-rgb),.6); }
+  html[data-sm-layout="prime"] .sm-dlg-sub .sm-included { margin:1.1rem 0 .1rem; }
+  html[data-sm-layout="prime"] .sm-dlg-bits { color:var(--l-muted); margin-top:.6rem; }
+  html[data-sm-layout="prime"] .sm-dlg-body { padding:0 3.4vw 4rem; }
+  html[data-sm-layout="prime"] .sm-tabs { gap:2rem; margin:0 0 1.8rem; border-bottom:1px solid rgba(255,255,255,.15); }
+  html[data-sm-layout="prime"] .sm-tab { padding:0 0 .8rem; font-size:1.1rem; font-weight:700; letter-spacing:0; color:var(--l-muted); }
+  html[data-sm-layout="prime"] .sm-tab:hover, html[data-sm-layout="prime"] .sm-tab[aria-selected="true"] { color:#fff; }
+  html[data-sm-layout="prime"] .sm-tab[aria-selected="true"]::after { height:3px; bottom:-1px; border-radius:2px; background:#fff; }
+  html[data-sm-layout="prime"] .sm-dlg-body[data-tab] > .sm-dlg-section[data-tab] { display:none; margin-top:0; }
+  html[data-sm-layout="prime"] .sm-dlg-body[data-tab="eps"] > .sm-dlg-section[data-tab="eps"],
+  html[data-sm-layout="prime"] .sm-dlg-body[data-tab="sim"] > .sm-dlg-section[data-tab="sim"] { display:block; }
+  html[data-sm-layout="prime"] .sm-dlg-body[data-tab="det"] > .sm-dlg-section[data-tab="det"] { display:grid; grid-template-columns:1.4fr 1fr; gap:3rem; }
+  html[data-sm-layout="prime"] .sm-dlg-section[data-tab] > h3, html[data-sm-layout="prime"] .sm-dlg-section[data-tab] .sm-dlg-section-head h3 { display:none; }
+  html[data-sm-layout="prime"] .sm-dlg-section-head { justify-content:flex-start; }
+  html[data-sm-layout="prime"] .sm-dlg-section-head .sm-dd-panel { left:0; right:auto; background:var(--l-surf); border-radius:8px; }
+  html[data-sm-layout="prime"] .sm-dd-btn { border-radius:8px; background:var(--l-surf2); border-color:var(--l-border); }
+  html[data-sm-layout="prime"] .sm-ep { border-bottom-color:var(--l-border); border-radius:8px; }
+  html[data-sm-layout="prime"] .sm-ep:hover { background:var(--l-surf); }
+  html[data-sm-layout="prime"] .sm-ep.hl { background:var(--l-surf); }
+  html[data-sm-layout="prime"] .sm-ep-img { border-radius:8px; }
+  html[data-sm-layout="prime"] .sm-ep-desc { color:var(--l-muted); }
+  html[data-sm-layout="prime"] .sm-similar { grid-template-columns:repeat(auto-fill, minmax(15rem, 1fr)); gap:1.2rem; overflow:visible !important; }
+  html[data-sm-layout="prime"] .sm-sim { background:none; border-radius:8px; overflow:visible !important; }
+  html[data-sm-layout="prime"] .sm-sim-img { border-radius:8px; transition:transform .3s; }
+  html[data-sm-layout="prime"] .sm-sim:hover .sm-sim-img { transform:scale(1.06); }
+  html[data-sm-layout="prime"] .sm-sim-body { padding:.6rem .1rem 0; }
+  html[data-sm-layout="prime"] .sm-sim-body p, html[data-sm-layout="prime"] .sm-sim .sm-meta { display:none; }
+  html[data-sm-layout="prime"] .sm-match, html[data-sm-layout="prime"] .sm-hd { display:none; }
+  html[data-sm-layout="prime"] .sm-det-side span { color:var(--l-muted); }
 
   /* Busca, perfis, painéis */
-  html[data-sm-mode="prime"] .sm-searchpage { grid-template-columns:1fr; gap:1.2rem; padding:96px var(--pad) 4rem; }
-  html[data-sm-mode="prime"] .sm-sp-side { position:static; max-height:none; }
-  html[data-sm-mode="prime"] .sm-sp-box { height:3.4rem; border-radius:8px; background:#1a242f; border:2px solid #33404d; }
-  html[data-sm-mode="prime"] .sm-sp-box:focus-within { border-color:#fff; background:#1a242f; }
-  html[data-sm-mode="prime"] .sm-sp-list { display:flex; flex-wrap:wrap; gap:.5rem; overflow:visible; }
-  html[data-sm-mode="prime"] .sm-sp-list > li { display:contents; }
-  html[data-sm-mode="prime"] .sm-sp-item { width:auto; padding:.5rem 1rem; border-radius:999px; background:#252e39; color:#fff; font-size:.92rem; }
-  html[data-sm-mode="prime"] .sm-sp-item:hover, html[data-sm-mode="prime"] .sm-sp-item.on { background:#fff; color:#0f171e; box-shadow:none; }
-  html[data-sm-mode="prime"] .sm-sp-item:hover b { color:#0f171e; }
-  html[data-sm-mode="prime"] .sm-xpl { border-radius:8px; background:#1a242f !important; box-shadow:none !important; }
-  html[data-sm-mode="prime"] .sm-xpl:hover { box-shadow:0 14px 30px rgba(0,0,0,.6) !important; }
-  html[data-sm-mode="prime"] .sm-ghost { background:#1a242f; border-radius:8px; }
-  html[data-sm-mode="prime"] .sm-pop, html[data-sm-mode="prime"] .sm-menu, html[data-sm-mode="prime"] .sm-dd-panel { background:#1a242f; border-radius:8px; }
-  html[data-sm-mode="prime"] .sm-av, html[data-sm-mode="prime"] .sm-prof-av, html[data-sm-mode="prime"] .sm-prof-edit, html[data-sm-mode="prime"] .sm-av-xl { border-radius:50%; }
-  html[data-sm-mode="prime"] #sm-profiles { background:#0f171e; }
-  html[data-sm-mode="prime"] .sm-gate h1 { font-weight:700; }
-  html[data-sm-mode="prime"] .sm-prof:hover .sm-prof-av { outline-color:#fff; }
-  html[data-sm-mode="prime"] .sm-gate-btn { border-radius:8px; }
-  html[data-sm-mode="prime"] .sm-gate-btn.white { background:#fff; color:#0f171e; }
-  html[data-sm-mode="prime"] .sm-offline { background:#1a242f; border-color:#33404d; color:#fff; border-radius:8px; }
+  html[data-sm-layout="prime"] .sm-searchpage { grid-template-columns:1fr; gap:1.2rem; padding:96px var(--pad) 4rem; }
+  html[data-sm-layout="prime"] .sm-sp-side { position:static; max-height:none; }
+  html[data-sm-layout="prime"] .sm-sp-box { height:3.4rem; border-radius:8px; background:var(--l-surf); border:2px solid var(--l-border); }
+  html[data-sm-layout="prime"] .sm-sp-box:focus-within { border-color:#fff; background:var(--l-surf); }
+  html[data-sm-layout="prime"] .sm-sp-list { display:flex; flex-wrap:wrap; gap:.5rem; overflow:visible; }
+  html[data-sm-layout="prime"] .sm-sp-list > li { display:contents; }
+  html[data-sm-layout="prime"] .sm-sp-item { width:auto; padding:.5rem 1rem; border-radius:999px; background:var(--l-surf2); color:#fff; font-size:.92rem; }
+  html[data-sm-layout="prime"] .sm-sp-item:hover, html[data-sm-layout="prime"] .sm-sp-item.on { background:#fff; color:var(--l-bg); box-shadow:none; }
+  html[data-sm-layout="prime"] .sm-sp-item:hover b { color:var(--l-bg); }
+  html[data-sm-layout="prime"] .sm-xpl { border-radius:8px; background:var(--l-surf) !important; box-shadow:none !important; }
+  html[data-sm-layout="prime"] .sm-xpl:hover { box-shadow:0 14px 30px rgba(0,0,0,.6) !important; }
+  html[data-sm-layout="prime"] .sm-ghost { background:var(--l-surf); border-radius:8px; }
+  html[data-sm-layout="prime"] .sm-pop, html[data-sm-layout="prime"] .sm-menu, html[data-sm-layout="prime"] .sm-dd-panel { background:var(--l-surf); border-radius:8px; }
+  html[data-sm-layout="prime"] .sm-av, html[data-sm-layout="prime"] .sm-prof-av, html[data-sm-layout="prime"] .sm-prof-edit, html[data-sm-layout="prime"] .sm-av-xl { border-radius:50%; }
+  html[data-sm-layout="prime"] #sm-profiles { background:var(--l-bg); }
+  html[data-sm-layout="prime"] .sm-gate h1 { font-weight:700; }
+  html[data-sm-layout="prime"] .sm-prof:hover .sm-prof-av { outline-color:#fff; }
+  html[data-sm-layout="prime"] .sm-gate-btn { border-radius:8px; }
+  html[data-sm-layout="prime"] .sm-gate-btn.white { background:#fff; color:var(--l-bg); }
+  html[data-sm-layout="prime"] .sm-offline { background:var(--l-surf); border-color:var(--l-border); color:#fff; border-radius:8px; }
   /* Player: barra azul do Prime */
-  html[data-sm-mode="prime"] [class*="seek-bar-container"] [class*="track-after"] { background-color:#1a98ff !important; }
-  html[data-sm-mode="prime"] [class*="seek-bar-container"] [class*="thumb-"] { background:#fff !important; box-shadow:0 0 0 3px rgba(26,152,255,.35) !important; }
+  html[data-sm-layout="prime"] [class*="seek-bar-container"] [class*="track-after"] { background-color:var(--l-accent) !important; }
+  html[data-sm-layout="prime"] [class*="seek-bar-container"] [class*="thumb-"] { background:#fff !important; box-shadow:0 0 0 3px rgba(var(--l-accent-rgb),.35) !important; }
   /* Abertura: nome com um traço azul que se desenha embaixo */
-  .sm-intro.prime { background:radial-gradient(ellipse 60% 50% at 50% 50%, #16222d 0%, #0b1117 70%); }
+  .sm-intro.prime { background:radial-gradient(ellipse 60% 50% at 50% 50%, #18202a 0%, #050608 70%); }
   .sm-prime-intro { position:relative; display:flex; flex-direction:column; align-items:center; animation:sm-glass-in var(--t, 2.2s) cubic-bezier(.2,.8,.2,1) forwards; }
   .sm-intro.prime .sm-intro-word { color:#fff; font:800 clamp(2.8rem, 7vw, 6rem)/1 "Amazon Ember", Inter, "Segoe UI", sans-serif; letter-spacing:-.02em;
-    text-transform:lowercase; animation:none; opacity:1; }
-  .sm-prime-swoosh { display:block; height:.35rem; margin-top:.8rem; border-radius:999px; background:linear-gradient(90deg, rgba(26,152,255,0), #1a98ff 30%, #7cc4ff);
-    box-shadow:0 0 18px rgba(26,152,255,.8); width:0; animation:sm-prime-swoosh var(--t, 2.2s) cubic-bezier(.3,.7,.2,1) forwards; }
+    animation:none; opacity:1; }
+  .sm-intro.m-prime .sm-intro-word { text-transform:lowercase; }
+  .sm-prime-swoosh { display:block; height:.35rem; margin-top:.8rem; border-radius:999px; background:linear-gradient(90deg, transparent, var(--sm-accent) 30%, #fff);
+    box-shadow:0 0 18px var(--sm-accent); width:0; animation:sm-prime-swoosh var(--t, 2.2s) cubic-bezier(.3,.7,.2,1) forwards; }
   @keyframes sm-prime-swoosh { 0%, 15% { width:0; } 55%, 100% { width:min(70%, 22rem); } }
 
+
+  /* Pôsteres verticais (Crunchyroll) dentro do layout de barra no topo */
+  html[data-sm-layout="prime"] #sm-app { --perp:7; --cwp:calc((100vw - var(--pad) * 2 - var(--gap) * (var(--perp) - 1)) / var(--perp)); }
+  @media (max-width:1399px) { html[data-sm-layout="prime"] #sm-app { --perp:6; } }
+  @media (max-width:1099px) { html[data-sm-layout="prime"] #sm-app { --perp:5; } }
+  @media (max-width:799px) { html[data-sm-layout="prime"] #sm-app { --perp:3; } }
+  html[data-sm-layout="prime"] .sm-track > .sm-card.portrait { flex-basis:var(--cwp); height:calc(var(--cwp) * 1.5); }
+  html[data-sm-layout="prime"][data-sm-portrait] .sm-track > .sm-card.skeleton:not(.rank) { flex-basis:var(--cwp); height:calc(var(--cwp) * 1.5); }
+  .sm-card.portrait > .sm-card-logo, .sm-card.portrait > .sm-card-name { display:none; }
+  html[data-sm-layout="prime"] .sm-grid .sm-card.portrait { aspect-ratio:2/3; height:auto; }
+  /* Blocos de marca (HBO Max) no tom do modo */
+  html[data-sm-layout="prime"] .sm-brand { border-radius:10px; border-color:rgba(255,255,255,.08); background:linear-gradient(160deg, var(--l-surf2), var(--l-surf)); }
+  html[data-sm-layout="prime"] .sm-brands { margin-top:1.4rem; }
+  /* HBO Max: brilho azul-violeta no topo da página */
+  html[data-sm-mode="hbo"] #sm-app { background:radial-gradient(ellipse 80% 45% at 15% 0%, rgba(84,104,255,.22), transparent 70%), #07080f; }
+  /* Globoplay: brilho vermelho */
+  html[data-sm-mode="globoplay"] #sm-app { background:radial-gradient(ellipse 80% 45% at 85% 0%, rgba(255,30,70,.16), transparent 70%), #0b0b0d; }
+  /* Crunchyroll: capas sem cantos muito arredondados, título laranja ao passar o mouse */
+  html[data-sm-mode="crunchyroll"] .sm-card:not(.rank) { border-radius:4px; }
+  html[data-sm-mode="crunchyroll"] .sm-pv-name { color:#fff; }
+  html[data-sm-mode="crunchyroll"] .sm-links a.active { background:var(--l-accent); color:#000; }
+  html[data-sm-mode="crunchyroll"] .sm-pill { background:var(--l-accent) !important; color:#000; }
+  html[data-sm-mode="crunchyroll"] .sm-pill:hover { background:#ff8a3d !important; }
+  html[data-sm-mode="crunchyroll"] .sm-btn-white { background:var(--l-accent); color:#000; }
+  html[data-sm-mode="crunchyroll"] .sm-btn-white:hover { background:#ff8a3d; }
+  html[data-sm-mode="globoplay"] .sm-links a.active { background:var(--l-accent); color:#fff; }
   /* Filmes / Séries com seletor de gênero */
   .sm-genre-head { display:flex; align-items:center; gap:1.4rem; margin:0 var(--pad) 1.6rem; overflow:visible !important; }
   .sm-genre-head .sm-page-title { margin:0; }
@@ -2199,6 +2325,8 @@
     else delete root.dataset.smThemed;
     if (MODES[state.mode].layout) root.dataset.smLayout = MODES[state.mode].layout;
     else delete root.dataset.smLayout;
+    if (MODES[state.mode].portrait) root.dataset.smPortrait = '';
+    else delete root.dataset.smPortrait;
     if (state.showInDefault) root.dataset.smShowDefault = '';
     else delete root.dataset.smShowDefault;
   }
@@ -2235,7 +2363,7 @@
           <animate attributeName="opacity" values="0;.95;0" keyTimes="0;.3;1" begin="1.3s" dur=".7s" fill="freeze"/></circle></svg>`;
     }
     if (mode.layout === 'prime') {
-      overlay.classList.add('prime');
+      overlay.classList.add('prime', `m-${mode.key}`);
       overlay.appendChild(h('div', { class: 'sm-prime-intro' }, h('div', { class: 'sm-intro-word', text: mode.splash }), h('i', { class: 'sm-prime-swoosh' })));
       return overlay;
     }
@@ -3086,7 +3214,7 @@
   // Selo azul "Incluído no Prime" (Prime Video).
   function includedTag() {
     const tag = h('div', { class: 'sm-included' });
-    tag.innerHTML = '<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="10" fill="#1a98ff"/><path d="M5.6 10.3l2.9 2.9 5.9-6.2" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    tag.innerHTML = '<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="10" style="fill:var(--l-accent, #1a98ff)"/><path d="M5.6 10.3l2.9 2.9 5.9-6.2" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     tag.appendChild(h('span', { text: MODES[state.mode].included }));
     return tag;
   }
@@ -3106,7 +3234,8 @@
       onScroll(y) { hero.classList.toggle('offscreen', y > hero.offsetHeight * 0.7); },
     };
     (async () => {
-      const lists = await Promise.all(sources.map((src) => catalog(src.type, src.id).then((ms) => ms.slice(0, 6)).catch(() => [])));
+      const lists = await Promise.all(sources.map((src) => catalog(src.type, src.id)
+        .then((ms) => ms.slice(0, 6).map((m) => ({ ...m, _kicker: src.kicker }))).catch(() => [])));
       const pool = [];
       const seen = new Set();
       for (let i = 0; i < 6 && pool.length < 8; i++) {
@@ -3133,7 +3262,7 @@
         const slide = h('div', { class: 'sm-bill-slide' },
           h('div', { class: 'sm-bill-img', style: { backgroundImage: cssUrl(it.background) } }),
           h('div', { class: 'sm-bill-info' },
-            MODES[state.mode].included ? includedTag() : h('div', { class: 'sm-bill-kicker', text: MODES[state.mode].heroKicker || '' }),
+            MODES[state.mode].included ? includedTag() : h('div', { class: 'sm-bill-kicker', text: it._kicker ?? MODES[state.mode].heroKicker ?? '' }),
             logoOrTitle(it, 'sm-bill-logo', 'sm-bill-title'),
             h('div', { class: 'sm-bill-meta', text: meta }),
             it.description ? h('p', { class: 'sm-bill-desc', text: it.description }) : null,
@@ -3223,6 +3352,7 @@
   function buildHero(mode, wrap, rows, sourcesOverride) {
     const types = state.page === 'series' ? ['series'] : state.page === 'movies' ? ['movie'] : ['series', 'movie'];
     const sources = (sourcesOverride || (isKids() ? mode.kidsHero : mode.heroCatalogs)).filter((c) => types.includes(c.type));
+    if (!sources.length) { rows.classList.add('flat'); return; }
     if (mode.layout === 'disney') return buildCarousel(wrap, rows, sources);
     if (mode.layout === 'apple' || mode.layout === 'prime') return buildBillboard(wrap, rows, sources);
     const hero = h('section', { class: 'sm-hero', 'aria-label': 'Destaque' });
@@ -3460,7 +3590,7 @@
 
   function card(item, opts = {}) {
     // Apple TV: pôster na vertical (como no tvOS 26), menos em "Continuar assistindo".
-    const portrait = isApple() && !opts.progress && item.poster && item.posterShape !== 'landscape';
+    const portrait = MODES[state.mode].portrait && !opts.progress && item.poster && item.posterShape !== 'landscape';
     const el = h('div', { class: portrait ? 'sm-card portrait' : 'sm-card', tabindex: '0', role: 'button', 'aria-label': item.name,
       style: { backgroundImage: cssUrl(portrait ? tmdbSize(item.poster, 'w342') || item.poster : cardImage(item)) } });
     el.appendChild(logoOrTitle(item, 'sm-card-logo', 'sm-card-name'));
@@ -3469,10 +3599,11 @@
       const meta = [item.releaseInfo, item.rating ? `★ ${item.rating}` : null, item.type === 'movie' ? 'Filme' : 'Série'].filter(Boolean).join('  ·  ');
       const playBtn = h('button', { type: 'button', class: 'sm-pv-play', 'aria-label': `Assistir ${item.name}` }, icon('play', true));
       playBtn.addEventListener('click', (e) => { e.stopPropagation(); play(item); });
-      el.appendChild(h('div', { class: 'sm-pv-check', title: 'Incluído no Prime' }));
+      const inc = MODES[state.mode].included;
+      if (inc) el.appendChild(h('div', { class: 'sm-pv-check', title: inc }));
       el.appendChild(h('div', { class: 'sm-pv-hover' },
         h('div', { class: 'sm-pv-row' }, playBtn, h('div', { class: 'sm-pv-name', text: item.name })),
-        includedTag(),
+        inc ? includedTag() : null,
         h('div', { class: 'sm-pv-meta', text: meta })));
     }
     if (opts.progress && item.progress > 0) {
@@ -3962,10 +4093,11 @@
       const sub = dialog.querySelector('.sm-dlg-sub');
       const bits = [info.year, info.seasonsCount ? (info.seasonsCount === 1 ? '1 temporada' : `${info.seasonsCount} temporadas`)
         : info.runtime && item.type === 'movie' ? fmtRuntime(info.runtime) : null, (info.genres || []).slice(0, 3).join(', ')].filter(Boolean);
-      sub?.replaceChildren(
-        isPrime() ? includedTag() : null,
+      // replaceChildren escreveria "null" como texto: os itens vazios são filtrados.
+      sub?.replaceChildren(...[
+        MODES[state.mode].included ? includedTag() : null,
         h('div', { class: 'sm-dlg-bits' }, d?.certification ? certBadge(d.certification) : null, h('span', { text: bits.join(' • ') })),
-        info.description ? h('p', { class: 'sm-dlg-sum', text: info.description }) : null);
+        info.description ? h('p', { class: 'sm-dlg-sum', text: info.description }) : null].filter(Boolean));
       body.replaceChildren(...(tabs ? [tabs] : []));
       addSection('det', 'DETALHES', h('div', { class: 'sm-dlg-section sm-det' },
         h('div', null, h('h3', { class: 'sm-det-title', text: tabs ? info.name : 'Informações' }), h('p', { class: 'sm-dlg-desc', text: info.description || '' })),
@@ -4454,7 +4586,7 @@
       btn.classList.toggle('on', on);
       btn.setAttribute('aria-label', on ? 'Lembrete ativo' : 'Lembrar-me');
       btn.title = on ? 'Lembrete ativo (clique para remover)' : 'Lembrar-me';
-      btn.replaceChildren(icon(on ? 'check' : 'bell'), withText ? h('span', { text: on ? 'Lembrete ativo' : 'Lembrar-me' }) : null);
+      btn.replaceChildren(...[icon(on ? 'check' : 'bell'), withText ? h('span', { text: on ? 'Lembrete ativo' : 'Lembrar-me' }) : null].filter(Boolean));
     };
     paint();
     btn.addEventListener('click', (e) => { e.stopPropagation(); toggleReminder(it); paint(); });
