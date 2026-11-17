@@ -4791,9 +4791,31 @@
   }
 
   // ---------- Explorar tudo ----------
+  // Voltar da lista: se ela foi aberta pela busca, volta para a busca com o mesmo texto.
+  function leaveExplore() {
+    if (state.explorePrev === 'search' && state.exploreFromSearch) {
+      const hash = state.exploreFromSearch;
+      state.exploreFromSearch = null;
+      location.hash = hash;
+      return;
+    }
+    setPage(state.explorePrev || 'home');
+  }
+
   function openExplore(c, title) {
     hidePreview();
     collapseCard();
+    // Aberta pela busca (Explorar, categorias): sai da rota da busca, senão ela reassume a tela na hora.
+    if (searchQuery() !== null) {
+      state.exploreFromSearch = location.hash;
+      state.explorePrev = 'search';
+      state.page = 'explore';
+      state.explore = { type: c.type, id: c.id, title };
+      location.hash = '#/';
+      renderPage();
+      app.scrollTop = 0;
+      return;
+    }
     if (state.page !== 'explore') state.explorePrev = state.page;
     state.explore = { type: c.type, id: c.id, title };
     state.page = 'explore';
@@ -4805,7 +4827,7 @@
     const ex = state.explore;
     if (!ex) { state.page = 'home'; return renderPage(); }
     const grid = h('div', { class: 'sm-grid sm-results' });
-    const back = () => setPage(state.explorePrev || 'home');
+    const back = () => leaveExplore();
     app.appendChild(h('div', { class: 'sm-rows flat sm-explorepage' },
       h('div', { class: 'sm-explore-head' },
         h('button', { type: 'button', class: 'sm-back', 'aria-label': 'Voltar', title: 'Voltar (Esc)', onclick: back }, icon('left')),
@@ -5183,7 +5205,7 @@
         if (popEl) return closePop();
         if (menuEl) return closeMenu();
         if (modalEl) return closeModal();
-        if (state.page === 'explore' && !popEl) return setPage(state.explorePrev || 'home');
+        if (state.page === 'explore' && !popEl) return leaveExplore();
       }
       if (e.altKey && !e.ctrlKey && !e.shiftKey && (e.key === 'm' || e.key === 'M')) {
         e.preventDefault();
