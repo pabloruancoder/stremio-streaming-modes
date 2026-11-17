@@ -1,6 +1,6 @@
 import { config, hasTmdb } from './config.js';
 import { cached, mapLimit } from './cache.js';
-import { discover, toMetaPreview } from './tmdb.js';
+import { tmdb, discover, toMetaPreview } from './tmdb.js';
 import { top10Metas } from './top10.js';
 import { PROVIDERS, NAME_SEPARATOR } from './providers.js';
 
@@ -23,6 +23,9 @@ function rowsFor(p) {
       params: { with_networks: p.tmdbNetworkId, sort_by: 'popularity.desc', 'first_air_date.gte': '2013-01-01', 'vote_count.gte': 30 },
       noProviderFilter: true,
     });
+  }
+  if (p.originalMovies) {
+    rows.push({ id: 'originals-movies', type: 'movie', name: `Filmes originais ${p.label}`, kind: 'original-movies', shape: card });
   }
   rows.push(
     // "Em alta" fica curto; o catálogo inteiro está em "Todos os filmes" / "Todas as séries".
@@ -103,6 +106,29 @@ export function manifestCatalogs() {
 }
 
 const PAGE = 20;
+
+// Filmes originais do streaming (o TMDB não marca "Original Disney+"): filmes dos estúdios, disponíveis no
+// streaming, lançados depois da estreia do serviço e que não passaram nos cinemas dos EUA nem do país
+// (estrearam direto no streaming ou na TV). Ex.: Abracadabra 2 e Pinóquio entram; Eternos (cinema) não.
+function originalMovieList(provider) {
+  const o = provider.originalMovies;
+  return cached(`orig-movies:${provider.key}:${config.region}`, 6 * 3600_000, async () => {
+    const params = { with_companies: o.companies, 'primary_release_date.gte': o.since, sort_by: 'popularity.desc',
+      with_watch_providers: provider.tmdbProviderId, with_watch_monetization_types: 'flatrate|ads' };
+    const items = await allPages('movie', params);
+    const checks = await mapLimit(items, 8, async (x) => {
+      const d = await tmdb(`/movie/${x.id}/release_dates`, { language: undefined }).catch(() => null);
+      if (!d) return false;
+      const types = (d.results || []).filter((r) => r.iso_3166_1 === 'US' || r.iso_3166_1 === config.region)
+        .flatMap((r) => r.release_dates.map((rd) => rd.type));
+      return types.length > 0 && !types.includes(3) && !types.includes(2); // 2 = cinema limitado, 3 = cinema
+    });
+    const keep = items.filter((_, i) => checks[i]);
+    const metas = await mapLimit(keep, 8, (item) => toMetaPreview(item, 'movie', config.cardStyle).catch(() => null));
+    const seen = new Set();
+    return metas.filter((m) => m && !seen.has(m.id) && seen.add(m.id));
+  });
+}
 const MAX_PAGES = 500; // limite do /discover do TMDB (10.000 títulos)
 
 function discoverParams(provider, row) {
@@ -148,6 +174,7 @@ export async function fullCatalog(id) {
   const { provider, row } = entry;
   if (row.kind === 'top10') return top10Metas(row.type, provider);
   if (row.kind === 'recent' || !hasTmdb()) return [];
+  if (row.kind === 'original-movies') return originalMovieList(provider);
   let items = row.kind === 'fresh'
     ? localFirst(await allPages(row.type, freshParams(row.type, provider, row)))
     : await allPages(row.type, discoverParams(provider, row), row.limit);
@@ -208,6 +235,7 @@ export async function catalogHandler(type, id, extra) {
   if (!hasTmdb()) return { metas: [] };
 
   if (row.kind === 'recent') return { metas: await publishedCatalog(type, id, skip), cacheMaxAge: 3600 };
+  if (row.kind === 'original-movies') return { metas: (await originalMovieList(provider)).slice(skip, skip + 40), cacheMaxAge: 3 * 3600 };
 
   if (row.kind === 'fresh') {
     const part = Math.floor((skip + 20) / 40); // cada parte junta 2 páginas (40 títulos)

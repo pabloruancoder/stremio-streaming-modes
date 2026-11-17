@@ -79,7 +79,7 @@
         { id: 'hulu', name: 'hulu', font: '800 1.25em "Arial Rounded MT Bold", "Segoe UI", Arial, sans-serif', spacing: '-.02em' },
       ],
       pages: {
-        home: ['@brands', '@continue', 'recent-movies', '@because0', 'originals', 'trending-movies', 'recent-series', '@soon',
+        home: ['@brands', '@continue', 'recent-movies', '@because0', 'originals', 'originals-movies', 'trending-movies', 'recent-series', '@soon',
           'trending-series', '@mylist', '@because1', 'new-movies', 'new-series', 'brand-marvel-movies', 'brand-pixar-movies',
           'brand-disney-movies', 'brand-starwars-series', 'acclaimed-movies', 'acclaimed-series', 'animation-movies',
           'action-movies', 'comedy-movies', 'brand-hulu-series', 'drama-series', 'scifi-series', 'brand-natgeo-series',
@@ -88,7 +88,7 @@
           'acclaimed-series', 'brand-marvel-series', 'brand-starwars-series', 'brand-hulu-series', 'drama-series',
           'comedy-series', 'action-series', 'scifi-series', 'mystery-series', 'crime-series', 'anime-series',
           'docu-series', 'brand-natgeo-series', 'reality-series', 'all-series'],
-        movies: ['@continue', 'recent-movies', '@because1', 'new-movies', 'trending-movies', 'acclaimed-movies',
+        movies: ['@continue', 'recent-movies', '@because1', 'new-movies', 'originals-movies', 'trending-movies', 'acclaimed-movies',
           'brand-marvel-movies', 'brand-pixar-movies', 'brand-disney-movies', 'brand-starwars-movies', 'brand-hulu-movies',
           'animation-movies', 'action-movies', 'comedy-movies', 'scifi-movies', 'thriller-movies', 'horror-movies',
           'romance-movies', 'brand-natgeo-movies', 'docs', 'all-movies'],
@@ -1237,6 +1237,26 @@
   .sm-brand-frame { flex:none; width:1.1em; height:1.6em; border:.28em solid #ffce00; box-sizing:border-box; }
   @media (max-width: 900px) { .sm-brands { grid-template-columns:repeat(3, minmax(0, 1fr)); } }
 
+  /* Página Originais */
+  .sm-orig-head { position:relative; padding:2.6rem var(--pad) .4rem; }
+  .sm-orig-kicker { font-size:.85rem; font-weight:800; letter-spacing:.32em; text-transform:uppercase; color:rgba(249,249,249,.7); }
+  .sm-orig-title { margin:.2rem 0 .3rem; font-size:clamp(2.4rem, 4.6vw, 4.6rem); font-weight:800; line-height:1; letter-spacing:-.01em;
+    background:linear-gradient(90deg, #fff 0%, #cfe6ff 45%, #7fb8ff 100%); -webkit-background-clip:text; background-clip:text; color:transparent;
+    filter:drop-shadow(0 0 22px rgba(90,150,255,.35)); animation:sm-rise-in .8s cubic-bezier(.2,.8,.2,1) both; }
+  .sm-orig-sub { margin:0; font-size:1.05rem; color:rgba(249,249,249,.75); animation:sm-rise-in .8s .12s cubic-bezier(.2,.8,.2,1) both; }
+  .sm-orig-head + div .sm-carousel { padding-top:1.2rem; }
+  html[data-sm-mode="disney"] .sm-orig-head ~ .sm-rows { padding-top:2.2rem; }
+
+  /* Trailer em tela cheia */
+  #sm-trailer { position:fixed; inset:0; z-index:9700; background:#000; animation:sm-ddin .2s ease-out; }
+  #sm-trailer iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
+  .sm-trailer-close { position:absolute; z-index:2; top:1.4rem; left:1.6rem; width:3rem; height:3rem; display:grid; place-items:center; padding:0;
+    border:2px solid rgba(249,249,249,.8) !important; border-radius:50%; background:rgba(0,0,0,.5) !important; color:#f9f9f9; cursor:pointer; }
+  .sm-trailer-close:hover { background:#c6c6c6 !important; color:#000; }
+  .sm-trailer-close .sm-ico { width:1.4rem; height:1.4rem; }
+  .sm-trailer-title { position:absolute; z-index:2; top:2rem; left:5.6rem; font-size:1.1rem; font-weight:700; color:#f9f9f9;
+    text-shadow:0 1px 8px rgba(0,0,0,.8); pointer-events:none; }
+
   /* Página da marca */
   .sm-bpage { position:relative; height:min(46vw, 70vh); min-height:18rem; display:grid; place-items:center; overflow:hidden;
     -webkit-mask-image:linear-gradient(180deg, #000 62%, transparent 100%); mask-image:linear-gradient(180deg, #000 62%, transparent 100%); }
@@ -1825,6 +1845,7 @@
     if (state.page === 'explore') return renderExplore();
     if (state.page === 'new') return renderNews();
     if (state.page === 'brand') return renderBrand(mode);
+    if (state.page === 'originals' && mode.layout === 'disney') return renderOriginals(mode);
     const heroWrap = h('div');
     const rows = h('div', { class: 'sm-rows' });
     app.append(heroWrap, rows);
@@ -1887,13 +1908,47 @@
     buildRows(mode, rows, ids);
   }
 
+  // Página "Originais" (Disney+): cabeçalho, carrossel com séries e filmes originais e as fileiras de cada um.
+  function renderOriginals(mode) {
+    const p = mode.provider;
+    const head = h('header', { class: 'sm-orig-head' },
+      h('div', { class: 'sm-orig-kicker', text: mode.label }),
+      h('h1', { class: 'sm-orig-title', text: 'Originais' }),
+      h('p', { class: 'sm-orig-sub', text: `Séries e filmes que você só encontra na ${mode.label}.` }));
+    const heroWrap = h('div');
+    const rows = h('div', { class: 'sm-rows' });
+    app.append(head, heroWrap, rows);
+    buildCarousel(heroWrap, rows, [{ type: 'series', id: `${p}.originals` }, { type: 'movie', id: `${p}.originals-movies` }]);
+    buildRows(mode, rows, ['originals', 'originals-movies'], { originals: 'Séries originais', 'originals-movies': 'Filmes originais' });
+  }
+
+  // Trailer em tela cheia (botão TRAILER da página de detalhes da Disney+).
+  let trailerEl = null;
+  function closeTrailer() {
+    trailerEl?.remove();
+    trailerEl = null;
+  }
+  function openTrailer(key, title) {
+    closeTrailer();
+    const k = encodeURIComponent(key);
+    trailerEl = h('div', { id: 'sm-trailer', role: 'dialog', 'aria-label': `Trailer: ${title}` },
+      h('iframe', { src: `https://www.youtube-nocookie.com/embed/${k}?autoplay=1&controls=1&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3`,
+        allow: 'autoplay; encrypted-media; fullscreen', allowfullscreen: true, title: `Trailer: ${title}` }),
+      h('button', { type: 'button', class: 'sm-trailer-close', 'aria-label': 'Fechar trailer', onclick: closeTrailer }, icon('left')),
+      h('div', { class: 'sm-trailer-title', text: title }));
+    document.body.appendChild(trailerEl);
+  }
+  // Esc fecha o trailer antes da página de detalhes.
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && trailerEl) { e.stopImmediatePropagation(); e.preventDefault(); closeTrailer(); }
+  }, true);
+
   // ---------- Barra superior ----------
   function buildRail(mode) {
     const item = (label, ic, onclick, active) => h('button', { type: 'button', class: `sm-rail-item${active ? ' active' : ''}`,
       'aria-label': label, 'aria-current': active ? 'page' : null, onclick }, icon(ic), h('span', { class: 'sm-rail-label', text: label }));
     const go = (k) => () => setPage(k);
-    const origId = `${mode.provider}.originals`;
-    const onOriginals = state.page === 'explore' && state.explore?.id === origId;
+    const onOriginals = state.page === 'originals';
     const items = [
       item('Busca', 'search', () => { if (searchQuery() === null) location.hash = '#/search'; }, state.page === 'search'),
       item('Início', 'home', go('home'), state.page === 'home' || state.page === 'brand'),
@@ -1902,7 +1957,7 @@
       item('Séries', 'tv', go('series'), state.page === 'series'),
     ];
     if (!isKids()) {
-      items.push(item('Originais', 'star', () => openExplore({ type: 'series', id: origId }, `Originais ${mode.label}`), onOriginals));
+      items.push(item('Originais', 'star', go('originals'), onOriginals));
       items.push(item('Novidades', 'sparkle', go('new'), state.page === 'new'));
     }
     const logo = h('div', { class: 'sm-rail-logo', title: 'Início', onclick: go('home') });
@@ -2401,7 +2456,7 @@
   }
 
   // ---------- Fileiras ----------
-  function buildRows(mode, container, orderOverride) {
+  function buildRows(mode, container, orderOverride, titles) {
     loadRanks();
     const order = orderOverride || (isKids() ? mode.kidsPages : mode.pages[state.page] || mode.pages.home);
     rowObserver = new IntersectionObserver((entries) => {
@@ -2451,7 +2506,7 @@
           }
         } else if (byId[key] && !(isKids() && typeFilter && byId[key].type !== typeFilter)) {
           const c = byId[key];
-          const name = c.name.startsWith(mode.prefix) ? c.name.slice(mode.prefix.length) : c.name;
+          const name = titles?.[key] || (c.name.startsWith(mode.prefix) ? c.name.slice(mode.prefix.length) : c.name);
           const isTop = key.startsWith('top10');
           row = makeRow(name, () => catalog(c.type, c.id), {
             rank: isTop,
@@ -2960,6 +3015,10 @@
     const d = await details(item.type, item.id);
     if (modalEl !== el) return;
     const info = { ...item, ...(d || {}) };
+    if (isDisney() && d?.trailer) {
+      dialog.querySelector('.sm-dlg-info .sm-btn-white')?.after(
+        h('button', { type: 'button', class: 'sm-btn sm-btn-gray sm-btn-trailer', onclick: () => openTrailer(d.trailer, info.name) }, 'Trailer'));
+    }
     const side = h('div', { class: 'sm-dlg-side' },
       info.cast?.length ? h('div', null, h('span', { text: 'Elenco: ' }), info.cast.join(', ')) : null,
       info.genres?.length ? h('div', null, h('span', { text: 'Gêneros: ' }), info.genres.join(', ')) : null,
