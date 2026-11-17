@@ -215,8 +215,9 @@
   const topNavMode = (o) => ({ layout: 'prime', wordmark: 'STREMIO', heroKicker: '', ...o });
 
   MODES.hbo = topNavMode({
-    key: 'hbo', label: 'HBO Max', prep: 'na', accent: '#5468ff', bg: '#07080f', splash: 'HBO Max', provider: 'hbo', prefix: 'HBO Max • ',
-    heroCatalogs: [{ type: 'series', id: 'hbo.originals', kicker: 'Original HBO Max' }, { type: 'movie', id: 'hbo.trending-movies', kicker: '' },
+    key: 'hbo', label: 'HBO Max', prep: 'na', accent: '#9aa4ff', bg: '#0b0c10', splash: 'HBO Max', provider: 'hbo', prefix: 'HBO Max • ',
+    layout: 'hbo', // menu lateral de ícones, destaque com "Ir para a série", marcas em círculos, botão ⋮ nas capas (app de 2025)
+    heroCatalogs: [{ type: 'series', id: 'hbo.originals', kicker: 'HBO Original' }, { type: 'movie', id: 'hbo.trending-movies', kicker: '' },
       { type: 'movie', id: 'hbo.brand-wb-movies', kicker: 'Warner Bros.' }],
     navPages: [['home', 'Início'], ['series', 'Séries'], ['movies', 'Filmes'], ['new', 'Novidades'], ['mylist', 'Minha lista']],
     // Marcas (página "Categorias" do app)
@@ -245,6 +246,9 @@
       ['movie', 'thriller-movies', 'Suspense'], ['series', 'reality-series', 'Reality shows'], ['movie', 'docs', 'Documentários'],
       ['movie', 'animation-movies', 'Animação'], ['series', 'kids-series', 'Infantis']],
   });
+
+  MODES.hbo.rowTitles = { originals: 'Em destaque', 'trending-series': 'Séries em alta', 'trending-movies': 'Filmes em alta',
+    'new-series': 'Novas séries', 'new-movies': 'Novos filmes', 'brand-hbo-series': 'HBO Originals', 'acclaimed-series': 'Aclamadas pela crítica' };
 
   MODES.globoplay = topNavMode({
     key: 'globoplay', label: 'Globoplay', prep: 'no', accent: '#ff1e46', bg: '#0b0b0d', splash: 'Globoplay', provider: 'globoplay', prefix: 'Globoplay • ',
@@ -391,8 +395,9 @@
   const isDisney = () => MODES[state.mode]?.layout === 'disney';
   const isApple = () => MODES[state.mode]?.layout === 'apple';
   const isPrime = () => MODES[state.mode]?.layout === 'prime';
+  const isHbo = () => MODES[state.mode]?.layout === 'hbo';
   // Modos com interface própria (Disney+, Apple TV): sem prévia ao passar o mouse, detalhes em página inteira, trailer.
-  const isCustom = () => isDisney() || isApple() || isPrime();
+  const isCustom = () => isDisney() || isApple() || isPrime() || isHbo();
   const isBoardRoute = () => /^(#\/?)?$/.test(location.hash);
   // Texto buscado quando a rota é a busca do Stremio (#/search?search=...); null fora dela.
   const searchQuery = () => {
@@ -1961,6 +1966,213 @@
   html[data-sm-mode="crunchyroll"] .sm-btn-white { background:var(--l-accent); color:#000; }
   html[data-sm-mode="crunchyroll"] .sm-btn-white:hover { background:#ff8a3d; }
   html[data-sm-mode="globoplay"] .sm-links a.active { background:var(--l-accent); color:#fff; }
+  /* ===================== Visual HBO Max (app de 2025) ===================== */
+  html[data-sm-mode="hbo"] { --hm-bg:#0b0c10; --hm-surf:#17181d; --hm-surf2:#22242b; --hm-muted:#a7a9b1; --glass-blur:blur(24px) saturate(150%); }
+  html[data-sm-mode="hbo"] #sm-app, html[data-sm-mode="hbo"] #sm-modal, html[data-sm-mode="hbo"] #sm-profiles, html[data-sm-mode="hbo"] .sm-menu {
+    font-family:Inter, "Segoe UI", Arial, sans-serif; }
+  html[data-sm-mode="hbo"] #sm-app { --rail:5rem; --railspace:var(--rail); --pad:3.2vw; --gap:.9vw; --per:5; padding-left:var(--railspace); color:#fff;
+    background:linear-gradient(180deg, #101218 0%, #0b0c10 40%, #08090c 100%) !important;
+    --cw:calc((100vw - var(--railspace) - var(--pad) * 2 - var(--gap) * (var(--per) - 1)) / var(--per)); }
+  @media (max-width:1099px) { html[data-sm-mode="hbo"] #sm-app { --per:4; } }
+  @media (max-width:799px) { html[data-sm-mode="hbo"] #sm-app { --per:2; } }
+  html[data-sm-mode="hbo"] #sm-app > :not(.sm-rail) { position:relative; z-index:1; }
+  html[data-sm-mode="hbo"] .sm-row, html[data-sm-mode="hbo"] .sm-slider, html[data-sm-mode="hbo"] .sm-row-head, html[data-sm-mode="hbo"] .sm-rows,
+  html[data-sm-mode="hbo"] .sm-bill-info, html[data-sm-mode="hbo"] .sm-bill-actions, html[data-sm-mode="hbo"] .sm-dlg-info, html[data-sm-mode="hbo"] .sm-actions,
+  html[data-sm-mode="hbo"] .sm-tabs, html[data-sm-mode="hbo"] .sm-dlg-sub, html[data-sm-mode="hbo"] .sm-catpage, html[data-sm-mode="hbo"] .sm-hbo-chips,
+  html[data-sm-mode="hbo"] .sm-explorepage, html[data-sm-mode="hbo"] .sm-brands { overflow:visible !important; }
+
+  /* Menu lateral: perfil e Minha lista no topo, ícones, degradê com os nomes ao passar o mouse, traço no ativo */
+  .sm-hbo-rail { padding:1.4rem 0 1.4rem; }
+  .sm-hbo-rail .sm-rail-top { display:flex; flex-direction:column; gap:.2rem; margin-bottom:auto; overflow:visible !important; }
+  .sm-hbo-rail .sm-rail-top .sm-rail-item, .sm-hbo-rail .sm-rail-me { overflow:visible !important; }
+  .sm-hbo-rail .sm-rail-items { flex:none; gap:.15rem; margin:auto 0; }
+  .sm-hbo-rail .sm-rail-bottom { margin-top:auto; align-items:stretch; gap:.4rem; }
+  .sm-hbo-rail .sm-rail-bottom .sm-switch, .sm-hbo-rail .sm-rail-bottom .sm-popwrap { margin-left:1.55rem; }
+  .sm-hbo-rail::before { background:linear-gradient(90deg, rgba(8,9,12,.97) 0%, rgba(8,9,12,.9) 40%, rgba(8,9,12,0) 100%); }
+  .sm-hbo-rail .sm-rail-item { height:2.7rem; padding-left:1.75rem; gap:1.3rem; color:rgba(255,255,255,.62); }
+  .sm-hbo-rail .sm-rail-item .sm-ico { width:1.35rem !important; height:1.35rem !important; }
+  .sm-hbo-rail .sm-rail-label { font-size:1rem; font-weight:500; }
+  .sm-hbo-rail .sm-rail-item.active { color:#fff; }
+  .sm-hbo-rail .sm-rail-item.active .sm-rail-label { font-weight:700; }
+  .sm-hbo-rail .sm-rail-item.active::after { left:1.05rem; top:.6rem; bottom:.6rem; width:2px; height:auto; background:#fff; }
+  .sm-hbo-rail .sm-rail-item.active .sm-ico { filter:none; }
+  .sm-rail-me .sm-av { width:1.6rem !important; height:1.6rem !important; border-radius:50%; flex:none; }
+  .sm-hbo-logo { position:fixed; top:1.3rem; right:2.2rem; z-index:41; display:flex; flex-direction:column; align-items:center; line-height:.82; cursor:pointer;
+    color:#fff; text-shadow:0 2px 12px rgba(0,0,0,.5); user-select:none; }
+  .sm-hbo-logo b { font:900 1.25rem/1 "Arial Black", Arial, sans-serif; letter-spacing:-.04em; }
+  .sm-hbo-logo span { font:800 1.15rem/1 Inter, Arial, sans-serif; letter-spacing:-.05em; }
+  html[data-sm-mode="hbo"] .sm-rail .sm-pop { left:calc(100% + .9rem); right:auto; top:auto; bottom:0; background:var(--hm-surf2); border-radius:8px; }
+  html[data-sm-mode="hbo"] .sm-rail .sm-pop::before { display:none; }
+  html[data-sm-mode="hbo"] .sm-rail .sm-switch { width:2.2rem; height:2.2rem; padding:0; justify-content:center; border-radius:50%; background:rgba(255,255,255,.08); }
+  html[data-sm-mode="hbo"] .sm-rail .sm-switch > span:not(.sm-dot), html[data-sm-mode="hbo"] .sm-rail .sm-switch > .sm-ico { display:none; }
+
+  /* Destaque em tela cheia */
+  html[data-sm-mode="hbo"] .sm-bill { height:min(84vh, 52vw); min-height:28rem; }
+  html[data-sm-mode="hbo"] .sm-bill-slide::after { background:linear-gradient(90deg, rgba(8,9,12,.88) 0%, rgba(8,9,12,.5) 30%, rgba(8,9,12,0) 58%),
+    linear-gradient(0deg, #0b0c10 0%, rgba(11,12,16,.5) 16%, rgba(11,12,16,0) 40%); }
+  html[data-sm-mode="hbo"] .sm-bill-info { left:calc(var(--railspace) + var(--pad)); bottom:calc(6vw + 4.2rem); width:min(30rem, 36%); gap:.65rem; }
+  html[data-sm-mode="hbo"] .sm-bill-kicker { font-size:.72rem; font-weight:800; letter-spacing:.08em; color:#fff; }
+  html[data-sm-mode="hbo"] .sm-bill-logo { max-height:8.5rem; }
+  html[data-sm-mode="hbo"] .sm-bill-title { font-weight:800; }
+  .sm-hbo-meta { display:flex; align-items:center; gap:.6rem; font-size:.85rem !important; color:#e6e6e6 !important; font-weight:600; }
+  .sm-hbo-new { padding:.05rem .4rem; border:1px solid rgba(255,255,255,.85); border-radius:3px; font-size:.75rem; font-weight:700; color:#fff; }
+  html[data-sm-mode="hbo"] .sm-bill-desc { font-size:.98rem; color:#ececec; -webkit-line-clamp:3; }
+  .sm-hbo-go { height:2.7rem; padding:0 1.25rem !important; border-radius:4px !important; background:#fff !important; color:#0b0c10; font:700 .95rem/1 inherit;
+    cursor:pointer; transition:transform .2s, background .2s; }
+  .sm-hbo-go:hover { background:#dcdcdc !important; transform:scale(1.03); }
+  html[data-sm-mode="hbo"] .sm-bill-pager { left:calc(50% + var(--railspace) / 2); bottom:calc(6vw + 1.6rem); background:none; box-shadow:none !important;
+    -webkit-backdrop-filter:none; backdrop-filter:none; padding:0 !important; gap:.55rem; }
+  html[data-sm-mode="hbo"] .sm-bill-dot { width:.42rem; height:.42rem; background:rgba(255,255,255,.4) !important; }
+  html[data-sm-mode="hbo"] .sm-bill-dot.on { width:.42rem; background:#fff !important; }
+  html[data-sm-mode="hbo"] .sm-bill-dot i { display:none; }
+  html[data-sm-mode="hbo"] .sm-bill-arrow { border-radius:50% !important; background:rgba(0,0,0,.35) !important; box-shadow:none !important; }
+  html[data-sm-mode="hbo"] .sm-bill-arrow.l { left:calc(var(--railspace) + .6rem); }
+  html[data-sm-mode="hbo"] .sm-bill-mute { right:2.2rem; bottom:calc(6vw + 1rem); }
+  html[data-sm-mode="hbo"] .sm-rows { margin-top:-6vw; padding-top:0; z-index:2 !important; }
+  html[data-sm-mode="hbo"] .sm-rows.flat { margin-top:0; padding-top:2.6rem; }
+
+  /* Fileiras: título pequeno em negrito, capas com cantos pouco arredondados, ⋮ no canto e borda branca no foco */
+  html[data-sm-mode="hbo"] .sm-row { margin:0 0 1.1vw; }
+  html[data-sm-mode="hbo"] .sm-row-head { margin-bottom:0; }
+  html[data-sm-mode="hbo"] .sm-row-title { display:inline-flex; align-items:center; gap:.2rem; font-size:clamp(.95rem, 1.1vw, 1.15rem); font-weight:700; color:#fff; }
+  html[data-sm-mode="hbo"] .sm-row-title.link { cursor:pointer; }
+  html[data-sm-mode="hbo"] .sm-row-title .sm-ico { width:1em !important; height:1em !important; opacity:0; transform:translateX(-4px); transition:opacity .2s, transform .2s; }
+  html[data-sm-mode="hbo"] .sm-row-title.link:hover .sm-ico { opacity:.8; transform:none; }
+  html[data-sm-mode="hbo"] .sm-dashes { display:none; }
+  html[data-sm-mode="hbo"] .sm-track { padding-top:.8rem; padding-bottom:1.8rem; }
+  html[data-sm-mode="hbo"] .sm-arrow { top:.8rem; bottom:1.8rem; background:linear-gradient(90deg, rgba(8,9,12,.85), transparent) !important; }
+  html[data-sm-mode="hbo"] .sm-arrow.r { background:linear-gradient(270deg, rgba(8,9,12,.85), transparent) !important; }
+  html[data-sm-mode="hbo"] .sm-card:not(.rank) { border-radius:4px; overflow:visible !important; transition:transform .22s ease, box-shadow .22s; }
+  html[data-sm-mode="hbo"] .sm-card:not(.rank)::after { border-radius:4px; }
+  html[data-sm-mode="hbo"] .sm-card:not(.rank):not(.skeleton):hover, html[data-sm-mode="hbo"] .sm-card:not(.rank):focus-visible {
+    transform:scale(1.04); z-index:3; outline:none; box-shadow:0 0 0 3px #fff, 0 16px 34px rgba(0,0,0,.6); }
+  html[data-sm-mode="hbo"] .sm-card.skeleton { background:linear-gradient(110deg, #17181d 30%, #22242b 50%, #17181d 70%); background-size:250% 100%; animation:sm-skel 1.4s linear infinite; }
+  html[data-sm-mode="hbo"] .sm-card-progress { left:0; right:0; bottom:0; height:3px; border-radius:0 0 4px 4px; background:rgba(255,255,255,.25); overflow:hidden; }
+  html[data-sm-mode="hbo"] .sm-card-progress i { background:#fff; }
+  .sm-hbo-kebab { position:absolute; z-index:4; top:.35rem; right:.3rem; width:1.5rem; height:1.7rem; display:flex; flex-direction:column; align-items:center;
+    justify-content:center; gap:3px; padding:0 !important; border-radius:4px !important; cursor:pointer; opacity:.85; transition:background .15s, opacity .15s; }
+  .sm-hbo-kebab i { width:3.5px; height:3.5px; border-radius:50%; background:#fff; box-shadow:0 0 3px rgba(0,0,0,.8); }
+  .sm-hbo-kebab:hover { background:rgba(0,0,0,.55) !important; opacity:1; }
+  .sm-hbo-menu { position:absolute; z-index:6; top:2.2rem; right:.3rem; min-width:13rem; padding:.35rem; border-radius:6px; background:#22242b;
+    box-shadow:0 14px 40px rgba(0,0,0,.7); border:1px solid rgba(255,255,255,.08); animation:sm-ddin .15s ease-out; overflow:visible !important; }
+  .sm-hbo-menu button { display:flex; align-items:center; gap:.6rem; width:100%; padding:.55rem .65rem !important; border-radius:4px !important; color:#e8e8e8;
+    font:500 .85rem/1.2 inherit; text-align:left; cursor:pointer; white-space:nowrap; }
+  .sm-hbo-menu button:hover { background:rgba(255,255,255,.1) !important; color:#fff; }
+  .sm-hbo-menu .sm-ico { width:1rem !important; height:1rem !important; }
+
+  /* Marcas em círculos */
+  html[data-sm-mode="hbo"] .sm-brands { display:flex; flex-wrap:nowrap; gap:1.2rem; margin:1.2rem var(--pad) 2rem; }
+  html[data-sm-mode="hbo"] .sm-brand { flex:none; width:clamp(5.5rem, 8vw, 8.5rem); aspect-ratio:1; border-radius:50% !important; padding:.5rem !important;
+    border:0 !important; background:radial-gradient(circle at 50% 35%, #2b2e38, #121318 75%) !important; font-size:clamp(.8rem, 1.15vw, 1.25rem);
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.12), 0 10px 24px rgba(0,0,0,.5) !important; animation:none; }
+  html[data-sm-mode="hbo"] .sm-brand:hover, html[data-sm-mode="hbo"] .sm-brand:focus-visible { transform:scale(1.07);
+    box-shadow:0 0 0 3px #fff, 0 16px 30px rgba(0,0,0,.6) !important; }
+  html[data-sm-mode="hbo"] .sm-brand-bg { border-radius:50%; }
+  html[data-sm-mode="hbo"] .sm-brand .sm-shine { border-radius:50%; }
+  html[data-sm-mode="hbo"] .sm-brand-name.box { border-width:.07em; }
+  html[data-sm-mode="hbo"] .sm-catpage .sm-brands { margin:0 0 2.2rem; flex-wrap:wrap; }
+
+  /* Página de marca/categoria */
+  .sm-hbo-cathead { position:relative; display:flex; flex-direction:column; align-items:center; gap:1.1rem; padding:2.2rem var(--pad) 2.2rem;
+    background:radial-gradient(ellipse 70% 120% at 50% 0%, var(--tint), transparent 70%); overflow:visible !important; }
+  .sm-hbo-back { position:absolute; left:var(--pad); top:2rem; width:2.6rem; height:2.6rem; display:grid; place-items:center; padding:0 !important;
+    border-radius:50% !important; background:rgba(0,0,0,.35) !important; color:#fff; cursor:pointer; }
+  .sm-hbo-back:hover { background:rgba(255,255,255,.18) !important; }
+  .sm-hbo-back .sm-ico { width:1.2rem !important; height:1.2rem !important; }
+  .sm-hbo-cattitle { margin:0; font-size:clamp(1.4rem, 2vw, 2rem); font-weight:700; }
+  .sm-hbo-chips { display:flex; gap:.6rem; }
+  .sm-hbo-chip { padding:.45rem 1.1rem !important; border-radius:999px !important; color:rgba(255,255,255,.75); font:600 .9rem/1 inherit; cursor:pointer;
+    box-shadow:inset 0 0 0 1px transparent; transition:background .2s, color .2s, box-shadow .2s; }
+  .sm-hbo-chip:hover { color:#fff; background:rgba(255,255,255,.08) !important; }
+  .sm-hbo-chip.on { color:#fff; box-shadow:inset 0 0 0 1.5px #fff !important; }
+  html[data-sm-mode="hbo"] .sm-rows.sm-hbo-catrows { padding-top:.6rem; }
+
+  /* Detalhes: página inteira, botões retangulares, abas */
+  html[data-sm-mode="hbo"] #sm-modal { background:#0b0c10; }
+  html[data-sm-mode="hbo"] .sm-dialog { width:100%; min-height:100vh; margin:0; border-radius:0; background:transparent; box-shadow:none; transform:none; }
+  html[data-sm-mode="hbo"] .sm-dlg-hero { position:relative; aspect-ratio:auto; min-height:max(34rem, 82vh); background-size:cover; background-position:center 20%; }
+  html[data-sm-mode="hbo"] .sm-dlg-hero::after { z-index:1; background:linear-gradient(90deg, rgba(8,9,12,.95) 0%, rgba(8,9,12,.7) 32%, rgba(8,9,12,0) 62%),
+    linear-gradient(0deg, #0b0c10 0%, rgba(11,12,16,0) 40%); }
+  html[data-sm-mode="hbo"] .sm-dlg-info { left:4vw; bottom:3rem; width:min(34rem, 42%); }
+  html[data-sm-mode="hbo"] .sm-dlg-info .sm-hero-logo { max-height:8.5rem; max-width:80%; margin-bottom:1.1rem; }
+  html[data-sm-mode="hbo"] .sm-dlg-info .sm-actions { gap:.6rem; }
+  html[data-sm-mode="hbo"] .sm-dlg-info .sm-btn { height:2.8rem; padding:0 1.3rem 0 1.1rem; border-radius:4px; font-weight:700; font-size:.95rem; }
+  html[data-sm-mode="hbo"] .sm-btn-white { background:#fff; color:#0b0c10; }
+  html[data-sm-mode="hbo"] .sm-btn-white:hover { background:#dcdcdc; }
+  html[data-sm-mode="hbo"] .sm-btn-gray { background:rgba(255,255,255,.14); color:#fff; }
+  html[data-sm-mode="hbo"] .sm-btn-gray:hover { background:rgba(255,255,255,.24); }
+  html[data-sm-mode="hbo"] .sm-round { width:2.8rem; height:2.8rem; border:0; border-radius:4px; background:rgba(255,255,255,.14); color:#fff; }
+  html[data-sm-mode="hbo"] .sm-round:hover { background:rgba(255,255,255,.24); }
+  html[data-sm-mode="hbo"] .sm-btn:focus:not(:focus-visible), html[data-sm-mode="hbo"] .sm-dlg-info .sm-btn-white:focus { outline:none; }
+  html[data-sm-mode="hbo"] .sm-dlg-close { top:1.3rem; left:1.5rem; right:auto; width:2.6rem; height:2.6rem; border:0; border-radius:50%; background:rgba(0,0,0,.45); }
+  html[data-sm-mode="hbo"] .sm-dlg-bits { color:#e6e6e6; margin-top:1rem; }
+  html[data-sm-mode="hbo"] .sm-dlg-sum { color:#ececec; }
+  html[data-sm-mode="hbo"] .sm-dlg-body { padding:0 4vw 4rem; }
+  html[data-sm-mode="hbo"] .sm-tabs { gap:2rem; margin:0 0 1.8rem; border-bottom:1px solid rgba(255,255,255,.14); }
+  html[data-sm-mode="hbo"] .sm-tab { padding:0 0 .8rem; font-size:1rem; font-weight:600; letter-spacing:0; color:var(--hm-muted); }
+  html[data-sm-mode="hbo"] .sm-tab:hover, html[data-sm-mode="hbo"] .sm-tab[aria-selected="true"] { color:#fff; }
+  html[data-sm-mode="hbo"] .sm-tab[aria-selected="true"]::after { height:2px; bottom:-1px; background:#fff; }
+  html[data-sm-mode="hbo"] .sm-dlg-body[data-tab] > .sm-dlg-section[data-tab] { display:none; margin-top:0; }
+  html[data-sm-mode="hbo"] .sm-dlg-body[data-tab="eps"] > .sm-dlg-section[data-tab="eps"],
+  html[data-sm-mode="hbo"] .sm-dlg-body[data-tab="sim"] > .sm-dlg-section[data-tab="sim"] { display:block; }
+  html[data-sm-mode="hbo"] .sm-dlg-body[data-tab="det"] > .sm-dlg-section[data-tab="det"] { display:grid; grid-template-columns:1.4fr 1fr; gap:3rem; }
+  html[data-sm-mode="hbo"] .sm-dlg-section[data-tab] > h3, html[data-sm-mode="hbo"] .sm-dlg-section[data-tab] .sm-dlg-section-head h3 { display:none; }
+  html[data-sm-mode="hbo"] .sm-dlg-section-head { justify-content:flex-start; }
+  html[data-sm-mode="hbo"] .sm-dlg-section-head .sm-dd-panel { left:0; right:auto; background:var(--hm-surf2); border-radius:6px; }
+  html[data-sm-mode="hbo"] .sm-dd-btn { border-radius:4px; background:var(--hm-surf2); border-color:rgba(255,255,255,.12); }
+  html[data-sm-mode="hbo"] .sm-dlg-section[data-tab="eps"] > div:last-child { display:grid; grid-template-columns:repeat(auto-fill, minmax(16rem, 1fr));
+    gap:1.8rem 1.2rem; overflow:visible !important; }
+  html[data-sm-mode="hbo"] .sm-ep { grid-template-columns:auto 1fr; gap:.6rem .4rem; align-items:start; padding:0; border:0; background:none !important; overflow:visible !important; }
+  html[data-sm-mode="hbo"] .sm-ep > .sm-ep-img { grid-column:1 / -1; grid-row:1; border-radius:4px; transition:transform .22s, box-shadow .22s; }
+  html[data-sm-mode="hbo"] .sm-ep:hover > .sm-ep-img { transform:scale(1.03); box-shadow:0 0 0 3px #fff; }
+  html[data-sm-mode="hbo"] .sm-ep > .sm-ep-num { grid-column:1; grid-row:2; font-size:.9rem; font-weight:700; color:#fff; text-align:left; }
+  html[data-sm-mode="hbo"] .sm-ep > .sm-ep-num::after { content:"."; }
+  html[data-sm-mode="hbo"] .sm-ep > div:last-child { grid-column:2; grid-row:2; min-width:0; }
+  html[data-sm-mode="hbo"] .sm-ep-top { font-size:.95rem; }
+  html[data-sm-mode="hbo"] .sm-ep-right { color:var(--hm-muted); font-weight:500; font-size:.85rem; }
+  html[data-sm-mode="hbo"] .sm-ep-desc { color:var(--hm-muted); font-size:.85rem; }
+  html[data-sm-mode="hbo"] .sm-ep-img .sm-ico { opacity:0; transition:opacity .2s; }
+  html[data-sm-mode="hbo"] .sm-ep:hover .sm-ep-img .sm-ico { opacity:1; }
+  html[data-sm-mode="hbo"] .sm-similar { grid-template-columns:repeat(auto-fill, minmax(14rem, 1fr)); gap:1.2rem; overflow:visible !important; }
+  html[data-sm-mode="hbo"] .sm-sim { background:none; border-radius:4px; overflow:visible !important; }
+  html[data-sm-mode="hbo"] .sm-sim-img { border-radius:4px; transition:transform .22s, box-shadow .22s; }
+  html[data-sm-mode="hbo"] .sm-sim:hover .sm-sim-img { transform:scale(1.04); box-shadow:0 0 0 3px #fff; }
+  html[data-sm-mode="hbo"] .sm-sim-body p, html[data-sm-mode="hbo"] .sm-sim .sm-meta { display:none; }
+  html[data-sm-mode="hbo"] .sm-sim-body { padding:.5rem .1rem 0; }
+  html[data-sm-mode="hbo"] .sm-match, html[data-sm-mode="hbo"] .sm-hd { display:none; }
+  html[data-sm-mode="hbo"] .sm-det-side span { color:var(--hm-muted); }
+
+  /* Busca, perfis, painéis */
+  html[data-sm-mode="hbo"] .sm-searchpage { grid-template-columns:1fr; gap:1.2rem; padding:2rem var(--pad) 4rem; }
+  html[data-sm-mode="hbo"] .sm-sp-side { position:static; max-height:none; }
+  html[data-sm-mode="hbo"] .sm-sp-box { height:3.3rem; border-radius:4px; background:var(--hm-surf); border:1px solid rgba(255,255,255,.14); }
+  html[data-sm-mode="hbo"] .sm-sp-box:focus-within { border-color:#fff; background:var(--hm-surf); }
+  html[data-sm-mode="hbo"] .sm-sp-list { display:flex; flex-wrap:wrap; gap:.5rem; overflow:visible; }
+  html[data-sm-mode="hbo"] .sm-sp-list > li { display:contents; }
+  html[data-sm-mode="hbo"] .sm-sp-item { width:auto; padding:.45rem 1rem; border-radius:999px; background:none; box-shadow:inset 0 0 0 1px rgba(255,255,255,.25); color:#fff; font-size:.88rem; }
+  html[data-sm-mode="hbo"] .sm-sp-item:hover, html[data-sm-mode="hbo"] .sm-sp-item.on { background:rgba(255,255,255,.1); box-shadow:inset 0 0 0 1.5px #fff; }
+  html[data-sm-mode="hbo"] .sm-xpl { border-radius:4px; background:var(--hm-surf) !important; box-shadow:none !important; }
+  html[data-sm-mode="hbo"] .sm-xpl:hover { box-shadow:0 0 0 3px #fff !important; }
+  html[data-sm-mode="hbo"] .sm-track > .sm-xpl { border-radius:4px; }
+  html[data-sm-mode="hbo"] .sm-ghost { background:var(--hm-surf); border-radius:4px; }
+  html[data-sm-mode="hbo"] .sm-page-title { color:#fff; }
+  html[data-sm-mode="hbo"] .sm-pop, html[data-sm-mode="hbo"] .sm-menu, html[data-sm-mode="hbo"] .sm-dd-panel { background:var(--hm-surf2); border-radius:6px; }
+  html[data-sm-mode="hbo"] .sm-av, html[data-sm-mode="hbo"] .sm-prof-av, html[data-sm-mode="hbo"] .sm-prof-edit, html[data-sm-mode="hbo"] .sm-av-xl { border-radius:50%; }
+  html[data-sm-mode="hbo"] #sm-profiles { background:#0b0c10; }
+  html[data-sm-mode="hbo"] .sm-prof:hover .sm-prof-av { outline-color:#fff; }
+  html[data-sm-mode="hbo"] .sm-gate-btn { border-radius:4px; }
+  html[data-sm-mode="hbo"] .sm-gate-btn.white { background:#fff; color:#0b0c10; }
+  html[data-sm-mode="hbo"] .sm-offline { background:var(--hm-surf); border-color:rgba(255,255,255,.12); color:#fff; border-radius:4px; }
+  html[data-sm-mode="hbo"] [class*="seek-bar-container"] [class*="track-after"] { background-color:#fff !important; }
+  html[data-sm-mode="hbo"] [class*="seek-bar-container"] [class*="thumb-"] { background:#fff !important; box-shadow:0 2px 8px rgba(0,0,0,.5) !important; }
+  /* Abertura: "HBO max" surgindo com brilho */
+  .sm-intro.hbo { background:radial-gradient(ellipse 55% 45% at 50% 50%, #1b1d26 0%, #050608 70%); }
+  .sm-hbo-intro { display:flex; flex-direction:column; align-items:center; line-height:.8; color:#fff; animation:sm-glass-in var(--t, 2.2s) cubic-bezier(.2,.8,.2,1) forwards;
+    filter:drop-shadow(0 0 30px rgba(180,190,255,.35)); }
+  .sm-hbo-intro b { font:900 clamp(4rem, 10vw, 8rem)/1 "Arial Black", Arial, sans-serif; letter-spacing:-.05em;
+    background:linear-gradient(180deg, #fff 30%, #c9ccd6); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .sm-hbo-intro span { font:800 clamp(3.4rem, 8.5vw, 6.8rem)/1 Inter, Arial, sans-serif; letter-spacing:-.06em; }
+
   /* Filmes / Séries com seletor de gênero */
   .sm-genre-head { display:flex; align-items:center; gap:1.4rem; margin:0 var(--pad) 1.6rem; overflow:visible !important; }
   .sm-genre-head .sm-page-title { margin:0; }
@@ -2362,6 +2574,11 @@
           <animate attributeName="r" values="2;46;60" keyTimes="0;.5;1" begin="1.3s" dur=".7s" fill="freeze"/>
           <animate attributeName="opacity" values="0;.95;0" keyTimes="0;.3;1" begin="1.3s" dur=".7s" fill="freeze"/></circle></svg>`;
     }
+    if (mode.layout === 'hbo') {
+      overlay.classList.add('hbo');
+      overlay.appendChild(h('div', { class: 'sm-hbo-intro' }, h('b', { text: 'HBO' }), h('span', { text: 'max' })));
+      return overlay;
+    }
     if (mode.layout === 'prime') {
       overlay.classList.add('prime', `m-${mode.key}`);
       overlay.appendChild(h('div', { class: 'sm-prime-intro' }, h('div', { class: 'sm-intro-word', text: mode.splash }), h('i', { class: 'sm-prime-swoosh' })));
@@ -2377,7 +2594,7 @@
   }
 
   function simpleTransition(mode, reduced) {
-    const total = reduced ? 600 : mode.layout === 'disney' ? 2300 : mode.layout === 'apple' || mode.layout === 'prime' ? 2200 : 1500;
+    const total = reduced ? 600 : mode.layout === 'disney' ? 2300 : ['apple', 'prime', 'hbo'].includes(mode.layout) ? 2200 : 1500;
     const overlay = buildIntro(mode);
     overlay.style.setProperty('--t', `${total}ms`);
     document.body.appendChild(overlay);
@@ -2626,6 +2843,7 @@
     if (state.page === 'explore') return renderExplore();
     if (state.page === 'new') return renderNews();
     if (state.page === 'brand') return renderBrand(mode);
+    if (state.page === 'categories') return renderCategories(mode);
     if (state.page === 'originals' && mode.layout === 'disney') return renderOriginals(mode);
     if ((state.page === 'movies' || state.page === 'series') && mode.genres && !isKids()) return renderGenrePage(mode);
     const heroWrap = h('div');
@@ -2670,9 +2888,43 @@
     renderPage();
     app.scrollTop = 0;
   }
+  // HBO Max: "Categorias" com as marcas em círculos e os gêneros em blocos.
+  function renderCategories(mode) {
+    app.appendChild(h('div', { class: 'sm-rows flat sm-catpage' },
+      h('h1', { class: 'sm-page-title', text: 'Categorias' }),
+      h('h2', { class: 'sm-sp-title', text: 'Marcas' }),
+      mode.brands?.length ? brandsRow(mode) : null,
+      h('h2', { class: 'sm-sp-title', text: 'Gêneros' }),
+      h('div', { class: 'sm-xpl-grid' }, (mode.explore || []).map(([t, id, label]) => genreTile(mode, t, id, label)))));
+  }
+
+  // HBO Max: página de marca/categoria como no app (título centralizado, fundo em degradê e as etiquetas
+  // Destaques / Séries / Filmes, que filtram as fileiras).
+  const BRAND_TINT = { hbo: '#4b2a8a', dc: '#0a3d91', wb: '#1d4f8f', cn: '#5a5a5a', adultswim: '#3a3a3a', discovery: '#0d5b8c' };
+  function renderHboBrand(mode, b) {
+    const filter = state.brandFilter || 'all';
+    const sets = {
+      all: [`brand-${b.id}-new`, `brand-${b.id}-series`, `brand-${b.id}-movies`, `brand-${b.id}-top`, `brand-${b.id}-series-new`, `brand-${b.id}-classics`],
+      series: [`brand-${b.id}-series`, `brand-${b.id}-series-new`],
+      movies: [`brand-${b.id}-new`, `brand-${b.id}-movies`, `brand-${b.id}-top`, `brand-${b.id}-classics`],
+    };
+    const titles = { [`brand-${b.id}-new`]: 'Novidades', [`brand-${b.id}-movies`]: 'Filmes populares', [`brand-${b.id}-series`]: 'Séries populares',
+      [`brand-${b.id}-top`]: 'Mais bem avaliados', [`brand-${b.id}-series-new`]: 'Séries recentes', [`brand-${b.id}-classics`]: 'Clássicos' };
+    const chip = (key, label) => h('button', { type: 'button', class: `sm-hbo-chip${filter === key ? ' on' : ''}`,
+      onclick: () => { state.brandFilter = key; renderPage(); } }, label);
+    const head = h('header', { class: 'sm-hbo-cathead', style: { '--tint': BRAND_TINT[b.id] || '#333' } },
+      h('button', { type: 'button', class: 'sm-hbo-back', 'aria-label': 'Voltar', onclick: () => { state.brandFilter = 'all'; setPage(state.brandPrev || 'home'); } }, icon('left')),
+      h('h1', { class: 'sm-hbo-cattitle', text: b.name.replace('\n', ' ') }),
+      h('div', { class: 'sm-hbo-chips' }, chip('all', 'Destaques'), chip('series', 'Séries'), chip('movies', 'Filmes')));
+    const rows = h('div', { class: 'sm-rows flat sm-hbo-catrows' });
+    app.append(head, rows);
+    buildRows(mode, rows, sets[filter], titles);
+  }
+
   function renderBrand(mode) {
     const b = (mode.brands || []).find((x) => x.id === state.brand);
     if (!b) { state.page = 'home'; return renderPage(); }
+    if (mode.layout === 'hbo') return renderHboBrand(mode, b);
     const ids = [`brand-${b.id}-new`, `brand-${b.id}-movies`, `brand-${b.id}-series`, `brand-${b.id}-top`,
       `brand-${b.id}-series-new`, `brand-${b.id}-classics`];
     const titles = { [ids[0]]: 'Lançamentos', [ids[1]]: 'Filmes populares', [ids[2]]: 'Séries', [ids[3]]: 'Mais bem avaliados',
@@ -2780,6 +3032,37 @@
   }, true);
 
   // ---------- Barra superior ----------
+  // HBO Max (redesenho de 2025 na TV): perfil e Minha lista no topo, ícones no meio, nomes sobre um degradê ao passar o
+  // mouse, traço à esquerda no item ativo e o logo no canto superior direito.
+  function buildHboRail(mode) {
+    const item = (label, ic, onclick, active) => h('button', { type: 'button', class: `sm-rail-item${active ? ' active' : ''}`,
+      'aria-label': label, 'aria-current': active ? 'page' : null, onclick }, icon(ic), h('span', { class: 'sm-rail-label', text: label }));
+    const go = (k) => () => setPage(k);
+    const me = activeProfile();
+    const top = h('div', { class: 'sm-rail-top' },
+      h('button', { type: 'button', class: 'sm-rail-item sm-rail-me', 'aria-label': `Perfil: ${me.name}`, onclick: () => openProfileGate(false) },
+        avatarEl(me, 'sm-av sm-av-sm'), h('span', { class: 'sm-rail-label', text: me.name })),
+      item('Minha lista', 'library', go('mylist'), state.page === 'mylist'));
+    const items = [
+      item('Busca', 'search', () => { if (searchQuery() === null) location.hash = '#/search'; }, state.page === 'search'),
+      item('Início', 'home', go('home'), state.page === 'home'),
+      item('Séries', 'tv', go('series'), state.page === 'series'),
+      item('Filmes', 'film', go('movies'), state.page === 'movies'),
+    ];
+    if (!isKids()) {
+      items.push(item('HBO', 'star', () => openBrand('hbo'), state.page === 'brand' && state.brand === 'hbo'));
+      items.push(item('Novidades', 'sparkle', go('new'), state.page === 'new'));
+      items.push(item('Categorias', 'puzzle', go('categories'), state.page === 'categories' || (state.page === 'brand' && state.brand !== 'hbo')));
+    }
+    const logo = h('div', { class: 'sm-hbo-logo', title: 'Início', onclick: go('home') }, h('b', { text: 'HBO' }), h('span', { text: 'max' }));
+    return h('nav', { class: 'sm-rail sm-hbo-rail', 'aria-label': 'Menu' },
+      top,
+      h('div', { class: 'sm-rail-items' }, items),
+      h('div', { class: 'sm-rail-bottom' }, makeSwitcher(), isKids() ? null : buildBell(mode),
+        item('Configurações', 'gear', () => { location.hash = '#/settings'; }, false)),
+      logo);
+  }
+
   function buildRail(mode) {
     const item = (label, ic, onclick, active) => h('button', { type: 'button', class: `sm-rail-item${active ? ' active' : ''}`,
       'aria-label': label, 'aria-current': active ? 'page' : null, onclick }, icon(ic), h('span', { class: 'sm-rail-label', text: label }));
@@ -2808,6 +3091,7 @@
   }
 
   function buildNav(mode) {
+    if (mode.layout === 'hbo') return buildHboRail(mode);
     if (mode.layout === 'disney' || mode.layout === 'apple') return buildRail(mode);
     const links = h('ul', { class: 'sm-links' },
       (mode.navPages || NAV_PAGES).filter(([key]) => !(isKids() && key === 'new')).map(([key, label]) =>
@@ -3255,6 +3539,11 @@
       const pager = h('div', { class: 'sm-bill-pager' });
       const slides = pool.map((it, i) => {
         const meta = [it.type === 'movie' ? 'Filme' : 'Série', ...(it.genres || []).slice(0, 2), it.releaseInfo].filter(Boolean).join(' · ');
+        // HBO Max: "Novo" com contorno + ano e gêneros, e um único botão "Ir para a série/o filme".
+        const isNew = Number(it.releaseInfo) >= new Date().getFullYear() - 1;
+        const hboMeta = isHbo() ? h('div', { class: 'sm-bill-meta sm-hbo-meta' },
+          isNew ? h('span', { class: 'sm-hbo-new', text: 'Novo' }) : null,
+          h('span', { text: [it.releaseInfo, ...(it.genres || []).slice(0, 2)].filter(Boolean).join('  ·  ') })) : null;
         const listBtn = h('button', { type: 'button', class: 'sm-glass-round', 'aria-label': 'Minha lista' });
         const setList = () => listBtn.replaceChildren(icon(inMyList(it.id) ? 'check' : 'plus'));
         setList();
@@ -3264,9 +3553,11 @@
           h('div', { class: 'sm-bill-info' },
             MODES[state.mode].included ? includedTag() : h('div', { class: 'sm-bill-kicker', text: it._kicker ?? MODES[state.mode].heroKicker ?? '' }),
             logoOrTitle(it, 'sm-bill-logo', 'sm-bill-title'),
-            h('div', { class: 'sm-bill-meta', text: meta }),
+            hboMeta || h('div', { class: 'sm-bill-meta', text: meta }),
             it.description ? h('p', { class: 'sm-bill-desc', text: it.description }) : null,
-            h('div', { class: 'sm-bill-actions' },
+            isHbo() ? h('div', { class: 'sm-bill-actions' },
+              h('button', { type: 'button', class: 'sm-hbo-go', onclick: () => openModal(it) }, it.type === 'movie' ? 'Ir para o filme' : 'Ir para a série'))
+            : h('div', { class: 'sm-bill-actions' },
               h('button', { type: 'button', class: 'sm-pill', onclick: () => play(it) }, icon('play', true), 'Assistir'),
               listBtn,
               h('button', { type: 'button', class: 'sm-glass-round', 'aria-label': 'Mais informações', onclick: () => openModal(it) }, icon('info')))));
@@ -3354,7 +3645,7 @@
     const sources = (sourcesOverride || (isKids() ? mode.kidsHero : mode.heroCatalogs)).filter((c) => types.includes(c.type));
     if (!sources.length) { rows.classList.add('flat'); return; }
     if (mode.layout === 'disney') return buildCarousel(wrap, rows, sources);
-    if (mode.layout === 'apple' || mode.layout === 'prime') return buildBillboard(wrap, rows, sources);
+    if (mode.layout === 'apple' || mode.layout === 'prime' || mode.layout === 'hbo') return buildBillboard(wrap, rows, sources);
     const hero = h('section', { class: 'sm-hero', 'aria-label': 'Destaque' });
     wrap.appendChild(hero);
     let iframe = null;
@@ -3505,7 +3796,7 @@
           }
         } else if (byId[key] && !(isKids() && typeFilter && byId[key].type !== typeFilter)) {
           const c = byId[key];
-          const name = titles?.[key] || (c.name.startsWith(mode.prefix) ? c.name.slice(mode.prefix.length) : c.name);
+          const name = titles?.[key] || mode.rowTitles?.[key] || (c.name.startsWith(mode.prefix) ? c.name.slice(mode.prefix.length) : c.name);
           const isTop = key.startsWith('top10');
           row = makeRow(name, () => catalog(c.type, c.id), {
             rank: isTop,
@@ -3533,10 +3824,10 @@
     const dashes = h('div', { class: 'sm-dashes' });
     const head = h('div', { class: 'sm-row-head' },
       h('h2', { class: 'sm-row-title', text: title }),
-      opts.onExplore && !isApple() ? h('a', { class: 'sm-explore', onclick: opts.onExplore }, isDisney() ? 'VER TUDO' : isPrime() ? 'Ver mais' : 'Explorar tudo ›') : null,
+      opts.onExplore && !isApple() && !isHbo() ? h('a', { class: 'sm-explore', onclick: opts.onExplore }, isDisney() ? 'VER TUDO' : isPrime() ? 'Ver mais' : 'Explorar tudo ›') : null,
       dashes);
     // Apple TV: o título da fileira é o link ("Em alta ›").
-    if (isApple() && opts.onExplore) {
+    if ((isApple() || isHbo()) && opts.onExplore) {
       const t = head.querySelector('.sm-row-title');
       t.classList.add('link');
       t.appendChild(icon('right'));
@@ -3595,6 +3886,24 @@
       style: { backgroundImage: cssUrl(portrait ? tmdbSize(item.poster, 'w342') || item.poster : cardImage(item)) } });
     el.appendChild(logoOrTitle(item, 'sm-card-logo', 'sm-card-name'));
     if (item.epLabel) el.appendChild(h('div', { class: 'sm-card-ep', text: item.epLabel }));
+    if (isHbo()) {
+      const kebab = h('button', { type: 'button', class: 'sm-hbo-kebab', 'aria-label': 'Mais opções' }, h('i'), h('i'), h('i'));
+      kebab.addEventListener('click', (e) => {
+        e.stopPropagation();
+        document.querySelectorAll('.sm-hbo-menu').forEach((m) => m.remove());
+        const inList = inMyList(item.id);
+        const menu = h('div', { class: 'sm-hbo-menu', role: 'menu', onclick: (ev) => ev.stopPropagation() },
+          h('button', { type: 'button', role: 'menuitem', onclick: () => { menu.remove(); play(item); } }, icon('play', true), 'Assistir'),
+          h('button', { type: 'button', role: 'menuitem', onclick: () => { menu.remove(); toggleMyList(item); } },
+            icon(inList ? 'check' : 'plus'), inList ? 'Remover da Minha lista' : 'Adicionar à Minha lista'),
+          h('button', { type: 'button', role: 'menuitem', onclick: () => { menu.remove(); openModal(item); } },
+            icon('info'), item.type === 'movie' ? 'Ir para o filme' : 'Ir para a série'));
+        el.appendChild(menu);
+        const close = (ev) => { if (!menu.contains(ev.target)) { menu.remove(); document.removeEventListener('pointerdown', close, true); } };
+        setTimeout(() => document.addEventListener('pointerdown', close, true), 0);
+      });
+      el.appendChild(kebab);
+    }
     if (isPrime() && !opts.progress) {
       const meta = [item.releaseInfo, item.rating ? `★ ${item.rating}` : null, item.type === 'movie' ? 'Filme' : 'Série'].filter(Boolean).join('  ·  ');
       const playBtn = h('button', { type: 'button', class: 'sm-pv-play', 'aria-label': `Assistir ${item.name}` }, icon('play', true));
@@ -3994,8 +4303,9 @@
     const body = h('div', { class: 'sm-dlg-body' }, h('div', { class: 'sm-meta', text: 'Carregando…' }));
     // Disney+: as seções viram abas. Fora dela, addSection só acrescenta a seção.
     const TAB_ORDER = ['eps', 'sim', 'det'];
-    const tabs = isDisney() || isPrime() ? h('div', { class: 'sm-tabs', role: 'tablist' }) : null;
-    const TAB_NAMES = isPrime() ? { eps: 'Episódios', sim: 'Relacionados', det: 'Detalhes', cast: 'Elenco' } : null;
+    const tabs = isDisney() || isPrime() || isHbo() ? h('div', { class: 'sm-tabs', role: 'tablist' }) : null;
+    const TAB_NAMES = isPrime() ? { eps: 'Episódios', sim: 'Relacionados', det: 'Detalhes', cast: 'Elenco' }
+      : isHbo() ? { eps: 'Episódios', sim: 'Mais como este', det: 'Detalhes', cast: 'Elenco' } : null;
     let tabChosen = false;
     const setTab = (key, byUser) => {
       if (byUser) tabChosen = true;
