@@ -58,7 +58,9 @@
     ['mylist', 'Minha lista'],
   ];
 
-  const DEFAULTS = { mode: 'stremio', addonUrl: 'http://127.0.0.1:7100', showInDefault: false, muted: true };
+  // remoteAddonUrl: cópia estática do addon no GitHub Pages, usada quando o addon do PC está desligado.
+  const DEFAULTS = { mode: 'stremio', addonUrl: 'http://127.0.0.1:7100', showInDefault: false, muted: true,
+    remoteAddonUrl: 'https://pabloruancoder.github.io/stremio-streaming-modes' };
 
   // ===========================================================================
   // Utilidades
@@ -182,7 +184,25 @@
   }
   // API_V muda quando o formato das respostas muda, para não usar o cache antigo do navegador.
   const API_V = 2;
-  const addon = (path) => getJSON(`${state.addonUrl}${path}${path.includes('?') ? '&' : '?'}v=${API_V}`);
+  // Addon do PC desligado: fileiras, Top 10 e estreias vêm da cópia no GitHub Pages (arquivos estáticos).
+  // Busca, recomendações personalizadas, trailers e dados do player precisam do addon do PC.
+  let localDownAt = 0;
+  const localDown = () => Date.now() - localDownAt < 60_000; // tenta o PC de novo a cada minuto
+  const STATIC_PATH = /^\/(manifest\.json|catalog\/(movie|series)\/[^/]+\.json|sm\/upcoming\/[a-z]+\.json)$/;
+  function addon(path) {
+    const bare = path.split('?')[0];
+    const remote = () => getJSON(`${store.get('remoteAddonUrl')}${bare}`);
+    const canRemote = STATIC_PATH.test(bare) && store.get('remoteAddonUrl');
+    if (canRemote && localDown()) return remote();
+    return getJSON(`${state.addonUrl}${path}${path.includes('?') ? '&' : '?'}v=${API_V}`).catch((err) => {
+      if (!canRemote) throw err;
+      localDownAt = Date.now();
+      return remote();
+    });
+  }
+  const offlineText = () => (localDown()
+    ? 'Esta parte precisa do addon do PC ligado (abra o iniciar-stremio.bat). As fileiras continuam vindo do GitHub.'
+    : `Não consegui falar com o addon em ${state.addonUrl}. Ele está rodando? Abra o iniciar-stremio.bat.`);
   const catalog = (type, id) => addon(`/catalog/${type}/${encodeURIComponent(id)}.json`).then((d) => d.metas || []);
   const manifest = () => addon('/manifest.json');
   const details = (type, id) => addon(`/sm/details/${type}/${id}.json`).then((d) => d.details).catch(() => null);
@@ -1652,7 +1672,7 @@
         hero.remove();
         rows.classList.add('flat');
         rows.prepend(h('div', { class: 'sm-offline', text:
-          `Não consegui falar com o addon em ${state.addonUrl}. Ele está rodando? (na pasta addon: npm start)` }));
+          offlineText() }));
         return;
       }
       const item = pool[Math.floor(Math.random() * pool.length)];
@@ -1772,7 +1792,7 @@
     }).catch(() => {
       container.classList.add('flat');
       container.appendChild(h('div', { class: 'sm-offline', text:
-        `Não consegui falar com o addon em ${state.addonUrl}. Ele está rodando? (na pasta addon: npm start)` }));
+        offlineText() }));
     });
   }
 
@@ -2441,7 +2461,7 @@
         } else if (++emptyStreak > 8) { done = true; sentinel.remove(); io.disconnect(); return; }
       } catch {
         if (!page) feed.replaceChildren(h('div', { class: 'sm-offline', text:
-          `Não consegui falar com o addon em ${state.addonUrl}. Ele está rodando? (na pasta addon: npm start)` }));
+          offlineText() }));
         done = true;
         io.disconnect();
         return;
@@ -2481,7 +2501,7 @@
     const ghosts = () => h('div', { class: 'sm-grid', 'aria-busy': 'true' },
       Array.from({ length: 12 }, () => h('div', { class: 'sm-card sm-ghost' })));
     const offline = () => h('div', { class: 'sm-offline', text:
-      `Não consegui falar com o addon em ${state.addonUrl}. Ele está rodando? (na pasta addon: npm start)` });
+      offlineText() });
 
     if (!q) {
       // Sem texto: recomendações a partir do que você assiste, carregando mais ao descer.

@@ -7,6 +7,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { hasTmdb } from '../src/config.js';
 import { manifestCatalogs, catalogHandler } from '../src/catalogs.js';
+import { upcoming } from '../src/news.js';
+import { PROVIDERS } from '../src/providers.js';
 
 const out = path.resolve(process.argv[2] || 'dist');
 const PAGES = 5; // páginas de 20 juntadas por fileira
@@ -41,6 +43,13 @@ for (const c of catalogs) {
   write(`catalog/${c.type}/${c.id}.json`, { metas });
   total += metas.length;
   console.log(`${c.id.padEnd(32)} ${String(metas.length).padStart(3)} títulos`);
+}
+
+// Estreias (fileira "Em breve" do plugin quando o addon do PC está desligado).
+for (const p of Object.values(PROVIDERS)) {
+  const items = await upcoming(p).catch(() => []);
+  write(`sm/upcoming/${p.key}.json`, { items });
+  console.log(`em breve (${p.key})`.padEnd(32), String(items.length).padStart(3), 'títulos');
 }
 
 // Manifest sem paginação (arquivo fixo devolve tudo de uma vez).
