@@ -1,7 +1,7 @@
 /**
  * @name Streaming Modes
  * @description Transforma o Stremio no visual e nas recomendações de um streaming (Netflix primeiro). Alt+M abre o seletor de modo.
- * @version 0.2.0
+ * @version 0.2.1
  * @author Tec-Projetos
  * @updateUrl none
  */
@@ -213,12 +213,23 @@
   // ===========================================================================
   // Perfis ("Quem está assistindo?"), histórico por perfil e avaliações
   // ===========================================================================
+  // Avatares no estilo dos clássicos da Netflix: carinhas simples sobre um fundo de cor
+  // sólida, desenhadas em SVG (sem imagens externas). A ordem importa: os perfis guardam o índice.
   const AVATARS = [
-    { e: '😀', c: ['#e50914', '#7a0a0f'] }, { e: '😎', c: ['#1f6feb', '#0b2a66'] }, { e: '🐼', c: ['#2ea043', '#0d3b1a'] },
-    { e: '🦊', c: ['#f0883e', '#7a3300'] }, { e: '🐱', c: ['#a371f7', '#3c1a78'] }, { e: '🐶', c: ['#d29922', '#5c3d00'] },
-    { e: '🦁', c: ['#e3b341', '#6b4a00'] }, { e: '🐸', c: ['#3fb950', '#114d1d'] }, { e: '🤖', c: ['#6e7681', '#22272e'] },
-    { e: '👾', c: ['#db61a2', '#5c1440'] }, { e: '🐙', c: ['#ff7b72', '#6e1a14'] }, { e: '🦄', c: ['#bc8cff', '#4b2c84'] },
-    { e: '🧸', c: ['#ffb347', '#ff5e7e'] }, { e: '🚀', c: ['#39c5cf', '#0b4a56'] },
+    { name: 'Sorriso azul', bg: '#0071eb', fg: '#0a2a5c', face: 'smile' },
+    { name: 'Piscadinha amarela', bg: '#f5c518', fg: '#5c4300', face: 'wink' },
+    { name: 'Sorriso vermelho', bg: '#e50914', fg: '#4a0306', face: 'grin' },
+    { name: 'Óculos verde', bg: '#1db954', fg: '#06361a', face: 'cool' },
+    { name: 'Língua roxa', bg: '#8c4bff', fg: '#2a0d5c', face: 'tongue' },
+    { name: 'Surpresa rosa', bg: '#ff4fa3', fg: '#5c0a34', face: 'wow' },
+    { name: 'Sorriso laranja', bg: '#ff7a00', fg: '#5c2a00', face: 'happy' },
+    { name: 'Sorriso turquesa', bg: '#00b3b3', fg: '#003d3d', face: 'smile' },
+    { name: 'Piscadinha cinza', bg: '#7b8794', fg: '#1f252b', face: 'wink' },
+    { name: 'Óculos azul-escuro', bg: '#2b3a8c', fg: '#a9b8ff', face: 'cool' },
+    { name: 'Sorriso coral', bg: '#ff6b5e', fg: '#5c1410', face: 'grin' },
+    { name: 'Língua lilás', bg: '#c39bff', fg: '#3c1a78', face: 'tongue' },
+    { name: 'Ursinho infantil', bg: '#ffb347', fg: '#5c3300', face: 'bear' },
+    { name: 'Surpresa ciano', bg: '#39c5f0', fg: '#0b3a56', face: 'wow' },
   ];
   const KIDS_GENRES = new Set(['Animação', 'Família', 'Infantil', 'Kids']);
 
@@ -535,7 +546,7 @@
 
   /* ---------- Perfis ---------- */
   .sm-av { display:inline-grid; place-items:center; border-radius:6px; overflow:hidden; flex:none; line-height:1; }
-  .sm-av > span { font-size:1.2em; filter:drop-shadow(0 2px 3px rgba(0,0,0,.35)); }
+  .sm-av > svg { width:100%; height:100%; display:block; }
   .sm-av-nav { width:2rem; height:2rem; font-size:1.1rem; }
   .sm-av-sm { width:1.7rem; height:1.7rem; font-size:.95rem; }
   .sm-av-md { width:3.4rem; height:3.4rem; font-size:1.7rem; }
@@ -555,7 +566,7 @@
   .sm-prof-name { font-size:clamp(.95rem, 1.3vw, 1.3rem); }
   .sm-prof-kids { margin-top:-.4rem; font-size:.75rem; font-weight:700; color:#b3b3b3; text-transform:uppercase; letter-spacing:.06em; }
   .sm-prof-edit { position:absolute; inset:0; display:grid; place-items:center; border-radius:8px; background:rgba(0,0,0,.55); }
-  .sm-prof-edit .sm-ico { width:30% !important; height:30% !important; color:#fff; }
+  .sm-prof-edit .sm-ico { width:34% !important; height:34% !important; padding:7%; box-sizing:border-box; border:2px solid #fff; border-radius:50%; color:#fff; }
   .sm-gate-btn { padding:.6em 1.8em; border:1px solid #808080; background:transparent; color:#808080; font:inherit; font-size:1.1rem; letter-spacing:.15em;
     text-transform:uppercase; cursor:pointer; transition:color .15s, border-color .15s; }
   .sm-gate-btn:hover { color:#fff; border-color:#fff; }
@@ -575,11 +586,11 @@
   .sm-edit-pick.on { outline-color:#fff; }
   .sm-edit-kids { display:flex; align-items:center; gap:.8rem; cursor:pointer; }
   .sm-edit-kids input { position:absolute; opacity:0; width:1px; height:1px; }
-  .sm-toggle { position:relative; flex:none; width:2.8rem; height:1.6rem; border-radius:999px; background:#555; transition:background .2s; }
-  .sm-toggle::after { content:""; position:absolute; top:.2rem; left:.2rem; width:1.2rem; height:1.2rem; border-radius:50%; background:#fff; transition:transform .2s; }
-  .sm-edit-kids input:checked + .sm-toggle { background:#e50914; }
-  .sm-edit-kids input:checked + .sm-toggle::after { transform:translateX(1.2rem); }
-  .sm-edit-kids input:focus-visible + .sm-toggle { outline:2px solid #fff; outline-offset:2px; }
+  .sm-kswitch { position:relative; flex:none; width:2.8rem; height:1.6rem; border-radius:999px; background:#555; transition:background .2s; }
+  .sm-kswitch::after { content:""; position:absolute; top:.2rem; left:.2rem; width:1.2rem; height:1.2rem; border-radius:50%; background:#fff; transition:transform .2s; }
+  .sm-edit-kids input:checked + .sm-kswitch { background:#e50914; }
+  .sm-edit-kids input:checked + .sm-kswitch::after { transform:translateX(1.2rem); }
+  .sm-edit-kids input:focus-visible + .sm-kswitch { outline:2px solid #fff; outline-offset:2px; }
   .sm-edit-kids span { display:flex; flex-direction:column; }
   .sm-edit-kids small { color:#b3b3b3; }
   .sm-edit-note { margin:0; color:#b3b3b3; font-size:.9rem; }
@@ -1475,8 +1486,50 @@
   // Perfil: atalhos do Stremio e a volta para o modo padrão.
   function avatarEl(p, cls = 'sm-av') {
     const a = AVATARS[p.avatar] || AVATARS[0];
-    return h('span', { class: cls, 'aria-hidden': 'true', style: { background: `linear-gradient(135deg, ${a.c[0]}, ${a.c[1]})` } },
-      h('span', { text: a.e }));
+    return h('span', { class: cls, 'aria-hidden': 'true', style: { background: a.bg } }, faceSvg(a));
+  }
+
+  function faceSvg(a) {
+    const svg = document.createElementNS(SVG_NS, 'svg');
+    svg.setAttribute('viewBox', '0 0 100 100');
+    const add = (tag, attrs) => {
+      const el = document.createElementNS(SVG_NS, tag);
+      for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+      svg.appendChild(el);
+      return el;
+    };
+    const ink = a.fg;
+    const line = (d, w = 7) => add('path', { d, fill: 'none', stroke: ink, 'stroke-width': w, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+    const eye = (x) => add('rect', { x, y: 30, width: 10, height: 18, rx: 5, fill: ink });
+    switch (a.face) {
+      case 'wink': eye(62); line('M27 40 Q33 34 39 40'); line('M26 62 Q50 82 74 60'); break;
+      case 'grin':
+        eye(28); eye(62);
+        add('path', { d: 'M24 58 H76 Q74 84 50 84 Q26 84 24 58 Z', fill: ink });
+        add('rect', { x: 32, y: 58, width: 36, height: 8, rx: 2, fill: '#fff' });
+        break;
+      case 'cool':
+        add('path', { d: 'M18 32 H82 V38 Q82 52 68 52 Q56 52 54 40 H46 Q44 52 32 52 Q18 52 18 38 Z', fill: ink });
+        line('M30 66 Q50 80 70 64');
+        break;
+      case 'tongue':
+        eye(28); eye(62); line('M24 60 Q50 80 76 60');
+        add('path', { d: 'M52 69 h14 v8 a7 7 0 0 1 -14 0 Z', fill: '#ff5e7e' });
+        break;
+      case 'wow': eye(28); eye(62); add('ellipse', { cx: 50, cy: 70, rx: 9, ry: 11, fill: ink }); break;
+      case 'happy': line('M26 42 Q33 32 40 42'); line('M60 42 Q67 32 74 42'); line('M26 60 Q50 84 74 60'); break;
+      case 'bear':
+        add('circle', { cx: 18, cy: 18, r: 12, fill: ink, opacity: '.35' });
+        add('circle', { cx: 82, cy: 18, r: 12, fill: ink, opacity: '.35' });
+        add('rect', { x: 28, y: 34, width: 9, height: 14, rx: 4.5, fill: ink });
+        add('rect', { x: 63, y: 34, width: 9, height: 14, rx: 4.5, fill: ink });
+        add('ellipse', { cx: 50, cy: 64, rx: 16, ry: 12, fill: '#fff', opacity: '.55' });
+        add('ellipse', { cx: 50, cy: 59, rx: 6, ry: 4, fill: ink });
+        line('M42 69 Q50 76 58 69', 5);
+        break;
+      default: eye(28); eye(62); line('M24 60 Q50 82 76 58 L80 54');
+    }
+    return svg;
   }
 
   function buildProfile() {
@@ -1561,7 +1614,7 @@
     paint();
     const name = h('input', { type: 'text', class: 'sm-edit-name', maxlength: '20', placeholder: 'Nome', value: draft.name, 'aria-label': 'Nome do perfil' });
     const grid = h('div', { class: 'sm-edit-grid' }, AVATARS.map((a, i) => {
-      const b = h('button', { type: 'button', class: i === draft.avatar ? 'sm-edit-pick on' : 'sm-edit-pick', 'aria-label': `Avatar ${a.e}`,
+      const b = h('button', { type: 'button', class: i === draft.avatar ? 'sm-edit-pick on' : 'sm-edit-pick', 'aria-label': `Avatar: ${a.name}`,
         onclick: () => { draft.avatar = i; grid.querySelectorAll('.sm-edit-pick').forEach((x) => x.classList.remove('on')); b.classList.add('on'); paint(); } },
       avatarEl({ avatar: i }, 'sm-av sm-av-md'));
       return b;
@@ -1590,7 +1643,7 @@
           h('div', { class: 'sm-edit-label', text: 'Escolha um avatar' }),
           grid,
           draft.main ? h('p', { class: 'sm-edit-note', text: 'Perfil principal: usa a sua biblioteca do Stremio.' })
-            : h('label', { class: 'sm-edit-kids', for: 'sm-kids' }, kids, h('i', { class: 'sm-toggle', 'aria-hidden': 'true' }),
+            : h('label', { class: 'sm-edit-kids', for: 'sm-kids' }, kids, h('i', { class: 'sm-kswitch', 'aria-hidden': 'true' }),
               h('span', null, h('b', { text: 'Perfil infantil' }), h('small', { text: 'Só títulos para crianças (classificação Livre e 10 anos)' }))))),
       h('div', { class: 'sm-edit-actions' },
         h('button', { type: 'button', class: 'sm-gate-btn white', onclick: save }, 'Salvar'),
