@@ -309,7 +309,7 @@
     return requests.get(url);
   }
   // API_V muda quando o formato das respostas muda, para não usar o cache antigo do navegador.
-  const API_V = 2;
+  const API_V = 3;
   // Addon do PC desligado: fileiras, Top 10 e estreias vêm da cópia no GitHub Pages (arquivos estáticos).
   // Busca, recomendações personalizadas, trailers e dados do player precisam do addon do PC.
   let localDownAt = 0;
@@ -1389,6 +1389,14 @@
   .sm-bill:hover .sm-bill-arrow { opacity:1; }
   .sm-bill-arrow:hover { transform:scale(1.08); }
   .sm-bill-arrow .sm-ico { width:1.4rem !important; height:1.4rem !important; }
+  /* Prévia em vídeo atrás do título */
+  .sm-bill-video { position:absolute; inset:0; overflow:hidden; opacity:0; transition:opacity 1.2s ease; pointer-events:none; }
+  .sm-bill-video.on { opacity:1; }
+  .sm-bill-video iframe { position:absolute; top:50%; left:50%; width:100%; height:100%; border:0; transform:translate(-50%, -50%) scale(1.35); }
+  .sm-bill.trailer .sm-bill-dot.on i { animation-play-state:paused; }
+  .sm-bill-mute { position:absolute; z-index:4; right:2rem; bottom:calc(7vw + 1rem); }
+  .sm-bill-mute[hidden] { display:none; }
+
   /* Cápsula de vidro com o progresso */
   .sm-bill-pager { position:absolute; z-index:4; left:50%; bottom:calc(7vw + 1.4rem); transform:translateX(-50%); display:flex; align-items:center; gap:.45rem;
     padding:.5rem .7rem !important; border-radius:999px; background:rgba(255,255,255,.12); -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur);
@@ -1463,8 +1471,9 @@
     background:rgba(255,255,255,.14); -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur); box-shadow:inset 0 1px 0 rgba(255,255,255,.2); }
   html[data-sm-mode="apple"] .sm-dlg-body { display:flex; flex-direction:column; padding:0 4.5vw 4rem; }
   html[data-sm-mode="apple"] .sm-dlg-body > [data-tab="eps"] { order:1; }
-  html[data-sm-mode="apple"] .sm-dlg-body > [data-tab="sim"] { order:2; }
-  html[data-sm-mode="apple"] .sm-dlg-body > [data-tab="det"] { order:3; display:grid; grid-template-columns:1.4fr 1fr; gap:3rem; }
+  html[data-sm-mode="apple"] .sm-dlg-body > [data-tab="cast"] { order:2; }
+  html[data-sm-mode="apple"] .sm-dlg-body > [data-tab="sim"] { order:3; }
+  html[data-sm-mode="apple"] .sm-dlg-body > [data-tab="det"] { order:4; display:grid; grid-template-columns:1.4fr 1fr; gap:3rem; }
   html[data-sm-mode="apple"] .sm-dlg-section { margin-top:2.6rem; }
   html[data-sm-mode="apple"] .sm-dlg-section h3, html[data-sm-mode="apple"] .sm-det-title { font-size:1.35rem; font-weight:700; letter-spacing:-.015em; }
   html[data-sm-mode="apple"] .sm-dlg-section-head { justify-content:flex-start; gap:1rem; }
@@ -1489,6 +1498,44 @@
   html[data-sm-mode="apple"] .sm-sim:hover .sm-sim-img { transform:scale(1.05); }
   html[data-sm-mode="apple"] .sm-sim-body { display:none; }
   html[data-sm-mode="apple"] .sm-dlg-cols, html[data-sm-mode="apple"] .sm-match, html[data-sm-mode="apple"] .sm-hd { display:none; }
+
+  /* Elenco e equipe: fotos redondas numa fileira */
+  .sm-cast { display:flex; gap:1.6rem; overflow-x:auto !important; overflow-y:visible !important; padding:.4rem .2rem 1rem; scrollbar-width:none; }
+  .sm-cast::-webkit-scrollbar { display:none; }
+  .sm-person { flex:none; width:7.4rem; text-align:center; overflow:visible !important; }
+  .sm-person-img { width:7rem; height:7rem; margin:0 auto .7rem; display:grid; place-items:center; border-radius:50%; background:#1c1c1e center 20%/cover no-repeat;
+    box-shadow:0 10px 24px rgba(0,0,0,.5), inset 0 0 0 1px rgba(255,255,255,.08); transition:transform .3s cubic-bezier(.2,.8,.2,1); }
+  .sm-person:hover .sm-person-img { transform:scale(1.06); }
+  .sm-person-img span { font-size:1.6rem; font-weight:600; color:rgba(245,245,247,.6); }
+  .sm-person-name { font-size:.92rem; font-weight:600; color:#f5f5f7; line-height:1.25; }
+  .sm-person-role { margin-top:.15rem; font-size:.82rem; color:rgba(245,245,247,.55); line-height:1.25;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+
+  /* Player: controles de vidro flutuando sobre o vídeo (tvOS 26) */
+  html[data-sm-mode="apple"] [class*="control-bar-layer"] { left:1.6rem !important; right:1.6rem !important; bottom:1.2rem !important;
+    padding:.3rem 0 .5rem !important; border-radius:1.8rem; background:rgba(30,30,34,.36) !important;
+    -webkit-backdrop-filter:blur(30px) saturate(180%); backdrop-filter:blur(30px) saturate(180%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.22), inset 0 0 0 1px rgba(255,255,255,.1), 0 20px 50px rgba(0,0,0,.45) !important; }
+  html[data-sm-mode="apple"] [class*="control-bar-layer"]::before, html[data-sm-mode="apple"] [class*="nav-bar-layer"]::before { display:none !important; }
+  html[data-sm-mode="apple"] [class*="control-bar-container"] { background:none !important; padding:0 1.4rem !important; }
+  html[data-sm-mode="apple"] [class*="seek-bar-container"] [class*="track-after"] { background-color:#fff !important; }
+  html[data-sm-mode="apple"] [class*="seek-bar-container"] [class*="track-before"] { background-color:rgba(255,255,255,.4) !important; }
+  html[data-sm-mode="apple"] [class*="seek-bar-container"] [class*="track-"]:not([class*="track-before"]):not([class*="track-after"]) { background-color:rgba(255,255,255,.2) !important; border-radius:999px; }
+  html[data-sm-mode="apple"] [class*="seek-bar-container"] [class*="thumb-"] { background:#fff !important; box-shadow:0 2px 8px rgba(0,0,0,.4) !important; }
+  html[data-sm-mode="apple"] [class*="control-bar-button-"] { border-radius:999px !important; opacity:.92; }
+  html[data-sm-mode="apple"] [class*="control-bar-button-"]:hover { background-color:rgba(255,255,255,.16) !important; opacity:1; }
+  html[data-sm-mode="apple"] [class*="nav-bar-layer"] { top:1rem !important; left:1.6rem !important; right:1.6rem !important; border-radius:999px;
+    background:rgba(30,30,34,.32) !important; -webkit-backdrop-filter:blur(30px) saturate(180%); backdrop-filter:blur(30px) saturate(180%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.2), inset 0 0 0 1px rgba(255,255,255,.08) !important; }
+  html[data-sm-mode="apple"] [class*="player-title"] { font-family:-apple-system, "SF Pro Display", Inter, "Segoe UI", sans-serif !important; font-weight:600 !important; }
+  html[data-sm-mode="apple"] #sm-player { font-family:-apple-system, "SF Pro Display", Inter, "Segoe UI", sans-serif; }
+  html[data-sm-mode="apple"] .sm-skip { border:0; border-radius:999px; background:rgba(255,255,255,.16);
+    -webkit-backdrop-filter:blur(30px) saturate(180%); backdrop-filter:blur(30px) saturate(180%); box-shadow:inset 0 1px 0 rgba(255,255,255,.25); bottom:9rem; }
+  html[data-sm-mode="apple"] .sm-skip:hover { background:#f5f5f7; color:#000; }
+  html[data-sm-mode="apple"] .sm-next { border-radius:22px; background:rgba(30,30,34,.5); -webkit-backdrop-filter:blur(30px) saturate(180%);
+    backdrop-filter:blur(30px) saturate(180%); box-shadow:inset 0 1px 0 rgba(255,255,255,.2), 0 20px 50px rgba(0,0,0,.5); bottom:9rem; }
+  html[data-sm-mode="apple"] .sm-next-thumb { border-radius:12px; }
+  html[data-sm-mode="apple"] .sm-next-credits, html[data-sm-mode="apple"] .sm-next-go { border-radius:999px; }
 
   /* Busca: campo de vidro arredondado, etiquetas e capas para explorar */
   html[data-sm-mode="apple"] .sm-searchpage { grid-template-columns:1fr; gap:1.2rem; padding:1.4rem var(--pad) 4rem; }
@@ -2821,8 +2868,62 @@
         pager.appendChild(h('button', { type: 'button', class: 'sm-bill-dot', 'aria-label': `Destaque ${i + 1}`, onclick: () => go(i) }, fill));
         return slide;
       });
+      // Prévia em vídeo: alguns segundos depois de a arte aparecer, o trailer começa sem som por trás do título.
+      // Enquanto ele toca, a troca automática espera (até 40 s); o botão de vidro liga e desliga o som.
+      let trailerTimer = null;
+      let trailerEnd = null;
+      let liveFrame = null;
+      const mute = h('button', { type: 'button', class: 'sm-glass-round sm-bill-mute', 'aria-label': 'Som da prévia', hidden: true });
+      const cmd = (func) => liveFrame?.contentWindow?.postMessage(JSON.stringify({ event: 'command', func, args: [] }), '*');
+      const setMute = () => mute.replaceChildren(icon(state.muted ? 'mute' : 'sound'));
+      setMute();
+      mute.addEventListener('click', () => { state.muted = !state.muted; store.set('muted', state.muted); cmd(state.muted ? 'mute' : 'unMute'); setMute(); });
+      heroCtl.pause = () => { hero.classList.add('paused'); cmd('pauseVideo'); };
+      heroCtl.resume = () => { hero.classList.remove('paused'); if (!hero.classList.contains('offscreen')) cmd('playVideo'); };
+      heroCtl.onScroll = (y) => {
+        const off = y > hero.offsetHeight * 0.7;
+        if (off === hero.classList.contains('offscreen')) return;
+        hero.classList.toggle('offscreen', off);
+        cmd(off ? 'pauseVideo' : 'playVideo');
+      };
+      const stopTrailer = () => {
+        clearTimeout(trailerTimer);
+        clearTimeout(trailerEnd);
+        hero.classList.remove('trailer');
+        mute.hidden = true;
+        liveFrame = null;
+        hero.querySelectorAll('.sm-bill-video').forEach((v) => v.remove());
+      };
+      const startTrailer = (slide, it, at) => {
+        trailerTimer = setTimeout(() => {
+          details(it.type, it.id).then((d) => {
+            if (stopped || idx !== at || !d?.trailer) return;
+            const k = encodeURIComponent(d.trailer);
+            const box = h('div', { class: 'sm-bill-video' });
+            const iframe = h('iframe', { tabindex: '-1', title: 'Prévia', allow: 'autoplay; encrypted-media',
+              src: `https://www.youtube-nocookie.com/embed/${k}?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&iv_load_policy=3&playsinline=1&disablekb=1&enablejsapi=1&origin=${encodeURIComponent(location.origin)}` });
+            iframe.addEventListener('load', () => {
+              iframe.contentWindow?.postMessage(JSON.stringify({ event: 'listening', id: 1 }), '*');
+              setTimeout(() => {
+                if (stopped || idx !== at || liveFrame !== iframe) return;
+                box.classList.add('on');
+                hero.classList.add('trailer');
+                mute.hidden = false;
+                if (!state.muted) cmd('unMute');
+                if (hero.classList.contains('paused') || hero.classList.contains('offscreen')) cmd('pauseVideo');
+                trailerEnd = setTimeout(() => { if (idx === at) go(idx + 1); }, 40000);
+              }, 3500);
+            });
+            liveFrame = iframe;
+            box.appendChild(iframe);
+            slide.querySelector('.sm-bill-img').after(box);
+          }).catch(() => {});
+        }, 3000);
+      };
       function go(i) {
         idx = (i + n) % n;
+        stopTrailer();
+        startTrailer(slides[idx], pool[idx], idx);
         slides.forEach((el, j) => el.classList.toggle('on', j === idx));
         [...pager.children].forEach((dt, j) => {
           dt.classList.toggle('on', j === idx);
@@ -2835,7 +2936,7 @@
       hero.append(...slides, h('div', { class: 'sm-bill-shade' }),
         h('button', { type: 'button', class: 'sm-bill-arrow l', 'aria-label': 'Anterior', onclick: () => go(idx - 1) }, icon('left')),
         h('button', { type: 'button', class: 'sm-bill-arrow r', 'aria-label': 'Próximo', onclick: () => go(idx + 1) }, icon('right')),
-        pager);
+        pager, mute);
       go(0);
     })();
   }
@@ -3583,6 +3684,17 @@
           d?.certification ? h('div', null, h('span', { text: 'Classificação' }), certBadge(d.certification)) : null,
           info.creators?.length ? h('div', null, h('span', { text: item.type === 'movie' ? 'Direção' : 'Criação' }), info.creators.join(', ')) : null,
           info.cast?.length ? h('div', null, h('span', { text: 'Elenco' }), info.cast.join(', ')) : null)));
+      // Apple TV: "Elenco e equipe" com fotos redondas, numa fileira.
+      if (isApple() && info.people?.length) {
+        addSection('cast', 'ELENCO', h('div', { class: 'sm-dlg-section sm-cast-sec' },
+          h('h3', { text: 'Elenco e equipe' }),
+          h('div', { class: 'sm-cast' }, info.people.map((pp) =>
+            h('div', { class: 'sm-person' },
+              h('div', { class: 'sm-person-img', style: pp.photo ? { backgroundImage: cssUrl(pp.photo) } : null },
+                pp.photo ? null : h('span', { text: pp.name.split(' ').map((w) => w[0]).slice(0, 2).join('') })),
+              h('div', { class: 'sm-person-name', text: pp.name }),
+              pp.role ? h('div', { class: 'sm-person-role', text: pp.role }) : null)))));
+      }
     }
 
     if (item.type === 'series' && d?.seasons?.length) {

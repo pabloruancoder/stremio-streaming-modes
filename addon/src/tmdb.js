@@ -160,6 +160,17 @@ export function fullDetails(type, imdb) {
       seasonsCount: d.number_of_seasons || null,
       genres: (d.genres || []).map((g) => GENRE_PT[g.name] || g.name),
       cast: (credits.cast || []).slice(0, 6).map((c) => c.name),
+      // Elenco e equipe com foto (seção "Elenco e equipe" da Apple TV).
+      people: [
+        ...(credits.cast || []).slice(0, 14).map((c) => ({
+          name: c.name,
+          role: c.character || c.roles?.[0]?.character || '',
+          photo: c.profile_path ? `${IMG}/w185${c.profile_path}` : null,
+        })),
+        ...(d.created_by || []).map((c) => ({ name: c.name, role: 'Criação', photo: c.profile_path ? `${IMG}/w185${c.profile_path}` : null })),
+        ...(credits.crew || []).filter((c) => c.job === 'Director').slice(0, 2).map((c) => ({
+          name: c.name, role: 'Direção', photo: c.profile_path ? `${IMG}/w185${c.profile_path}` : null })),
+      ],
       creators: (d.created_by || []).map((c) => c.name).concat(
         (credits.crew || []).filter((c) => c.job === 'Director').map((c) => c.name),
       ).slice(0, 3),
