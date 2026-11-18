@@ -12,6 +12,21 @@ import { upcoming } from './src/news.js';
 import { skipTimes, nextEpisode } from './src/player.js';
 import { forYou } from './src/foryou.js';
 import * as fontes from './src/fontes.js';
+import { execFile, spawn } from 'node:child_process';
+
+// Reinicia o Stremio Service (servidor de vídeo, porta 11470) quando o aviso do plugin pede.
+// Às vezes o stremio-service.exe fica aberto com o servidor caído por dentro, e todo vídeo dá "Video is not supported".
+const SERVICE_EXE = path.join(process.env.LOCALAPPDATA || '', 'Programs', 'StremioService', 'stremio-service.exe');
+const runQuiet = (cmd, args) => new Promise((ok) => execFile(cmd, args, { windowsHide: true }, () => ok()));
+async function restartStreamService() {
+  if (process.platform !== 'win32') return { ok: false, error: 'Só funciona no Windows.' };
+  if (!fs.existsSync(SERVICE_EXE)) return { ok: false, error: `Stremio Service não encontrado em ${SERVICE_EXE}` };
+  await runQuiet('taskkill', ['/f', '/im', 'stremio-service.exe']);
+  await runQuiet('taskkill', ['/f', '/im', 'stremio-runtime.exe']);
+  await new Promise((r) => setTimeout(r, 1500));
+  spawn(SERVICE_EXE, [], { detached: true, stdio: 'ignore' }).unref();
+  return { ok: true };
+}
 
 const manifest = () => ({
   id: 'community.streaming-modes',
@@ -153,6 +168,11 @@ const server = http.createServer(async (req, res) => {
       );
     }
     if (pathname === '/health') return send(res, 200, { ok: true, tmdb: hasTmdb(), region: config.region });
+    if (pathname === '/sm/service/restart') {
+      if (!isLoopback(req) || !fontesOriginOk(req.headers.origin)) return send(res, 403, { error: 'não permitido' });
+      if (req.method !== 'POST') return send(res, 405, { error: 'use POST' });
+      return send(res, 200, await restartStreamService());
+    }
 
     // Endpoints extras usados só pelo plugin (não fazem parte do protocolo do Stremio).
     let x;

@@ -1456,6 +1456,21 @@
   .sm-cw-x .sm-ico { width:1rem !important; height:1rem !important; }
   .sm-card:hover > .sm-cw-x, .sm-card:focus-within > .sm-cw-x { opacity:1; }
   .sm-card.expanded > .sm-cw-x { display:none; }
+  #sm-health { position:fixed; top:1rem; right:1rem; z-index:100003; width:min(26rem, calc(100vw - 2rem)); padding:1rem 1.1rem;
+    border-radius:8px; background:#231616 !important; border:1px solid #8a2a2a !important; color:#fff; font-size:.92rem;
+    box-shadow:0 10px 40px rgba(0,0,0,.6) !important; overflow:visible !important; }
+  #sm-health .sm-health-head { display:flex; align-items:center; gap:.6rem; }
+  #sm-health .sm-health-head strong { flex:1; font-size:1rem; }
+  #sm-health .sm-health-dot { flex:none; width:.65rem; height:.65rem; border-radius:50%; background:#ff4d4d !important; box-shadow:0 0 0 4px rgba(255,77,77,.2) !important; }
+  #sm-health .sm-health-x { display:grid; place-items:center; width:1.8rem; height:1.8rem; padding:0; border-radius:50%; background:none; color:#ccc; cursor:pointer; }
+  #sm-health .sm-health-x:hover { background:rgba(255,255,255,.1) !important; color:#fff; }
+  #sm-health .sm-health-x .sm-ico { width:1rem !important; height:1rem !important; }
+  #sm-health p { margin:.55rem 0 .85rem !important; color:#e6caca; line-height:1.4; }
+  #sm-health .sm-health-btns { display:flex; gap:.6rem; flex-wrap:wrap; }
+  #sm-health .sm-health-btns button { padding:.45rem .9rem !important; border-radius:4px; border:1px solid rgba(255,255,255,.35) !important;
+    background:rgba(255,255,255,.08) !important; color:#fff; font:inherit; font-weight:600; cursor:pointer; }
+  #sm-health .sm-health-btns button.primary { background:#fff !important; color:#000; border-color:#fff !important; }
+  #sm-health .sm-health-btns button:disabled { opacity:.6; cursor:default; }
   #sm-toast { position:fixed; left:50%; bottom:2rem; transform:translateX(-50%); z-index:100002; display:flex; align-items:center; gap:1.2rem;
     padding:.8rem 1.1rem; border-radius:6px; background:#2b2b2b !important; color:#fff; font-size:.95rem; box-shadow:0 8px 30px rgba(0,0,0,.5) !important; }
   #sm-toast button { border:0; background:none; color:#fff; font:inherit; font-weight:700; text-decoration:underline; cursor:pointer; }
@@ -6103,6 +6118,99 @@
     });
   }
 
+  // ===========================================================================
+  // Aviso quando algo cai: addon do PC (porta 7100) e servidor de vídeo do Stremio (Stremio Service, porta 11470).
+  // Checa a cada 30 s com a janela visível; uma falha nova é confirmada 5 s depois antes de avisar.
+  // ===========================================================================
+  const STREAM_SERVER_URL = 'http://127.0.0.1:11470';
+  const isLocalAddon = () => /^https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?(\/|$)/.test(state.addonUrl || '');
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  // no-cors: só interessa se a porta responde (a resposta vem opaca).
+  async function reachable(url, ms = 3000) {
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), ms);
+    try { await fetch(url, { mode: 'no-cors', cache: 'no-store', signal: ctl.signal }); return true; } catch { return false; } finally { clearTimeout(timer); }
+  }
+  const health = { addon: true, server: true, dismissed: '', busy: false, restarting: false };
+  const healthNow = async () => {
+    const [addonOk, serverOk] = await Promise.all([isLocalAddon() ? probeLocal() : true, reachable(`${STREAM_SERVER_URL}/settings`)]);
+    return { addon: addonOk, server: serverOk };
+  };
+  async function checkHealth() {
+    if (health.busy || health.restarting || document.visibilityState !== 'visible') return;
+    health.busy = true;
+    try {
+      let r = await healthNow();
+      if ((!r.addon && health.addon) || (!r.server && health.server)) { await sleep(5000); r = await healthNow(); }
+      const back = [];
+      if (r.addon && !health.addon) back.push('addon do PC');
+      if (r.server && !health.server) back.push('servidor de vídeo');
+      health.addon = r.addon;
+      health.server = r.server;
+      if (back.length && r.addon && r.server) toast(`Tudo funcionando de novo (${back.join(' e ')}).`);
+      renderHealth();
+    } finally {
+      health.busy = false;
+    }
+  }
+  function renderHealth(note) {
+    const key = `${health.addon ? 1 : 0}${health.server ? 1 : 0}`;
+    document.getElementById('sm-health')?.remove();
+    if (key === '11') { health.dismissed = ''; return; }
+    if (health.dismissed === key) return;
+    let title, text;
+    if (!health.addon && !health.server) {
+      title = 'Addon do PC e servidor de vídeo desligados';
+      text = 'Os vídeos não vão tocar e a busca, Minhas fontes e os trailers não funcionam. Abra o iniciar-stremio.bat para ligar tudo.';
+    } else if (!health.addon) {
+      title = 'Addon do PC desligado';
+      text = `Busca, Minhas fontes, trailers e detalhes em português não funcionam${store.get('remoteAddonUrl') ? ' (as fileiras continuam vindo do GitHub)' : ''}. Abra o iniciar-stremio.bat.`;
+    } else {
+      title = 'Servidor de vídeo do Stremio parado';
+      text = 'Os vídeos vão dar "Video is not supported". Clique em Reiniciar para ligar o Stremio Service de novo.';
+    }
+    const btn = (label, onclick, cls = '') => h('button', { type: 'button', class: cls, text: label, onclick });
+    const el = h('div', { id: 'sm-health', role: 'alert' },
+      h('div', { class: 'sm-health-head' }, h('span', { class: 'sm-health-dot' }), h('strong', { text: title }),
+        h('button', { type: 'button', class: 'sm-health-x', 'aria-label': 'Fechar aviso', title: 'Fechar (volta se mudar alguma coisa)',
+          onclick: () => { health.dismissed = key; el.remove(); } }, icon('close'))),
+      h('p', { text: note || text }),
+      h('div', { class: 'sm-health-btns' },
+        health.addon && !health.server ? btn(health.restarting ? 'Reiniciando…' : 'Reiniciar', restartStreamServer, 'primary') : null,
+        btn('Verificar de novo', () => { health.dismissed = ''; el.querySelector('p').textContent = 'Verificando…'; checkHealth(); })));
+    if (health.restarting) el.querySelector('.primary').disabled = true;
+    document.body.appendChild(el);
+  }
+  async function restartStreamServer() {
+    if (health.restarting) return;
+    health.restarting = true;
+    renderHealth('Reiniciando o Stremio Service… pode levar uns 20 segundos.');
+    let err = '';
+    try {
+      const r = await fetch(`${state.addonUrl}/sm/service/restart`, { method: 'POST' }).then((x) => x.json());
+      if (!r.ok) err = r.error || 'erro desconhecido';
+    } catch {
+      err = 'O addon do PC não respondeu.';
+    }
+    let ok = false;
+    if (!err) {
+      for (let i = 0; i < 20 && !ok; i++) { await sleep(2000); ok = await reachable(`${STREAM_SERVER_URL}/settings`); }
+    }
+    health.restarting = false;
+    if (ok) {
+      health.server = true;
+      renderHealth();
+      toast('Servidor de vídeo ligado de novo. Se um vídeo estava dando erro, abra ele outra vez.');
+    } else {
+      renderHealth(`Não consegui reiniciar${err ? `: ${err}` : ' (o servidor não voltou em 40 s)'}. Abra o iniciar-stremio.bat.`);
+    }
+  }
+  function startHealthMonitor() {
+    setTimeout(checkHealth, 8000); // o .bat abre o Stremio Enhanced logo depois de ligar o serviço
+    setInterval(checkHealth, 30000);
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') checkHealth(); });
+  }
+
   function start() {
     restoreIfEmpty();
     injectStyles();
@@ -6131,6 +6239,7 @@
       }
     });
     schedule();
+    startHealthMonitor();
     console.info('[Streaming Modes] carregado. Modo atual:', state.mode);
   }
 
