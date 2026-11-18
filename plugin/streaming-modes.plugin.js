@@ -800,12 +800,38 @@
     }
     return [...out.values()].filter((it) => it.type === 'movie' || it.type === 'series');
   }
+  // Players embutidos (Pomfy etc.): o Stremio não vê o que toca no iframe, então o plugin guarda o progresso
+  // por perfil, no mesmo formato da biblioteca ({ _id, type, name, poster, state: { video_id, timeOffset, duration, lastWatched } }).
+  const embedHistory = () => store.get(pkey('embedHistory')) || [];
+  function saveEmbedProgress(entry) {
+    const list = embedHistory().filter((x) => x._id !== entry._id);
+    list.unshift(entry);
+    store.set(pkey('embedHistory'), list.slice(0, 60));
+  }
+  // Estado mais recente de um título: biblioteca do Stremio ou player embutido.
+  function watchState(id) {
+    const lib = libraryItems().find((x) => x._id === id);
+    const emb = embedHistory().find((x) => x._id === id);
+    if (!emb) return lib;
+    if (!lib || (emb.state.lastWatched || '') > (lib.state?.lastWatched || '')) return { ...(lib || {}), ...emb, state: { ...(lib?.state || {}), ...emb.state } };
+    return lib;
+  }
   // Mesma regra do Stremio (stremio-core): (!removed || temp) && timeOffset > 0
-  const continueWatching = () =>
-    libraryItems()
-      .filter((it) => (!it.removed || it.temp) && it.state?.timeOffset > 0 && ownsLibraryItem(it._id))
+  // + o que foi assistido em players embutidos (filme quase no fim sai da fileira, como no Stremio).
+  const continueWatching = () => {
+    const libs = libraryItems();
+    const embs = embedHistory();
+    const libById = new Map(libs.map((it) => [it._id, it]));
+    const embById = new Map(embs.map((e) => [e._id, e]));
+    const newer = (a, b) => (a?.state?.lastWatched || '') > (b?.state?.lastWatched || '');
+    return [...libs.filter((it) => !newer(embById.get(it._id), it)),
+      ...embs.filter((e) => newer(e, libById.get(e._id)) || !libById.has(e._id))
+        .filter((e) => !(e.type === 'movie' && e.state.duration && e.state.timeOffset / e.state.duration >= 0.92))
+        .map((e) => ({ ...e, fromEmbed: true }))]
+      .filter((it) => (!it.removed || it.temp) && it.state?.timeOffset > 0 && (it.fromEmbed || ownsLibraryItem(it._id)))
       .sort((a, b) => (b.state.lastWatched || '').localeCompare(a.state.lastWatched || ''))
       .slice(0, 20);
+  };
   // Séries cujo último episódio foi terminado há pouco (o Stremio zera o progresso ao terminar).
   const finishedEpisodes = () => {
     const since = new Date(Date.now() - 45 * 86400_000).toISOString();
@@ -909,7 +935,7 @@
     playedId = item.id;
     if (item.type === 'movie') location.hash = `#/detail/movie/${item.id}/${item.id}`;
     else {
-      const lib = libraryItems().find((x) => x._id === item.id);
+      const lib = watchState(item.id);
       const vid = item.videoId || lib?.state?.video_id || `${item.id}:1:1`;
       location.hash = `#/detail/series/${item.id}/${encodeURIComponent(vid)}`;
     }
@@ -1392,6 +1418,7 @@
   #sm-embed { position:fixed; inset:0; z-index:100001; background:#000; display:flex; flex-direction:column; }
   #sm-embed .sm-embed-bar { display:flex; align-items:center; gap:1rem; padding:.5rem 1rem; background:#111; color:#ddd; font-size:.95rem; }
   #sm-embed .sm-embed-bar span { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  #sm-embed .sm-embed-bar span.sm-embed-resume { flex:none; color:#bbb; font-size:.85rem; }
   #sm-embed .sm-embed-pop { padding:.35rem .8rem; border:1px solid #46d369 !important; border-radius:999px; background:none; color:#46d369;
     font:inherit; font-size:.82rem; cursor:pointer; }
   #sm-embed .sm-embed-pop.on { border-color:#f5b50a !important; color:#f5b50a; }
@@ -4856,8 +4883,10 @@
   // aqui o player abre numa janela por cima do Stremio.
   let embedEl = null;
   function closeEmbedPlayer() {
+    stopEmbedTracking();
     embedEl?.remove();
     embedEl = null;
+    if (MODES[state.mode].provider) setTimeout(schedule, 300); // atualiza "Continuar assistindo"
   }
   // Por padrão o player fica numa sandbox sem pop-ups e sem poder trocar a página do Stremio: os "clique para verificar"
   // desses players costumam abrir janelas de anúncio. Se o player não funcionar assim, dá para liberar na barra.
@@ -4867,6 +4896,79 @@
     if (!store.get('embedPopups')) f.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-presentation');
     return f;
   }
+  // Onde a pessoa está no Stremio quando abre o player: #/detail/<tipo>/<id>/<vídeo>.
+  function currentDetail() {
+    const m = location.hash.match(/^#\/detail\/(movie|series)\/([^/?]+)(?:\/([^/?]+))?/);
+    if (!m) return null;
+    const dec = (v) => { try { return decodeURIComponent(v); } catch { return v; } };
+    const id = dec(m[2]);
+    return /^tt\d+$/.test(id) ? { type: m[1], id, videoId: m[3] ? dec(m[3]) : (m[1] === 'movie' ? id : null) } : null;
+  }
+  // Tempo assistido no player embutido. O iframe é de outro site e não informa o tempo do vídeo, então conta o tempo
+  // com o player aberto e a janela visível, somado ao ponto onde a pessoa tinha parado. Se o player mandar
+  // currentTime/duration por postMessage (alguns mandam), usa o valor exato.
+  let embedTrack = null;
+  function startEmbedTracking(frame) {
+    const at = currentDetail();
+    if (!at || (at.type === 'series' && !at.videoId)) return;
+    const prev = embedHistory().find((x) => x._id === at.id);
+    const resumeMs = prev && prev.state.video_id === at.videoId ? prev.state.timeOffset || 0 : 0;
+    const lib = libraryItems().find((x) => x._id === at.id);
+    const t = embedTrack = { at, frame, startMs: resumeMs, watchedMs: 0, exact: null, duration: prev?.state.video_id === at.videoId ? prev.state.duration : 0,
+      name: lib?.name || prev?.name || '', poster: lib?.poster || prev?.poster || metahub('poster', at.id), lastTick: Date.now() };
+    details(at.type, at.id).then((d) => {
+      if (!d) return;
+      if (!t.name) t.name = d.name || '';
+      if (d.poster && !lib?.poster) t.poster = d.poster;
+      if (!t.duration && d.runtime) t.duration = d.runtime * 60000;
+    });
+    if (at.type === 'series') {
+      const [, s, e] = at.videoId.split(':');
+      season(at.id, s).then((eps) => {
+        const ep = eps.find((x) => String(x.episode) === e);
+        if (ep?.runtime && !t.exact) t.duration = ep.runtime * 60000;
+      });
+    }
+    t.timer = setInterval(() => {
+      const now = Date.now();
+      if (document.visibilityState === 'visible') t.watchedMs += now - t.lastTick;
+      t.lastTick = now;
+      persistEmbed(t);
+    }, 15000);
+  }
+  function persistEmbed(t) {
+    const pos = t.exact ? t.exact.time : t.startMs + t.watchedMs;
+    if (pos < 30000) return; // menos de 30 s não conta
+    const duration = t.exact?.duration || t.duration || (t.at.type === 'movie' ? 110 : 45) * 60000;
+    saveEmbedProgress({ _id: t.at.id, type: t.at.type, name: t.name, poster: t.poster,
+      state: { video_id: t.at.videoId, timeOffset: Math.min(pos, duration), duration, lastWatched: new Date().toISOString() } });
+  }
+  function stopEmbedTracking() {
+    const t = embedTrack;
+    if (!t) return;
+    embedTrack = null;
+    clearInterval(t.timer);
+    if (document.visibilityState === 'visible') t.watchedMs += Date.now() - t.lastTick;
+    persistEmbed(t);
+  }
+  // Players que avisam o tempo por postMessage: procura currentTime/duration (em segundos) em qualquer nível da mensagem.
+  window.addEventListener('message', (ev) => {
+    const t = embedTrack;
+    if (!t || ev.source !== t.frame.contentWindow) return;
+    let data = ev.data;
+    if (typeof data === 'string') { try { data = JSON.parse(data); } catch { return; } }
+    const find = (o, depth = 0) => {
+      if (!o || typeof o !== 'object' || depth > 3) return null;
+      const cur = Number(o.currentTime ?? o.current_time ?? o.time ?? o.position);
+      const dur = Number(o.duration);
+      if (Number.isFinite(cur) && Number.isFinite(dur) && dur > 60 && cur >= 0 && cur <= dur) return { cur, dur };
+      for (const v of Object.values(o)) { const r = find(v, depth + 1); if (r) return r; }
+      return null;
+    };
+    const r = find(data);
+    if (r) t.exact = { time: r.cur * 1000, duration: r.dur * 1000 };
+  });
+
   function openEmbedPlayer(url, title) {
     closeEmbedPlayer();
     let frame = embedFrame(url, title);
@@ -4883,15 +4985,24 @@
       const next = embedFrame(url, title);
       frame.replaceWith(next);
       frame = next;
+      if (embedTrack) embedTrack.frame = next;
     });
     paint();
+    // Onde parou da última vez (o player embutido não aceita começar num ponto, então só avisa).
+    const at = currentDetail();
+    const prev = at && embedHistory().find((x) => x._id === at.id && x.state.video_id === at.videoId);
+    const fmt = (ms) => { const sec = Math.floor(ms / 1000); const h0 = Math.floor(sec / 3600); const m0 = Math.floor((sec % 3600) / 60);
+      return `${h0 ? `${h0}:` : ''}${String(m0).padStart(h0 ? 2 : 1, '0')}:${String(sec % 60).padStart(2, '0')}`; };
+    const resumeTip = prev?.state.timeOffset > 30000 ? h('span', { class: 'sm-embed-resume', text: `Você parou em ${fmt(prev.state.timeOffset)}` }) : null;
     embedEl = h('div', { id: 'sm-embed' },
       h('div', { class: 'sm-embed-bar' },
         h('span', { text: title || 'Player' }),
+        resumeTip,
         popBtn,
         h('button', { type: 'button', class: 'sm-round', 'aria-label': 'Fechar player', onclick: closeEmbedPlayer }, icon('close'))),
       frame);
     document.body.appendChild(embedEl);
+    startEmbedTracking(frame);
   }
   // Devolve { url, title } se o link for a página /fontes/player do addon do PC.
   function embedFromLink(href) {
@@ -4966,7 +5077,7 @@
       else setTab(body.dataset.tab);
     };
     // Já começou? O botão vira "Continuar" (com temporada e episódio, nas séries) e mostra a barra de progresso.
-    const libItem = libraryItems().find((x) => x._id === item.id);
+    const libItem = watchState(item.id);
     const ls = libItem?.state || {};
     const started = ls.timeOffset > 0 && ls.duration > 0;
     const [, sNum, eNum] = String(ls.video_id || '').split(':');
@@ -5077,7 +5188,7 @@
 
     if (item.type === 'series' && d?.seasons?.length) {
       const list = h('div');
-      const lib = libraryItems().find((x) => x._id === item.id);
+      const lib = watchState(item.id);
       const saved = Number(String(lib?.state?.video_id || '').split(':')[1]);
       let curSeason = d.seasons.some((s) => s.number === saved) ? saved : d.seasons[0].number;
       const select = dropdown(
