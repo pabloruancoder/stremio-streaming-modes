@@ -575,6 +575,32 @@
     const v = eps.find((x) => x.season > Number(s) || (x.season === Number(s) && x.episode > Number(e)));
     return v ? { next: { id: v.id || `${id}:${v.season}:${v.episode}`, season: v.season, episode: v.episode, title: v.name || v.title || '', thumbnail: v.thumbnail || null } } : { next: null };
   }
+  // Episódios assistidos: o Stremio guarda em state.watched um bitfield "{idÂncora}:{tamanho}:{base64(zlib)}",
+  // um bit por vídeo na ordem do meta do Cinemeta (mesma regra do WatchedBitField do stremio-core).
+  async function watchedEpisodes(lib) {
+    const out = new Set();
+    try {
+      const raw = lib?.state?.watched;
+      if (!raw) return out;
+      const parts = String(raw).split(':');
+      const buf = parts.pop();
+      const anchorLen = Number(parts.pop());
+      const anchor = parts.join(':');
+      const ids = ((await cinemeta('series', lib._id))?.videos || []).map((v) => v.id);
+      const at = ids.indexOf(anchor);
+      if (at < 0 || !buf) return out;
+      const packed = Uint8Array.from(atob(buf), (c) => c.charCodeAt(0));
+      const bytes = new Uint8Array(await new Response(new Blob([packed]).stream().pipeThrough(new DecompressionStream('deflate'))).arrayBuffer());
+      const offset = anchorLen - at - 1;
+      ids.forEach((id, i) => {
+        const j = i + offset;
+        if (j >= 0 && j < bytes.length * 8 && bytes[j >> 3] & (1 << (j & 7))) out.add(id);
+      });
+    } catch {
+      /* formato inesperado: sem marcação */
+    }
+    return out;
+  }
   const nextEpisode = (id, s, e) => addon(`/sm/next/${id}/${s}/${e}.json`).catch(() => cinemetaNext(id, s, e));
   const details = (type, id) => addon(`/sm/details/${type}/${id}.json`).then((d) => d.details || Promise.reject(new Error('vazio')))
     .catch(() => cinemetaDetails(type, id));
@@ -1356,6 +1382,9 @@
   .sm-ep-right { display:flex; align-items:center; gap:.6rem; flex:none; }
   .sm-ep-tag { padding:.1rem .4rem; border-radius:3px; background:var(--smc-accent); color:#fff; font-size:.68rem; letter-spacing:.04em; }
   .sm-ep-tag.soon { background:#424242; }
+  .sm-ep-seen { display:inline-flex; align-items:center; gap:.3rem; color:#bcbcbc; font-size:.78rem; font-weight:600; }
+  .sm-ep-seen .sm-ico { width:.95rem; height:.95rem; }
+  .sm-ep.seen .sm-ep-img { opacity:.75; }
   .sm-ep-cont { margin:-.1rem 0 .35rem; color:var(--smc-accent); font-size:.82rem; font-weight:700; }
   .sm-resume { display:flex; align-items:center; gap:.8rem; margin-top:1rem; max-width:22rem; color:#ddd; font-size:.9rem; }
   .sm-resume .sm-card-progress { position:relative; inset:auto; flex:1; height:4px; border-radius:2px; overflow:hidden; }
@@ -4939,10 +4968,11 @@
         'Temporada');
       const loadSeason = async () => {
         list.replaceChildren(h('div', { class: 'sm-meta', text: 'Carregando episódios…' }));
-        const eps = await season(item.id, curSeason);
+        const [eps, watched] = await Promise.all([season(item.id, curSeason), watchedEpisodes(lib)]);
         if (modalEl !== el) return;
         const curVid = lib?.state?.video_id;
         const st = lib?.state || {};
+        const curStarted = st.timeOffset > 0 && st.duration > 0;
         const hasCur = eps.some((ep) => ep.id === curVid);
         const now = Date.now();
         list.replaceChildren(...eps.map((ep, i) => {
@@ -4950,8 +4980,11 @@
           const rel = ep.released ? new Date(ep.released).getTime() : 0;
           const isNew = rel && rel <= now && now - rel < 14 * 86400_000;
           const upcoming = rel && rel > now;
-          const pct = isCur && st.timeOffset > 0 && st.duration > 0 ? Math.min(100, Math.round((st.timeOffset / st.duration) * 100)) : 0;
-          return h('div', { class: `sm-ep${isCur || (!hasCur && i === 0) ? ' hl' : ''}${upcoming ? ' soon' : ''}`, role: 'button', tabindex: '0',
+          // Onde parou: barra parcial (mínimo visível de 3%); já assistido: barra cheia e "Assistido".
+          const inProgress = isCur && curStarted;
+          const seen = !inProgress && watched.has(ep.id);
+          const pct = inProgress ? Math.max(3, Math.min(100, Math.round((st.timeOffset / st.duration) * 100))) : seen ? 100 : 0;
+          return h('div', { class: `sm-ep${isCur || (!hasCur && i === 0) ? ' hl' : ''}${upcoming ? ' soon' : ''}${seen ? ' seen' : ''}`, role: 'button', tabindex: '0',
             onclick: () => play({ ...item, videoId: ep.id }) },
             h('div', { class: 'sm-ep-num', text: String(ep.episode) }),
             h('div', { class: 'sm-ep-img', style: ep.still ? { backgroundImage: cssUrl(ep.still) } : null }, icon('play', true),
@@ -4960,10 +4993,11 @@
               h('div', { class: 'sm-ep-top' },
                 h('span', { text: ep.name }),
                 h('span', { class: 'sm-ep-right' },
-                  isNew ? h('b', { class: 'sm-ep-tag', text: 'NOVO' }) : null,
+                  seen ? h('span', { class: 'sm-ep-seen' }, icon('check'), 'Assistido') : null,
+                  isNew && !seen && !inProgress ? h('b', { class: 'sm-ep-tag', text: 'NOVO' }) : null,
                   upcoming ? h('b', { class: 'sm-ep-tag soon', text: `Estreia ${new Date(rel).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}` }) : null,
                   ep.runtime ? h('span', { text: `${ep.runtime}min` }) : null)),
-              isCur && pct ? h('div', { class: 'sm-ep-cont', text: `Continuar · faltam ${Math.max(1, Math.round((st.duration - st.timeOffset) / 60000))} min` }) : null,
+              inProgress ? h('div', { class: 'sm-ep-cont', text: `Continuar · faltam ${Math.max(1, Math.round((st.duration - st.timeOffset) / 60000))} min` }) : null,
               h('p', { class: 'sm-ep-desc', text: ep.description || '' })));
         }));
       };
