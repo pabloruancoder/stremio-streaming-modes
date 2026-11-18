@@ -2,7 +2,7 @@ import { config, hasTmdb } from './config.js';
 import { cached, mapLimit } from './cache.js';
 import { tmdb, discover, toMetaPreview } from './tmdb.js';
 import { top10Metas } from './top10.js';
-import { PROVIDERS, NAME_SEPARATOR } from './providers.js';
+import { PROVIDERS, NAME_SEPARATOR, watchFilter } from './providers.js';
 
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -113,6 +113,14 @@ function rowsFor(p) {
     rows.push({ id: k.id, type: k.type, name: k.name, kind: 'discover', shape: card,
       params: typeof k.params === 'function' ? () => ({ sort_by: 'popularity.desc', ...k.params() }) : { sort_by: 'popularity.desc', ...k.params } });
   }
+  // Sem filtro de streaming ("todos"): cada fileira fica nos títulos mais populares.
+  if (p.rowLimit) {
+    for (const r of rows) {
+      if (r.kind !== 'discover' && r.kind !== 'fresh') continue;
+      const cap = r.id.startsWith('all-') ? p.rowLimit * 4 : p.rowLimit;
+      r.limit = r.limit ? Math.min(r.limit, cap) : cap;
+    }
+  }
   return rows;
 }
 
@@ -145,7 +153,7 @@ function originalMovieList(provider) {
   const o = provider.originalMovies;
   return cached(`orig-movies:${provider.key}:${config.region}`, 6 * 3600_000, async () => {
     const params = { with_companies: o.companies, 'primary_release_date.gte': o.since, sort_by: 'popularity.desc',
-      with_watch_providers: provider.tmdbProviderId, with_watch_monetization_types: 'flatrate|ads' };
+      ...watchFilter(provider) };
     const items = await allPages('movie', params);
     const checks = o.allowTheatrical ? items.map(() => true) : await mapLimit(items, 8, async (x) => {
       const d = await tmdb(`/movie/${x.id}/release_dates`, { language: undefined }).catch(() => null);
@@ -164,10 +172,7 @@ const MAX_PAGES = 500; // limite do /discover do TMDB (10.000 títulos)
 
 function discoverParams(provider, row) {
   const params = typeof row.params === 'function' ? row.params() : { ...row.params };
-  if (!row.noProviderFilter) {
-    params.with_watch_providers = provider.tmdbProviderId;
-    params.with_watch_monetization_types = 'flatrate|ads';
-  }
+  if (!row.noProviderFilter) return { ...watchFilter(provider), ...params };
   return params;
 }
 
@@ -207,7 +212,7 @@ export async function fullCatalog(id) {
   if (row.kind === 'recent' || !hasTmdb()) return [];
   if (row.kind === 'original-movies') return originalMovieList(provider);
   let items = row.kind === 'fresh'
-    ? localFirst(await allPages(row.type, freshParams(row.type, provider, row)))
+    ? localFirst(await allPages(row.type, freshParams(row.type, provider, row), row.limit))
     : await allPages(row.type, discoverParams(provider, row), row.limit);
   const seenTmdb = new Set();
   items = items.filter((x) => !seenTmdb.has(x.id) && seenTmdb.add(x.id));
@@ -229,8 +234,7 @@ function freshParams(type, provider, row) {
     sort_by: 'popularity.desc',
     [`${dateKey}.gte`]: since,
     [`${dateKey}.lte`]: today(),
-    with_watch_providers: provider.tmdbProviderId,
-    with_watch_monetization_types: 'flatrate|ads',
+    ...watchFilter(provider, { floor: false }),
   };
 }
 

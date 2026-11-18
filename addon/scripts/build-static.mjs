@@ -12,7 +12,7 @@ import path from 'node:path';
 import { config, hasTmdb } from '../src/config.js';
 import { manifestCatalogs, fullCatalog, catalogKind } from '../src/catalogs.js';
 import { upcoming } from '../src/news.js';
-import { PROVIDERS } from '../src/providers.js';
+import { PROVIDERS, isAnyProvider } from '../src/providers.js';
 
 const out = path.resolve(process.argv[2] || 'dist');
 const CHUNK = 100; // títulos por arquivo
@@ -93,6 +93,18 @@ for (const p of Object.values(PROVIDERS)) {
     series: results.get(`${p.key}.all-series`) || [],
   };
   if (!all.movie.length && !all.series.length) continue;
+  // Sem filtro de streaming ("todos"), não existe "chegou ao streaming": a fileira mostra os lançamentos.
+  if (isAnyProvider(p)) {
+    for (const type of ['movie', 'series']) {
+      const id = `${p.key}.recent-${type === 'movie' ? 'movies' : 'series'}`;
+      if (!catalogs.some((c) => c.id === id)) continue;
+      const fresh = results.get(`${p.key}.new-${type === 'movie' ? 'movies' : 'series'}`) || [];
+      writeCatalog(type, id, fresh);
+      total += fresh.length;
+      console.log(`${id.padEnd(32)} ${String(fresh.length).padStart(5)} títulos (lançamentos)`);
+    }
+    continue;
+  }
   const prev = await previousState(p);
   const items = {};
   for (const type of ['movie', 'series']) {

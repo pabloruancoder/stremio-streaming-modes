@@ -484,7 +484,7 @@
     return requests.get(url);
   }
   // API_V muda quando o formato das respostas muda, para não usar o cache antigo do navegador.
-  const API_V = 3;
+  const API_V = 4;
   // Addon do PC desligado: fileiras, Top 10 e estreias vêm da cópia no GitHub Pages (arquivos estáticos).
   // Busca, recomendações personalizadas, trailers e dados do player precisam do addon do PC.
   let localDownAt = 0;

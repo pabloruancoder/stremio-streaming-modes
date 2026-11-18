@@ -87,6 +87,7 @@ export function watchProviders(type, tmdbId) {
 
 // providerId pode ser um número ou uma lista "8|337|..." (qualquer um deles serve).
 export async function isOnProvider(type, tmdbId, providerId) {
+  if (providerId === '*') return true; // "todos os streamings": qualquer título vale
   const data = await watchProviders(type, tmdbId);
   const region = data.results?.[config.region];
   const lists = [region?.flatrate, region?.ads, region?.free].filter(Boolean).flat();

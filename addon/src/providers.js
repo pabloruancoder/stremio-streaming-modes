@@ -133,17 +133,27 @@ export const PROVIDERS = {
     upcoming: { days: 120, networks: '1112' },
   },
   // "Todos os streamings": usado quando a opção "Mostrar conteúdo de todos os streamings" está ligada no plugin.
-  // As fileiras gerais (em alta, gêneros, lançamentos, todos os filmes...) juntam os 7 serviços.
+  // Sem filtro de streaming: busca, semelhantes, recomendações e fileiras trazem qualquer título do TMDB,
+  // esteja ou não em algum serviço. As fileiras seguem a popularidade e têm limite (rowLimit) para não virarem
+  // dezenas de milhares de títulos obscuros.
   all: {
     key: 'all',
     label: 'Todos os streamings',
     prep: 'em',
-    tmdbProviderId: '8|337|350|119|1899|307|283',
+    tmdbProviderId: '*',
+    rowLimit: 600,
     hasOfficialTop10: false,
     upcoming: { days: 120, networks: '213|2739|2552|1024|49|3186|6783|8304|3290',
       movieCompanies: '178464|145174|2|3|420|1|194232|20580|210099|174|9993', langs: ['en', 'pt', 'es', 'ko', 'ja'] },
   },
 };
+
+// Filtro de streaming do /discover do TMDB. tmdbProviderId '*' = sem filtro (qualquer título);
+// aí só um piso de votos tira os cadastros vazios.
+export const isAnyProvider = (provider) => provider.tmdbProviderId === '*';
+export const watchFilter = (provider, { floor = true } = {}) => (isAnyProvider(provider)
+  ? (floor ? { 'vote_count.gte': 10 } : {})
+  : { with_watch_providers: provider.tmdbProviderId, with_watch_monetization_types: 'flatrate|ads' });
 
 const dayISO = (offset) => new Date(Date.now() + offset * 86400_000).toISOString().slice(0, 10);
 

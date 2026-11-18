@@ -3,6 +3,7 @@
 import { config } from './config.js';
 import { cached, mapLimit } from './cache.js';
 import { tmdb, discover, details, tmdbIdFromImdb, toMetaPreview, similarOnProvider, GENRE_PT } from './tmdb.js';
+import { watchFilter } from './providers.js';
 
 const HOUR = 3600_000;
 const tmdbType = (type) => (type === 'movie' ? 'movie' : 'tv');
@@ -68,10 +69,7 @@ async function plan(seeds) {
   return blocks;
 }
 
-const onProvider = (provider) => ({
-  with_watch_providers: provider.tmdbProviderId,
-  with_watch_monetization_types: 'flatrate|ads',
-});
+const onProvider = (provider) => watchFilter(provider);
 
 async function discoverMetas(type, params, page) {
   const data = await discover(type, params, page).catch(() => ({ results: [] }));

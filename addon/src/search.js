@@ -1,9 +1,10 @@
-// Busca no estilo Netflix: só devolve o que está no streaming da região.
+// Busca no estilo Netflix: só devolve o que está no streaming da região ("todos os streamings": qualquer título).
 // Junta três fontes: títulos com o nome buscado, gênero (ex.: "terror") e pessoas
 // (ex.: "Adam Sandler" traz os filmes dele que estão na Netflix).
 import { config } from './config.js';
 import { cached, mapLimit } from './cache.js';
 import { tmdb, discover, isOnProvider, toMetaPreview, similarOnProvider } from './tmdb.js';
+import { watchFilter } from './providers.js';
 
 const HOUR = 3600_000;
 
@@ -56,8 +57,7 @@ const keyOf = (type, id) => `${type}:${id}`;
 async function genreResults(g, provider, pages = [1, 2]) {
   const base = {
     sort_by: 'popularity.desc',
-    with_watch_providers: provider.tmdbProviderId,
-    with_watch_monetization_types: 'flatrate|ads',
+    ...watchFilter(provider, { floor: false }),
   };
   const jobs = [];
   for (const type of ['movie', 'series']) {
