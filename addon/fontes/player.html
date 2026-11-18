@@ -23,6 +23,8 @@
     f.allow = 'autoplay; fullscreen; encrypted-media; picture-in-picture';
     f.allowFullscreen = true;
     f.referrerPolicy = 'origin';
+    // Sem pop-ups nem troca da página principal (os "verificar que é humano" abrem anúncios). ?popups=1 libera.
+    if (p.get('popups') !== '1') f.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-presentation');
     document.body.appendChild(f);
   } else {
     document.body.innerHTML = '<div class="err">Endereço do player inválido.</div>';

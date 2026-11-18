@@ -317,7 +317,7 @@
   ];
 
   // remoteAddonUrl: cópia estática do addon no GitHub Pages, usada quando o addon do PC está desligado.
-  const DEFAULTS = { mode: 'stremio', addonUrl: 'http://127.0.0.1:7100', showInDefault: false, muted: true, allContent: false, binge: false,
+  const DEFAULTS = { embedPopups: false, mode: 'stremio', addonUrl: 'http://127.0.0.1:7100', showInDefault: false, muted: true, allContent: false, binge: false,
     remoteAddonUrl: 'https://pabloruancoder.github.io/stremio-streaming-modes' };
 
   // ===========================================================================
@@ -1389,6 +1389,9 @@
   #sm-embed { position:fixed; inset:0; z-index:100001; background:#000; display:flex; flex-direction:column; }
   #sm-embed .sm-embed-bar { display:flex; align-items:center; gap:1rem; padding:.5rem 1rem; background:#111; color:#ddd; font-size:.95rem; }
   #sm-embed .sm-embed-bar span { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  #sm-embed .sm-embed-pop { padding:.35rem .8rem; border:1px solid #46d369 !important; border-radius:999px; background:none; color:#46d369;
+    font:inherit; font-size:.82rem; cursor:pointer; }
+  #sm-embed .sm-embed-pop.on { border-color:#f5b50a !important; color:#f5b50a; }
   #sm-embed iframe { flex:1; width:100%; border:0 !important; background:#000 !important; }
   .sm-ep-seen { display:inline-flex; align-items:center; gap:.3rem; color:#bcbcbc; font-size:.78rem; font-weight:600; }
   .sm-ep-seen .sm-ico { width:.95rem; height:.95rem; }
@@ -4853,14 +4856,38 @@
     embedEl?.remove();
     embedEl = null;
   }
+  // Por padrão o player fica numa sandbox sem pop-ups e sem poder trocar a página do Stremio: os "clique para verificar"
+  // desses players costumam abrir janelas de anúncio. Se o player não funcionar assim, dá para liberar na barra.
+  function embedFrame(url, title) {
+    const f = h('iframe', { src: url, title: title || 'Player', allow: 'autoplay; fullscreen; encrypted-media; picture-in-picture',
+      allowfullscreen: 'true', referrerpolicy: 'origin' });
+    if (!store.get('embedPopups')) f.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-presentation');
+    return f;
+  }
   function openEmbedPlayer(url, title) {
     closeEmbedPlayer();
+    let frame = embedFrame(url, title);
+    const popBtn = h('button', { type: 'button', class: 'sm-embed-pop' });
+    const paint = () => {
+      const on = Boolean(store.get('embedPopups'));
+      popBtn.textContent = on ? 'Pop-ups liberados' : 'Pop-ups bloqueados';
+      popBtn.classList.toggle('on', on);
+      popBtn.title = on ? 'O player pode abrir janelas (anúncios). Clique para bloquear.' : 'O player não pode abrir janelas. Se ele não funcionar, clique para liberar.';
+    };
+    popBtn.addEventListener('click', () => {
+      store.set('embedPopups', !store.get('embedPopups'));
+      paint();
+      const next = embedFrame(url, title);
+      frame.replaceWith(next);
+      frame = next;
+    });
+    paint();
     embedEl = h('div', { id: 'sm-embed' },
       h('div', { class: 'sm-embed-bar' },
         h('span', { text: title || 'Player' }),
+        popBtn,
         h('button', { type: 'button', class: 'sm-round', 'aria-label': 'Fechar player', onclick: closeEmbedPlayer }, icon('close'))),
-      h('iframe', { src: url, title: title || 'Player', allow: 'autoplay; fullscreen; encrypted-media; picture-in-picture', allowfullscreen: 'true',
-        referrerpolicy: 'origin' }));
+      frame);
     document.body.appendChild(embedEl);
   }
   // Devolve { url, title } se o link for a página /fontes/player do addon do PC.
