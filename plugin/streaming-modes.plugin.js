@@ -1413,8 +1413,11 @@
   #sm-fontes iframe { width:min(1040px, 94vw); height:90vh; border:1px solid #333 !important; border-radius:10px; background:#141414 !important;
     box-shadow:0 20px 60px rgba(0,0,0,.6) !important; }
   /* Lista de fontes do Stremio (aba "Todos"): cada addon é uma <section aria-label="Nome"> dentro de um flex em coluna.
-     "Minhas fontes" (links próprios e players como a Pomfy) sobe para o topo quando tiver fontes. */
-  [class*="groups-"] > section[aria-label="Minhas fontes"] { order:-1; }
+     Ordem: Minhas fontes (links próprios e players como a Pomfy), FenixFlix (todas as instalações), torrents em
+     português (Torrentio Brazuca) e depois o resto, na ordem do Stremio. Só aparece quem tiver fontes. */
+  [class*="groups-"] > section[aria-label="Minhas fontes"] { order:-3; }
+  [class*="groups-"] > section[aria-label^="FenixFlix" i] { order:-2; }
+  [class*="groups-"] > section[aria-label*="Brazuca" i] { order:-1; }
   #sm-embed { position:fixed; inset:0; z-index:100001; background:#000; display:flex; flex-direction:column; }
   #sm-embed .sm-embed-bar { display:flex; align-items:center; gap:1rem; padding:.5rem 1rem; background:#111; color:#ddd; font-size:.95rem; }
   #sm-embed .sm-embed-bar span { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
