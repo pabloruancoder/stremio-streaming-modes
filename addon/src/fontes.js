@@ -3,7 +3,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { config } from './config.js';
+import { config, hasTmdb } from './config.js';
+import { tmdbIdFromImdb } from './tmdb.js';
 
 const FILE = path.join(config.dataDir, 'fontes.json');
 const FILES_CACHE = path.join(config.dataDir, 'fontes-arquivos.json');
@@ -22,7 +23,8 @@ function writeJson(file, data) {
 }
 const load = () => {
   const d = readJson(FILE, {});
-  return { sources: Array.isArray(d.sources) ? d.sources : [], addons: Array.isArray(d.addons) ? d.addons : [] };
+  return { sources: Array.isArray(d.sources) ? d.sources : [], addons: Array.isArray(d.addons) ? d.addons : [],
+    embeds: Array.isArray(d.embeds) ? d.embeds : [] };
 };
 const save = (d) => writeJson(FILE, d);
 const newId = () => crypto.randomBytes(6).toString('hex');
@@ -280,14 +282,102 @@ async function addonStreams(type, id, notes) {
   return lists.flat();
 }
 
-export async function streamsFor(type, id, notes) {
+// ---------- Players embutidos (páginas de player em iframe, ex.: API Pomfy) ----------
+// O Stremio não toca uma página HTML; a fonte vira um "externalUrl" para a página /fontes/player,
+// que o plugin abre numa janela por cima do Stremio (fora dele, abre no navegador).
+// Modelos: {tmdb} {imdb} {s} {e} (e {S} {E} com zero à esquerda).
+function validateEmbed(input) {
+  const name = String(input.name || '').trim().slice(0, 60);
+  if (!name) throw new Error('Dê um nome para o player.');
+  const check = (tpl, kind) => {
+    const v = String(tpl || '').trim();
+    if (!v) return '';
+    let u;
+    try { u = new URL(v.replace(/\{[a-zA-Z]+\}/g, '1')); } catch { throw new Error(`Modelo de ${kind} inválido.`); }
+    if (!/^https?:$/.test(u.protocol)) throw new Error(`Modelo de ${kind} precisa começar com http(s)://`);
+    if (!/\{(tmdb|imdb)\}/.test(v)) throw new Error(`Modelo de ${kind} precisa de {tmdb} ou {imdb}.`);
+    return v.slice(0, 500);
+  };
+  const movie = check(input.movie, 'filme');
+  const series = check(input.series, 'série');
+  if (!movie && !series) throw new Error('Preencha o modelo de filme e/ou de série.');
+  return { name, movie, series };
+}
+export function addEmbed(input) {
+  const d = load();
+  const emb = { id: newId(), ...validateEmbed(input), enabled: true, createdAt: new Date().toISOString() };
+  d.embeds.push(emb);
+  save(d);
+  return emb;
+}
+export function updateEmbed(id, patch) {
+  const d = load();
+  const i = d.embeds.findIndex((x) => x.id === id);
+  if (i < 0) throw new Error('Player não encontrado.');
+  const cur = d.embeds[i];
+  const next = 'name' in patch || 'movie' in patch || 'series' in patch ? { ...cur, ...validateEmbed({ ...cur, ...patch }) } : { ...cur };
+  if ('enabled' in patch) next.enabled = Boolean(patch.enabled);
+  d.embeds[i] = next;
+  save(d);
+  return next;
+}
+export function removeEmbed(id) {
+  const d = load();
+  d.embeds = d.embeds.filter((x) => x.id !== id);
+  save(d);
+}
+
+// ID do TMDB: pelo TMDB (chave no .env) ou, sem chave, pelo campo moviedb_id do Cinemeta.
+const tmdbCache = new Map();
+async function tmdbId(type, imdb) {
+  const k = `${type}:${imdb}`;
+  if (tmdbCache.has(k)) return tmdbCache.get(k);
+  let id = null;
+  if (hasTmdb()) id = await tmdbIdFromImdb(type, imdb).catch(() => null);
+  if (!id) {
+    const m = await fetchJson(`https://v3-cinemeta.strem.io/meta/${type}/${imdb}.json`).then((j) => j.meta).catch(() => null);
+    id = m?.moviedb_id || null;
+  }
+  if (id) tmdbCache.set(k, id);
+  return id;
+}
+
+const fillTemplate = (tpl, v) => tpl
+  .replaceAll('{tmdb}', String(v.tmdb ?? '')).replaceAll('{imdb}', v.imdb)
+  .replaceAll('{S}', String(v.s ?? '').padStart(2, '0')).replaceAll('{E}', String(v.e ?? '').padStart(2, '0'))
+  .replaceAll('{s}', String(v.s ?? '')).replaceAll('{e}', String(v.e ?? ''));
+
+async function embedStreams(type, imdb, season, episode, base, notes) {
+  const embeds = load().embeds.filter((x) => x.enabled !== false && (type === 'movie' ? x.movie : x.series));
+  if (!embeds.length) return [];
+  const needsTmdb = embeds.some((x) => (type === 'movie' ? x.movie : x.series).includes('{tmdb}'));
+  const tmdb = needsTmdb ? await tmdbId(type, imdb) : null;
+  const out = [];
+  for (const x of embeds) {
+    const tpl = type === 'movie' ? x.movie : x.series;
+    if (tpl.includes('{tmdb}') && !tmdb) { notes?.push(`${x.name}: não achei o ID do TMDB deste título.`); continue; }
+    const url = fillTemplate(tpl, { tmdb, imdb, s: season, e: episode });
+    const where = type === 'series' ? `T${season}:E${episode}` : 'Filme';
+    out.push({
+      externalUrl: `${base}/fontes/player?${new URLSearchParams({ u: url, t: `${x.name} · ${where}` })}`,
+      name: `▶ ${x.name}`,
+      title: `Player embutido · ${where}\nAbre por cima do Stremio`,
+      behaviorHints: { bingeGroup: `minhas-fontes-embed-${x.id}` },
+      embedUrl: url,
+    });
+  }
+  return out;
+}
+
+export async function streamsFor(type, id, notes, base = `http://127.0.0.1:${config.port}`) {
   const [imdb, s, e] = id.split(':');
   if (!/^tt\d+$/.test(imdb)) return [];
   const season = type === 'series' ? Number(s) : null;
   const episode = type === 'series' ? Number(e) : null;
   if (type === 'series' && !(season >= 0 && episode >= 0)) return [];
-  const [own, other] = await Promise.all([ownStreams(type, imdb, season, episode, notes), addonStreams(type, id, notes)]);
-  return [...own, ...other];
+  const [own, emb, other] = await Promise.all([ownStreams(type, imdb, season, episode, notes),
+    embedStreams(type, imdb, season, episode, base, notes), addonStreams(type, id, notes)]);
+  return [...own, ...emb, ...other];
 }
 
 export const fontesManifest = (base) => ({

@@ -100,6 +100,7 @@ Ali você cadastra fontes para um filme, um episódio, uma temporada inteira ou 
 - **Link direto** (`https://.../video.mp4`, `.mkv`, `.m3u8`). Para temporada/série inteira, use `{S}` e `{E}` no endereço (ex.: `.../S{S}E{E}.mkv`).
 - **Magnet** (ou só o hash). Em pacotes de temporada/série, o episódio certo é achado pelo nome dos arquivos (S01E02, 1x02, "Episódio 2"...).
 - **Outros addons** (URL terminando em `/manifest.json`): as fontes deles aparecem junto com as suas.
+- **Players embutidos** (sites que entregam uma página de player em iframe): modelo com `{tmdb}`/`{imdb}` e `{s}`/`{e}`. Aparecem como "▶ Nome" e o plugin abre o player por cima do Stremio.
 
 Instale uma vez o addon `http://127.0.0.1:7100/fontes/manifest.json` (botão "Instalar no Stremio" na página). As fontes aparecem como
 "⭐ Minhas fontes" na lista do Stremio. Os links ficam só em `addon/data/fontes.json` (fora do Git) e o endereço só responde a acessos do próprio PC.

@@ -1386,6 +1386,10 @@
   #sm-fontes { position:fixed; inset:0; z-index:100000; background:rgba(0,0,0,.7); display:grid; place-items:center; }
   #sm-fontes iframe { width:min(1040px, 94vw); height:90vh; border:1px solid #333 !important; border-radius:10px; background:#141414 !important;
     box-shadow:0 20px 60px rgba(0,0,0,.6) !important; }
+  #sm-embed { position:fixed; inset:0; z-index:100001; background:#000; display:flex; flex-direction:column; }
+  #sm-embed .sm-embed-bar { display:flex; align-items:center; gap:1rem; padding:.5rem 1rem; background:#111; color:#ddd; font-size:.95rem; }
+  #sm-embed .sm-embed-bar span { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  #sm-embed iframe { flex:1; width:100%; border:0 !important; background:#000 !important; }
   .sm-ep-seen { display:inline-flex; align-items:center; gap:.3rem; color:#bcbcbc; font-size:.78rem; font-weight:600; }
   .sm-ep-seen .sm-ico { width:.95rem; height:.95rem; }
   .sm-ep.seen .sm-ep-img { opacity:.75; }
@@ -4837,7 +4841,51 @@
       location.hash = `#/addons?addon=${encodeURIComponent(FONTES_MANIFEST())}`;
     }
   });
-  document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && fontesEl) { ev.stopPropagation(); closeFontes(); } }, true);
+  document.addEventListener('keydown', (ev) => {
+    if (ev.key !== 'Escape') return;
+    if (embedEl) { ev.stopPropagation(); closeEmbedPlayer(); } else if (fontesEl) { ev.stopPropagation(); closeFontes(); }
+  }, true);
+
+  // Players embutidos (fonte "▶ Nome" de Minhas fontes): o Stremio abriria o link fora do app;
+  // aqui o player abre numa janela por cima do Stremio.
+  let embedEl = null;
+  function closeEmbedPlayer() {
+    embedEl?.remove();
+    embedEl = null;
+  }
+  function openEmbedPlayer(url, title) {
+    closeEmbedPlayer();
+    embedEl = h('div', { id: 'sm-embed' },
+      h('div', { class: 'sm-embed-bar' },
+        h('span', { text: title || 'Player' }),
+        h('button', { type: 'button', class: 'sm-round', 'aria-label': 'Fechar player', onclick: closeEmbedPlayer }, icon('close'))),
+      h('iframe', { src: url, title: title || 'Player', allow: 'autoplay; fullscreen; encrypted-media; picture-in-picture', allowfullscreen: 'true',
+        referrerpolicy: 'origin' }));
+    document.body.appendChild(embedEl);
+  }
+  // Devolve { url, title } se o link for a página /fontes/player do addon do PC.
+  function embedFromLink(href) {
+    try {
+      const u = new URL(href, location.href);
+      if (!state.addonUrl || u.origin !== new URL(state.addonUrl).origin || u.pathname !== '/fontes/player') return null;
+      const url = u.searchParams.get('u') || '';
+      return /^https?:\/\//i.test(url) ? { url, title: u.searchParams.get('t') || '' } : null;
+    } catch { return null; }
+  }
+  document.addEventListener('click', (ev) => {
+    const a = ev.target?.closest?.('a[href]');
+    const emb = a && embedFromLink(a.getAttribute('href'));
+    if (!emb) return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    openEmbedPlayer(emb.url, emb.title);
+  }, true);
+  const nativeOpen = window.open;
+  window.open = function (href, ...rest) {
+    const emb = href && embedFromLink(String(href));
+    if (emb) { openEmbedPlayer(emb.url, emb.title); return null; }
+    return nativeOpen.call(window, href, ...rest);
+  };
 
   // ---------- Mais informações ----------
   let modalEl = null;

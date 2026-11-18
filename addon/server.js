@@ -83,10 +83,11 @@ async function handleFontes(req, res, pathname) {
   let x;
   if (pathname === '/fontes/manifest.json') return send(res, 200, fontes.fontesManifest(base));
   if ((x = pathname.match(/^\/fontes\/stream\/(movie|series)\/([^/]+)\.json$/))) {
-    return send(res, 200, { streams: await fontes.streamsFor(x[1], decodeURIComponent(x[2])), cacheMaxAge: 0 });
+    const streams = (await fontes.streamsFor(x[1], decodeURIComponent(x[2]), null, base)).map(({ embedUrl, ...st }) => st);
+    return send(res, 200, { streams, cacheMaxAge: 0 });
   }
-  if (pathname === '/fontes' || pathname === '/fontes/' || pathname === '/fontes/configure' || pathname === '/fontes/logo.svg') {
-    const file = pathname.endsWith('.svg') ? 'logo.svg' : 'index.html';
+  if (['/fontes', '/fontes/', '/fontes/configure', '/fontes/logo.svg', '/fontes/player'].includes(pathname)) {
+    const file = pathname.endsWith('.svg') ? 'logo.svg' : pathname === '/fontes/player' ? 'player.html' : 'index.html';
     res.writeHead(200, { 'content-type': file.endsWith('.svg') ? 'image/svg+xml' : 'text/html; charset=utf-8', 'cache-control': 'no-cache',
       'access-control-allow-origin': '*' });
     return res.end(fs.readFileSync(path.join(FONTES_DIR, file)));
@@ -109,6 +110,11 @@ async function handleFontes(req, res, pathname) {
       if (req.method === 'PATCH') return reply(200, fontes.updateSource(x[1], await readBody(req)));
       if (req.method === 'DELETE') { fontes.removeSource(x[1]); return reply(200, { ok: true }); }
     }
+    if (pathname === '/fontes/api/embeds' && req.method === 'POST') return reply(200, fontes.addEmbed(await readBody(req)));
+    if ((x = pathname.match(/^\/fontes\/api\/embeds\/([a-f0-9]+)$/))) {
+      if (req.method === 'PATCH') return reply(200, fontes.updateEmbed(x[1], await readBody(req)));
+      if (req.method === 'DELETE') { fontes.removeEmbed(x[1]); return reply(200, { ok: true }); }
+    }
     if (pathname === '/fontes/api/addons' && req.method === 'POST') return reply(200, await fontes.addAddon((await readBody(req)).url));
     if ((x = pathname.match(/^\/fontes\/api\/addons\/([a-f0-9]+)$/))) {
       if (req.method === 'PATCH') return reply(200, fontes.updateAddon(x[1], await readBody(req)));
@@ -117,7 +123,7 @@ async function handleFontes(req, res, pathname) {
     // Testar: o que o Stremio vai receber para um filme/episódio, com avisos dos pacotes e addons que falharem.
     if ((x = pathname.match(/^\/fontes\/api\/test\/(movie|series)\/([^/]+)$/))) {
       const notes = [];
-      const streams = await fontes.streamsFor(x[1], decodeURIComponent(x[2]), notes);
+      const streams = await fontes.streamsFor(x[1], decodeURIComponent(x[2]), notes, base);
       return reply(200, { streams, notes });
     }
     return reply(404, { error: 'not found' });

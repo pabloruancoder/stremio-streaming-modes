@@ -53,7 +53,7 @@
   .item { display:flex; gap:10px; align-items:center; padding:8px 10px; border-radius:6px; background:var(--panel2); margin-top:6px; flex-wrap:wrap; }
   .item.off { opacity:.5; }
   .badge { font-size:.72rem; font-weight:700; letter-spacing:.03em; padding:2px 7px; border-radius:4px; background:#444; flex:none; }
-  .badge.magnet { background:#5b2a86; } .badge.url { background:#1d5a8c; } .badge.addon { background:#7a4b00; }
+  .badge.magnet { background:#5b2a86; } .badge.url { background:#1d5a8c; } .badge.addon { background:#7a4b00; } .badge.embed { background:#0f6b5c; }
   .item .scope { font-weight:600; flex:none; min-width:92px; }
   .item .info { flex:1; min-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--muted); font-size:.88rem; }
   .item .info b { color:var(--text); font-weight:500; }
@@ -147,6 +147,24 @@
     </div>
     <div class="msg" id="addonMsg"></div>
     <div id="addons" style="margin-top:12px"></div>
+  </section>
+
+  <section class="card">
+    <h2>Players embutidos</h2>
+    <p class="muted small" style="margin-top:-6px">Sites que entregam uma página de player (iframe) em vez de um arquivo de vídeo. Aparecem na lista do Stremio como
+      “▶ Nome” e abrem numa janela por cima do Stremio. No modelo use <code>{tmdb}</code> ou <code>{imdb}</code>, e nas séries <code>{s}</code> e <code>{e}</code>
+      (temporada e episódio).</p>
+    <div class="row">
+      <div class="auto"><button type="button" id="pomfyBtn">Preencher com a API Pomfy</button></div>
+    </div>
+    <div class="row">
+      <div style="flex:0 1 200px"><label for="embName">Nome</label><input id="embName" placeholder="ex.: Pomfy"></div>
+      <div><label for="embMovie">Modelo para filmes</label><input id="embMovie" placeholder="https://site/filme/{tmdb}"></div>
+      <div><label for="embSeries">Modelo para séries</label><input id="embSeries" placeholder="https://site/serie/{tmdb}/{s}/{e}"></div>
+      <button class="auto" id="addEmbBtn">Adicionar</button>
+    </div>
+    <div class="msg" id="embMsg"></div>
+    <div id="embeds" style="margin-top:12px"></div>
   </section>
 </div>
 
@@ -336,6 +354,7 @@
     let data;
     try { data = await api('/list'); } catch (err) { $('list').replaceChildren(el('p', { class: 'msg show bad', text: `Não consegui falar com o addon: ${err.message}` })); return; }
     renderAddons(data.addons);
+    renderEmbeds(data.embeds || []);
     if (!data.sources.length) return $('list').replaceChildren(el('p', { class: 'empty', text: 'Nenhuma fonte ainda.' }));
     const groups = new Map();
     for (const s of data.sources) {
@@ -389,6 +408,61 @@
         await api(`/addons/${a.id}`, { method: 'DELETE' }); renderList();
       } }))));
   }
+  // ---------- Players embutidos ----------
+  // Endereços da documentação da API Pomfy: /filme/ID e /serie/ID/TEMP/EP (IDs do TMDB).
+  $('pomfyBtn').onclick = () => {
+    $('embName').value = 'Pomfy';
+    $('embMovie').value = 'https://api.pomfy.stream/filme/{tmdb}';
+    $('embSeries').value = 'https://api.pomfy.stream/serie/{tmdb}/{s}/{e}';
+    showMsg($('embMsg'), 'Preenchido. Opcional: no fim do modelo dá para pôr #eplist (menu de episódios, só série) e #cor:HEX (cor do player). Clique em Adicionar.', true);
+  };
+  function renderEmbeds(embeds) {
+    if (!embeds.length) return $('embeds').replaceChildren(el('p', { class: 'empty', text: 'Nenhum player embutido.' }));
+    $('embeds').replaceChildren(...embeds.map((x) => {
+      const test = el('div', { class: 'test' });
+      return el('div', null,
+        el('div', { class: `item${x.enabled === false ? ' off' : ''}` },
+          el('span', { class: 'badge embed', text: 'PLAYER' }),
+          el('span', { class: 'scope', text: x.name }),
+          el('span', { class: 'info', title: [x.movie, x.series].filter(Boolean).join('\n') },
+            [x.movie && `Filme: ${x.movie}`, x.series && `Série: ${x.series}`].filter(Boolean).join('  ·  ')),
+          el('button', { class: 'link', type: 'button', text: 'Ver endereço', onclick: async () => {
+            test.className = 'test show';
+            if (!chosen) { test.textContent = 'Escolha um título em “Adicionar fonte” para ver o endereço que seria aberto.'; return; }
+            test.textContent = 'Montando…';
+            try {
+              const sc = chosen.type === 'series';
+              const target = sc ? `${chosen.id}:${$('season').value || 1}:${$('episode').value || 1}` : chosen.id;
+              const r = await api(`/test/${chosen.type}/${encodeURIComponent(target)}`);
+              const st = r.streams.find((s) => s.behaviorHints?.bingeGroup === `minhas-fontes-embed-${x.id}`);
+              test.textContent = st ? `${chosen.name}${sc ? ` T${target.split(':')[1]}:E${target.split(':')[2]}` : ''}:\n${st.embedUrl}`
+                : (r.notes.join('\n') || 'Esse player não tem modelo para este tipo de título.');
+            } catch (err) { test.textContent = err.message; }
+          } }),
+          el('button', { class: 'link', type: 'button', text: x.enabled === false ? 'Ativar' : 'Desativar', onclick: async () => {
+            await api(`/embeds/${x.id}`, { method: 'PATCH', body: JSON.stringify({ enabled: x.enabled === false }) }); renderList();
+          } }),
+          el('button', { class: 'link', type: 'button', text: 'Remover', onclick: async () => {
+            if (!confirm(`Remover o player ${x.name}?`)) return;
+            await api(`/embeds/${x.id}`, { method: 'DELETE' }); renderList();
+          } })),
+        test);
+    }));
+  }
+  $('addEmbBtn').onclick = async () => {
+    $('addEmbBtn').disabled = true;
+    try {
+      const x = await api('/embeds', { method: 'POST', body: JSON.stringify({ name: $('embName').value, movie: $('embMovie').value, series: $('embSeries').value }) });
+      $('embName').value = ''; $('embMovie').value = ''; $('embSeries').value = '';
+      showMsg($('embMsg'), `"${x.name}" adicionado. Ele aparece na lista de fontes de todos os filmes/episódios.`, true);
+      renderList();
+    } catch (err) {
+      showMsg($('embMsg'), err.message, false);
+    } finally {
+      $('addEmbBtn').disabled = false;
+    }
+  };
+
   $('addAddonBtn').onclick = async () => {
     $('addAddonBtn').disabled = true;
     try {
