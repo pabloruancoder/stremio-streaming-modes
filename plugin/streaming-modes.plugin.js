@@ -4973,6 +4973,12 @@
         const curVid = lib?.state?.video_id;
         const st = lib?.state || {};
         const curStarted = st.timeOffset > 0 && st.duration > 0;
+        // Episódio sem imagem (ou que dá 404, comum nos lançados há poucos dias): o fundo da série aparece por baixo.
+        const fallbackImg = info.background || item.background || cardImage(item);
+        const epImage = (still) => {
+          const layers = [still, fallbackImg].filter(Boolean).map(cssUrl);
+          return layers.length ? { backgroundImage: layers.join(', ') } : null;
+        };
         const hasCur = eps.some((ep) => ep.id === curVid);
         const now = Date.now();
         list.replaceChildren(...eps.map((ep, i) => {
@@ -4987,7 +4993,7 @@
           return h('div', { class: `sm-ep${isCur || (!hasCur && i === 0) ? ' hl' : ''}${upcoming ? ' soon' : ''}${seen ? ' seen' : ''}`, role: 'button', tabindex: '0',
             onclick: () => play({ ...item, videoId: ep.id }) },
             h('div', { class: 'sm-ep-num', text: String(ep.episode) }),
-            h('div', { class: 'sm-ep-img', style: ep.still ? { backgroundImage: cssUrl(ep.still) } : null }, icon('play', true),
+            h('div', { class: 'sm-ep-img', style: epImage(ep.still) }, icon('play', true),
               pct ? h('div', { class: 'sm-card-progress' }, h('i', { style: { width: `${pct}%` } })) : null),
             h('div', null,
               h('div', { class: 'sm-ep-top' },
