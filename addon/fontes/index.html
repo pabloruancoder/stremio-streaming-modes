@@ -193,6 +193,7 @@
   async function api(path, opts = {}) {
     const r = await fetch(API + path, { ...opts, headers: { 'content-type': 'application/json' } });
     const j = await r.json().catch(() => ({}));
+    if (r.status === 404 && j.error === 'not found') throw new Error('O addon em execução é de uma versão antiga e não conhece esta função. Feche a janela do addon e abra o iniciar-stremio.bat de novo.');
     if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
     return j;
   }
