@@ -374,6 +374,7 @@
     sparkle: 'M12 3v5M12 16v5M3 12h5M16 12h5M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6',
     play: 'M6 4v16a1 1 0 0 0 1.52.85l13-8a1 1 0 0 0 0-1.7l-13-8A1 1 0 0 0 6 4z',
     plus: 'M12 5v14M5 12h14',
+    link: 'M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1',
     check: 'M5 12.5l4.5 4.5L19 7.5',
     down: 'M6 9l6 6 6-6',
     left: 'M15 5l-7 7 7 7',
@@ -1382,6 +1383,9 @@
   .sm-ep-right { display:flex; align-items:center; gap:.6rem; flex:none; }
   .sm-ep-tag { padding:.1rem .4rem; border-radius:3px; background:var(--smc-accent); color:#fff; font-size:.68rem; letter-spacing:.04em; }
   .sm-ep-tag.soon { background:#424242; }
+  #sm-fontes { position:fixed; inset:0; z-index:100000; background:rgba(0,0,0,.7); display:grid; place-items:center; }
+  #sm-fontes iframe { width:min(1040px, 94vw); height:90vh; border:1px solid #333 !important; border-radius:10px; background:#141414 !important;
+    box-shadow:0 20px 60px rgba(0,0,0,.6) !important; }
   .sm-ep-seen { display:inline-flex; align-items:center; gap:.3rem; color:#bcbcbc; font-size:.78rem; font-weight:600; }
   .sm-ep-seen .sm-ico { width:.95rem; height:.95rem; }
   .sm-ep.seen .sm-ep-img { opacity:.75; }
@@ -4800,6 +4804,41 @@
     return root;
   }
 
+  // ---------- Minhas fontes ----------
+  // Página do addon do PC (/fontes) aberta por cima do Stremio, já com o título (e o episódio) escolhido.
+  const FONTES_MANIFEST = () => `${state.addonUrl}/fontes/manifest.json`;
+  function fontesInstalled() {
+    try {
+      const prof = JSON.parse(localStorage.getItem('profile') || '{}');
+      return (prof.addons || []).some((a) => /\/fontes\/manifest\.json$/.test(a?.transportUrl || ''));
+    } catch { return false; }
+  }
+  let fontesEl = null;
+  function closeFontes() {
+    fontesEl?.remove();
+    fontesEl = null;
+  }
+  async function openFontes(item, s, e) {
+    if (!(await probeLocal())) { alert(offlineText()); return; }
+    closeFontes();
+    const q = new URLSearchParams({ type: item.type, id: item.id, installed: fontesInstalled() ? '1' : '0' });
+    if (s) q.set('s', s);
+    if (e) q.set('e', e);
+    fontesEl = h('div', { id: 'sm-fontes', onclick: (ev) => { if (ev.target === fontesEl) closeFontes(); } },
+      h('iframe', { src: `${state.addonUrl}/fontes?${q}`, title: 'Minhas fontes' }));
+    document.body.appendChild(fontesEl);
+  }
+  window.addEventListener('message', (ev) => {
+    if (!state.addonUrl || ev.origin !== new URL(state.addonUrl).origin) return;
+    if (ev.data?.type === 'sm-fontes-close') closeFontes();
+    if (ev.data?.type === 'sm-fontes-install' && /\/fontes\/manifest\.json$/.test(ev.data.url || '')) {
+      closeFontes();
+      closeModal();
+      location.hash = `#/addons?addon=${encodeURIComponent(FONTES_MANIFEST())}`;
+    }
+  });
+  document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && fontesEl) { ev.stopPropagation(); closeFontes(); } }, true);
+
   // ---------- Mais informações ----------
   let modalEl = null;
 
@@ -4869,7 +4908,9 @@
           h('div', { class: 'sm-actions' },
             h('button', { type: 'button', class: 'sm-btn sm-btn-white', onclick: () => play(item) }, icon('play', true), playLabel),
             listBtn,
-            thumbButton(item)),
+            thumbButton(item),
+            h('button', { type: 'button', class: 'sm-round sm-fontes-btn', 'aria-label': 'Minhas fontes', title: 'Minhas fontes (adicionar links)',
+              onclick: () => openFontes(item, sNum, eNum) }, icon('link'))),
           resume,
           isCustom() ? h('div', { class: 'sm-dlg-sub' }) : null)),
       body);

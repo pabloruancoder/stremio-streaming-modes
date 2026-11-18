@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Minhas fontes</title>
+<link rel="icon" href="/fontes/logo.svg">
+<style>
+  :root { --bg:#141414; --panel:#1f1f1f; --panel2:#2a2a2a; --line:#363636; --text:#f2f2f2; --muted:#a3a3a3; --accent:#e50914; --ok:#46d369; --warn:#f5b50a; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:15px/1.45 "Segoe UI", system-ui, sans-serif; }
+  .wrap { max-width:980px; margin:0 auto; padding:28px 20px 60px; }
+  header { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:22px; }
+  header img { width:40px; height:40px; }
+  h1 { font-size:1.6rem; margin:0; flex:1; }
+  h2 { font-size:1.15rem; margin:0 0 14px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:20px; margin-bottom:22px; }
+  .muted { color:var(--muted); }
+  .small { font-size:.86rem; }
+  label { display:block; font-size:.85rem; color:var(--muted); margin:14px 0 6px; }
+  input, select, textarea { width:100%; background:var(--panel2); color:var(--text); border:1px solid #444; border-radius:6px; padding:10px 12px; font:inherit; }
+  textarea { min-height:70px; resize:vertical; font-family:Consolas, monospace; font-size:.85rem; word-break:break-all; }
+  input:focus, select:focus, textarea:focus { outline:2px solid #fff3; border-color:#777; }
+  button { background:var(--panel2); color:var(--text); border:1px solid #4a4a4a; border-radius:6px; padding:9px 16px; font:inherit; cursor:pointer; white-space:nowrap; }
+  button:hover { background:#383838; }
+  button.primary { background:var(--accent); border-color:var(--accent); font-weight:600; }
+  button.primary:hover { background:#f6121d; }
+  button.link { background:none; border:0; color:var(--muted); padding:4px 8px; }
+  button.link:hover { color:#fff; }
+  button:disabled { opacity:.5; cursor:default; }
+  .row { display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; }
+  .row > * { flex:1; min-width:140px; }
+  .row > .auto { flex:none; }
+  .results { display:grid; grid-template-columns:repeat(auto-fill, minmax(118px, 1fr)); gap:12px; margin-top:14px; }
+  .res { cursor:pointer; border-radius:6px; overflow:hidden; background:var(--panel2); border:1px solid transparent; text-align:left; padding:0; }
+  .res:hover { border-color:#888; }
+  .res .ph { aspect-ratio:2/3; background:#333 center/cover; }
+  .res div.t { padding:6px 8px; font-size:.82rem; }
+  .res div.t span { display:block; color:var(--muted); font-size:.75rem; }
+  .chosen { display:flex; gap:14px; align-items:center; background:var(--panel2); border-radius:8px; padding:10px; }
+  .chosen .ph { width:54px; aspect-ratio:2/3; border-radius:4px; background:#333 center/cover; flex:none; }
+  .chosen b { display:block; font-size:1.05rem; }
+  .hint { margin-top:6px; font-size:.82rem; }
+  .hint.ok { color:var(--ok); } .hint.bad { color:#ff6b6b; } .hint.warn { color:var(--warn); }
+  details { margin-top:14px; } summary { cursor:pointer; color:var(--muted); font-size:.88rem; }
+  .msg { margin-top:14px; padding:10px 12px; border-radius:6px; font-size:.9rem; display:none; white-space:pre-line; }
+  .msg.show { display:block; } .msg.ok { background:#163d22; color:#b9f5c8; } .msg.bad { background:#4a1414; color:#ffc4c4; }
+  .group { border-top:1px solid var(--line); padding:14px 0; }
+  .group:first-of-type { border-top:0; padding-top:0; }
+  .group-head { display:flex; gap:12px; align-items:center; margin-bottom:8px; }
+  .group-head .ph { width:34px; aspect-ratio:2/3; border-radius:3px; background:#333 center/cover; flex:none; }
+  .group-head b { flex:1; }
+  .item { display:flex; gap:10px; align-items:center; padding:8px 10px; border-radius:6px; background:var(--panel2); margin-top:6px; flex-wrap:wrap; }
+  .item.off { opacity:.5; }
+  .badge { font-size:.72rem; font-weight:700; letter-spacing:.03em; padding:2px 7px; border-radius:4px; background:#444; flex:none; }
+  .badge.magnet { background:#5b2a86; } .badge.url { background:#1d5a8c; } .badge.addon { background:#7a4b00; }
+  .item .scope { font-weight:600; flex:none; min-width:92px; }
+  .item .info { flex:1; min-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--muted); font-size:.88rem; }
+  .item .info b { color:var(--text); font-weight:500; }
+  .test { margin-top:8px; font-size:.84rem; background:#181818; border-radius:6px; padding:8px 10px; white-space:pre-line; display:none; }
+  .test.show { display:block; }
+  .install { background:#2b1a0a; border:1px solid #6b4310; border-radius:8px; padding:12px 14px; margin-bottom:22px; display:none; gap:12px; align-items:center; flex-wrap:wrap; }
+  .install.show { display:flex; }
+  .install p { margin:0; flex:1; min-width:240px; }
+  code { background:#000; padding:2px 6px; border-radius:4px; font-size:.82rem; }
+  .empty { color:var(--muted); font-style:italic; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img src="/fontes/logo.svg" alt="">
+    <h1>Minhas fontes</h1>
+    <button class="link" id="closeBtn" hidden>Fechar ✕</button>
+  </header>
+
+  <div class="install" id="install">
+    <p>Para essas fontes aparecerem na lista do Stremio, instale o addon <b>Minhas fontes</b> uma vez:
+      <code id="manifestUrl"></code></p>
+    <button class="primary" id="installBtn">Instalar no Stremio</button>
+    <button id="copyBtn">Copiar link</button>
+  </div>
+
+  <section class="card">
+    <h2>Adicionar fonte</h2>
+    <div id="pickArea">
+      <label for="q">Filme ou série</label>
+      <div class="row">
+        <input id="q" placeholder="Digite o nome (ex.: The Devil's Plan)" autocomplete="off">
+        <button class="auto" id="searchBtn">Buscar</button>
+      </div>
+      <div class="results" id="results"></div>
+    </div>
+    <div id="chosenArea" hidden>
+      <div class="chosen">
+        <div class="ph" id="chosenPh"></div>
+        <div style="flex:1"><b id="chosenName"></b><span class="muted small" id="chosenSub"></span></div>
+        <button class="link" id="changeBtn">Trocar</button>
+      </div>
+      <div id="seriesArea" hidden>
+        <div class="row">
+          <div>
+            <label for="scope">Vale para</label>
+            <select id="scope">
+              <option value="ep">Um episódio</option>
+              <option value="season">Temporada inteira (pacote)</option>
+              <option value="series">Série inteira (pacote)</option>
+            </select>
+          </div>
+          <div id="seasonWrap"><label for="season">Temporada</label><select id="season"></select></div>
+          <div id="episodeWrap"><label for="episode">Episódio</label><select id="episode"></select></div>
+        </div>
+      </div>
+      <label for="link">Link da fonte</label>
+      <textarea id="link" placeholder="magnet:?xt=urn:btih:...   ou   https://servidor/video.mp4"></textarea>
+      <div class="hint" id="linkHint"></div>
+      <label for="label">Nome que aparece no Stremio (opcional)</label>
+      <input id="label" placeholder="ex.: 1080p · Dublado · rápido">
+      <details>
+        <summary>Opções avançadas</summary>
+        <div class="row">
+          <div><label for="fileIdx">Índice do arquivo no torrent</label><input id="fileIdx" inputmode="numeric" placeholder="automático"></div>
+          <div><label for="referer">Referer (link direto)</label><input id="referer" placeholder="https://site-de-origem/"></div>
+          <div><label for="ua">User-Agent (link direto)</label><input id="ua" placeholder="padrão"></div>
+        </div>
+        <p class="muted small">Pacote com link direto: use <code>{S}</code> e <code>{E}</code> (com zero: 01) ou <code>{s}</code> e <code>{e}</code> (sem zero) no endereço,
+          ex.: <code>https://servidor/serie/S{S}E{E}.mkv</code>.</p>
+      </details>
+      <div class="row" style="margin-top:18px">
+        <button class="primary auto" id="saveBtn">Salvar fonte</button>
+      </div>
+      <div class="msg" id="saveMsg"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Fontes cadastradas</h2>
+    <div id="list"><p class="empty">Carregando…</p></div>
+  </section>
+
+  <section class="card">
+    <h2>Outros addons de fontes</h2>
+    <p class="muted small" style="margin-top:-6px">Cole a URL de um addon (termina em <code>/manifest.json</code>). As fontes dele aparecem junto com as suas, dentro de “Minhas fontes”.</p>
+    <div class="row">
+      <input id="addonUrl" placeholder="https://.../manifest.json">
+      <button class="auto" id="addAddonBtn">Adicionar</button>
+    </div>
+    <div class="msg" id="addonMsg"></div>
+    <div id="addons" style="margin-top:12px"></div>
+  </section>
+</div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const API = '/fontes/api';
+  const CINEMETA = 'https://v3-cinemeta.strem.io';
+  const params = new URLSearchParams(location.search);
+  const inFrame = window.parent !== window;
+  const manifestUrl = `${location.origin}/fontes/manifest.json`;
+  const el = (tag, attrs = {}, ...kids) => {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) {
+      if (v == null || v === false) continue;
+      if (k === 'class') n.className = v;
+      else if (k === 'text') n.textContent = v;
+      else if (k.startsWith('on')) n.addEventListener(k.slice(2), v);
+      else if (k === 'style') n.style.cssText = v;
+      else n.setAttribute(k, v);
+    }
+    for (const c of kids.flat()) if (c != null && c !== false) n.append(c.nodeType ? c : document.createTextNode(String(c)));
+    return n;
+  };
+  const bg = (u) => (u ? `background-image:url("${String(u).replace(/["\\\n]/g, '')}")` : '');
+  async function api(path, opts = {}) {
+    const r = await fetch(API + path, { ...opts, headers: { 'content-type': 'application/json' } });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
+    return j;
+  }
+  const showMsg = (box, text, ok) => { box.textContent = text; box.className = `msg show ${ok ? 'ok' : 'bad'}`; };
+
+  // ---------- Instalação ----------
+  $('manifestUrl').textContent = manifestUrl;
+  if (params.get('installed') !== '1') $('install').classList.add('show');
+  $('installBtn').onclick = () => {
+    if (inFrame) window.parent.postMessage({ type: 'sm-fontes-install', url: manifestUrl }, '*');
+    else location.href = manifestUrl.replace(/^https?:\/\//, 'stremio://');
+  };
+  $('copyBtn').onclick = async () => {
+    try { await navigator.clipboard.writeText(manifestUrl); $('copyBtn').textContent = 'Copiado!'; } catch { prompt('Copie o link:', manifestUrl); }
+  };
+  if (inFrame) {
+    $('closeBtn').hidden = false;
+    $('closeBtn').onclick = () => window.parent.postMessage({ type: 'sm-fontes-close' }, '*');
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') window.parent.postMessage({ type: 'sm-fontes-close' }, '*'); });
+  }
+
+  // ---------- Escolher título ----------
+  let chosen = null; // { id, type, name, poster, year, videos }
+  const metaCache = new Map();
+  const getMeta = (type, id) => {
+    const k = `${type}/${id}`;
+    if (!metaCache.has(k)) metaCache.set(k, fetch(`${CINEMETA}/meta/${type}/${id}.json`).then((r) => r.json()).then((j) => j.meta || null).catch(() => null));
+    return metaCache.get(k);
+  };
+
+  async function search() {
+    const q = $('q').value.trim();
+    if (!q) return;
+    $('results').replaceChildren(el('p', { class: 'muted', text: 'Buscando…' }));
+    const enc = encodeURIComponent(q);
+    const lists = await Promise.all(['series', 'movie'].map((t) =>
+      fetch(`${CINEMETA}/catalog/${t}/top/search=${enc}.json`).then((r) => r.json()).then((j) => j.metas || []).catch(() => [])));
+    const all = [];
+    for (let i = 0; i < Math.max(lists[0].length, lists[1].length); i++) { if (lists[0][i]) all.push(lists[0][i]); if (lists[1][i]) all.push(lists[1][i]); }
+    if (!all.length) return $('results').replaceChildren(el('p', { class: 'muted', text: 'Nada encontrado.' }));
+    $('results').replaceChildren(...all.slice(0, 24).map((m) => el('button', { class: 'res', type: 'button', onclick: () => choose(m.type, m.id) },
+      el('div', { class: 'ph', style: bg(m.poster) }),
+      el('div', { class: 't' }, m.name, el('span', { text: `${m.type === 'movie' ? 'Filme' : 'Série'}${m.releaseInfo ? ` · ${m.releaseInfo}` : ''}` })))));
+  }
+  $('searchBtn').onclick = search;
+  $('q').addEventListener('keydown', (e) => { if (e.key === 'Enter') search(); });
+
+  async function choose(type, id, s, e) {
+    $('pickArea').hidden = true;
+    $('chosenArea').hidden = false;
+    $('chosenName').textContent = 'Carregando…';
+    const m = await getMeta(type, id);
+    chosen = { id, type, name: m?.name || id, poster: m?.poster, year: m?.releaseInfo || '', videos: (m?.videos || []).filter((v) => v.season > 0 && v.episode > 0) };
+    $('chosenPh').style.cssText = bg(chosen.poster);
+    $('chosenName').textContent = chosen.name;
+    $('chosenSub').textContent = `${type === 'movie' ? 'Filme' : 'Série'}${chosen.year ? ` · ${chosen.year}` : ''} · ${id}`;
+    $('seriesArea').hidden = type !== 'series';
+    if (type === 'series') {
+      const seasons = [...new Set(chosen.videos.map((v) => v.season))].sort((a, b) => a - b);
+      if (!seasons.length) seasons.push(1);
+      $('season').replaceChildren(...seasons.map((n) => el('option', { value: n, text: `Temporada ${n}` })));
+      if (s && seasons.includes(Number(s))) $('season').value = s;
+      fillEpisodes(e);
+    }
+    $('link').focus();
+    renderList();
+  }
+  function fillEpisodes(pick) {
+    const s = Number($('season').value);
+    const eps = chosen.videos.filter((v) => v.season === s).sort((a, b) => a.episode - b.episode);
+    const opts = eps.length ? eps.map((v) => el('option', { value: v.episode, text: `${v.episode}. ${v.name || v.title || `Episódio ${v.episode}`}` }))
+      : Array.from({ length: 30 }, (_, i) => el('option', { value: i + 1, text: `Episódio ${i + 1}` }));
+    $('episode').replaceChildren(...opts);
+    if (pick && [...$('episode').options].some((o) => o.value === String(pick))) $('episode').value = pick;
+  }
+  $('season').onchange = () => fillEpisodes();
+  const syncScope = () => {
+    const sc = $('scope').value;
+    $('seasonWrap').hidden = sc === 'series';
+    $('episodeWrap').hidden = sc !== 'ep';
+    checkLink();
+  };
+  $('scope').onchange = syncScope;
+  $('changeBtn').onclick = () => { chosen = null; $('chosenArea').hidden = true; $('pickArea').hidden = false; $('q').focus(); renderList(); };
+
+  // ---------- Link ----------
+  function checkLink() {
+    const v = $('link').value.trim();
+    const hint = $('linkHint');
+    const pack = chosen?.type === 'series' && $('scope').value !== 'ep';
+    if (!v) { hint.textContent = ''; return; }
+    if (/^magnet:\?/i.test(v) && /xt=urn:btih:/i.test(v)) {
+      const dn = new URLSearchParams(v.slice(v.indexOf('?') + 1)).get('dn');
+      hint.className = 'hint ok';
+      hint.textContent = `✓ Magnet${dn ? `: ${dn}` : ''}${pack ? ' — o episódio certo é achado pelo nome dos arquivos (S01E02, 1x02...).' : ''}`;
+    } else if (/^[a-f0-9]{40}$/i.test(v)) {
+      hint.className = 'hint ok'; hint.textContent = '✓ Hash de torrent';
+    } else if (/^https?:\/\/\S+$/i.test(v)) {
+      const ph = /\{(s|e|S|E)\}/.test(v);
+      if (pack && !ph) { hint.className = 'hint bad'; hint.textContent = 'Para pacote com link direto, coloque {S} e {E} no endereço (veja Opções avançadas).'; }
+      else { hint.className = 'hint ok'; hint.textContent = `✓ Link direto${ph ? ' com temporada/episódio no endereço' : ''}`; }
+    } else {
+      hint.className = 'hint bad'; hint.textContent = 'Não reconheci: cole um magnet:?... ou um link http(s)://...';
+    }
+  }
+  $('link').addEventListener('input', checkLink);
+
+  $('saveBtn').onclick = async () => {
+    if (!chosen) return;
+    const sc = chosen.type === 'series' ? $('scope').value : null;
+    const body = {
+      type: chosen.type, imdb: chosen.id, name: chosen.name, link: $('link').value.trim(), label: $('label').value.trim(),
+      season: sc && sc !== 'series' ? $('season').value : null,
+      episode: sc === 'ep' ? $('episode').value : null,
+      fileIdx: $('fileIdx').value.trim() || null, referer: $('referer').value.trim(), userAgent: $('ua').value.trim(),
+    };
+    $('saveBtn').disabled = true;
+    try {
+      const src = await api('/sources', { method: 'POST', body: JSON.stringify(body) });
+      $('link').value = ''; $('label').value = ''; $('fileIdx').value = ''; checkLink();
+      showMsg($('saveMsg'), 'Fonte salva! Testando…', true);
+      await renderList();
+      const r = await runTest(src);
+      showMsg($('saveMsg'), r.ok ? `Fonte salva. ${r.text}` : `Fonte salva, mas: ${r.text}`, r.ok);
+    } catch (err) {
+      showMsg($('saveMsg'), err.message, false);
+    } finally {
+      $('saveBtn').disabled = false;
+    }
+  };
+
+  // ---------- Teste ----------
+  // Monta o ID que o Stremio pediria e mostra o que o addon devolve.
+  async function testTarget(src) {
+    if (src.type === 'movie') return src.imdb;
+    if (src.episode != null) return `${src.imdb}:${src.season}:${src.episode}`;
+    const m = await getMeta('series', src.imdb);
+    const eps = (m?.videos || []).filter((v) => v.season > 0 && v.episode > 0 && (src.season == null || v.season === src.season))
+      .sort((a, b) => a.season - b.season || a.episode - b.episode);
+    const v = eps[0];
+    return `${src.imdb}:${v ? v.season : src.season || 1}:${v ? v.episode : 1}`;
+  }
+  async function runTest(src) {
+    try {
+      const target = await testTarget(src);
+      const r = await api(`/test/${src.type}/${encodeURIComponent(target)}`);
+      const mine = r.streams.filter((s) => (s.behaviorHints?.bingeGroup || '') === `minhas-fontes-${src.id}`);
+      const where = target.includes(':') ? `T${target.split(':')[1]}:E${target.split(':')[2]}` : 'o filme';
+      if (mine.length) return { ok: true, text: `Teste com ${where}: ${mine[0].title.replace(/\n/g, ' — ')}` };
+      return { ok: false, text: r.notes.join('\n') || `não gerou fonte para ${where}.` };
+    } catch (err) {
+      return { ok: false, text: err.message };
+    }
+  }
+
+  // ---------- Lista ----------
+  const scopeText = (s) => (s.type === 'movie' ? 'Filme' : s.season == null ? 'Série inteira' : s.episode == null ? `Temporada ${s.season}` : `T${s.season}:E${s.episode}`);
+  async function renderList() {
+    let data;
+    try { data = await api('/list'); } catch (err) { $('list').replaceChildren(el('p', { class: 'msg show bad', text: `Não consegui falar com o addon: ${err.message}` })); return; }
+    renderAddons(data.addons);
+    if (!data.sources.length) return $('list').replaceChildren(el('p', { class: 'empty', text: 'Nenhuma fonte ainda.' }));
+    const groups = new Map();
+    for (const s of data.sources) {
+      if (!groups.has(s.imdb)) groups.set(s.imdb, []);
+      groups.get(s.imdb).push(s);
+    }
+    const order = [...groups.keys()].sort((a, b) => (b === chosen?.id) - (a === chosen?.id));
+    $('list').replaceChildren(...order.map((imdb) => {
+      const items = groups.get(imdb).sort((a, b) => (a.season ?? -1) - (b.season ?? -1) || (a.episode ?? -1) - (b.episode ?? -1));
+      const first = items[0];
+      const ph = el('div', { class: 'ph' });
+      getMeta(first.type, imdb).then((m) => { if (m?.poster) ph.style.cssText = bg(m.poster); });
+      return el('div', { class: 'group' },
+        el('div', { class: 'group-head' }, ph, el('b', { text: first.name || imdb }),
+          el('button', { class: 'link', type: 'button', text: '+ fonte', onclick: () => { choose(first.type, imdb); scrollTo({ top: 0, behavior: 'smooth' }); } })),
+        ...items.map((s) => {
+          const test = el('div', { class: 'test' });
+          return el('div', null,
+            el('div', { class: `item${s.enabled === false ? ' off' : ''}` },
+              el('span', { class: `badge ${s.kind}`, text: s.kind === 'magnet' ? 'MAGNET' : 'LINK' }),
+              el('span', { class: 'scope', text: scopeText(s) }),
+              el('span', { class: 'info', title: s.link }, s.label ? el('b', { text: `${s.label} · ` }) : null, s.kind === 'magnet' ? (s.dn || s.infoHash) : s.link),
+              el('button', { class: 'link', type: 'button', text: 'Testar', onclick: async () => {
+                test.className = 'test show'; test.textContent = 'Testando…';
+                const r = await runTest(s); test.textContent = `${r.ok ? '✓' : '✗'} ${r.text}`;
+              } }),
+              el('button', { class: 'link', type: 'button', text: s.enabled === false ? 'Ativar' : 'Desativar', onclick: async () => {
+                await api(`/sources/${s.id}`, { method: 'PATCH', body: JSON.stringify({ enabled: s.enabled === false }) }); renderList();
+              } }),
+              el('button', { class: 'link', type: 'button', text: 'Remover', onclick: async () => {
+                if (!confirm(`Remover esta fonte de ${s.name || imdb} (${scopeText(s)})?`)) return;
+                await api(`/sources/${s.id}`, { method: 'DELETE' }); renderList();
+              } })),
+            test);
+        }));
+    }));
+  }
+
+  // ---------- Addons ----------
+  function renderAddons(addons) {
+    if (!addons.length) return $('addons').replaceChildren(el('p', { class: 'empty', text: 'Nenhum addon extra.' }));
+    $('addons').replaceChildren(...addons.map((a) => el('div', { class: `item${a.enabled === false ? ' off' : ''}` },
+      el('span', { class: 'badge addon', text: 'ADDON' }),
+      el('span', { class: 'scope', text: a.name }),
+      el('span', { class: 'info', title: a.url, text: a.url }),
+      el('button', { class: 'link', type: 'button', text: a.enabled === false ? 'Ativar' : 'Desativar', onclick: async () => {
+        await api(`/addons/${a.id}`, { method: 'PATCH', body: JSON.stringify({ enabled: a.enabled === false }) }); renderList();
+      } }),
+      el('button', { class: 'link', type: 'button', text: 'Remover', onclick: async () => {
+        if (!confirm(`Remover o addon ${a.name}?`)) return;
+        await api(`/addons/${a.id}`, { method: 'DELETE' }); renderList();
+      } }))));
+  }
+  $('addAddonBtn').onclick = async () => {
+    $('addAddonBtn').disabled = true;
+    try {
+      const a = await api('/addons', { method: 'POST', body: JSON.stringify({ url: $('addonUrl').value }) });
+      $('addonUrl').value = '';
+      showMsg($('addonMsg'), `"${a.name}" adicionado.`, true);
+      renderList();
+    } catch (err) {
+      showMsg($('addonMsg'), err.message, false);
+    } finally {
+      $('addAddonBtn').disabled = false;
+    }
+  };
+
+  // ---------- Início ----------
+  syncScope();
+  const pid = params.get('id');
+  const ptype = params.get('type');
+  if (/^tt\d+$/.test(pid || '') && (ptype === 'movie' || ptype === 'series')) choose(ptype, pid, params.get('s'), params.get('e'));
+  else { renderList(); $('q').focus(); }
+})();
+</script>
+</body>
+</html>

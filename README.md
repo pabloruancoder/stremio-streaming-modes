@@ -92,6 +92,18 @@ No modo Netflix, o player do Stremio ganha:
   **Assistir aos créditos** cancela;
 - **Continuar assistindo** mostra o episódio (T1:E5) e troca o episódio terminado pelo próximo.
 
+## Minhas fontes (links próprios, só no PC)
+
+Com o addon do PC ligado, abra `http://127.0.0.1:7100/fontes` (ou o botão de corrente 🔗 na janela de um título, no modo streaming).
+Ali você cadastra fontes para um filme, um episódio, uma temporada inteira ou a série inteira:
+
+- **Link direto** (`https://.../video.mp4`, `.mkv`, `.m3u8`). Para temporada/série inteira, use `{S}` e `{E}` no endereço (ex.: `.../S{S}E{E}.mkv`).
+- **Magnet** (ou só o hash). Em pacotes de temporada/série, o episódio certo é achado pelo nome dos arquivos (S01E02, 1x02, "Episódio 2"...).
+- **Outros addons** (URL terminando em `/manifest.json`): as fontes deles aparecem junto com as suas.
+
+Instale uma vez o addon `http://127.0.0.1:7100/fontes/manifest.json` (botão "Instalar no Stremio" na página). As fontes aparecem como
+"⭐ Minhas fontes" na lista do Stremio. Os links ficam só em `addon/data/fontes.json` (fora do Git) e o endereço só responde a acessos do próprio PC.
+
 ## Fileiras no celular e na TV (addon online)
 
 - **GitHub Pages (grátis, sem servidor):** o workflow `.github/workflows/addon-pages.yml` gera as fileiras como arquivos

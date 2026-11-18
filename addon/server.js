@@ -11,6 +11,7 @@ import { searchOnProvider, searchMore } from './src/search.js';
 import { upcoming } from './src/news.js';
 import { skipTimes, nextEpisode } from './src/player.js';
 import { forYou } from './src/foryou.js';
+import * as fontes from './src/fontes.js';
 
 const manifest = () => ({
   id: 'community.streaming-modes',
@@ -66,11 +67,75 @@ function sendVideo(req, res, { file, type }) {
   fs.createReadStream(file, { start, end }).pipe(res);
 }
 
+// ---------- Minhas fontes (só para acessos do próprio PC) ----------
+const FONTES_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), 'fontes');
+const isLoopback = (req) => /^(::1|127\.\d+\.\d+\.\d+|::ffff:127\.\d+\.\d+\.\d+)$/.test(req.socket.remoteAddress || '');
+// A API de edição só aceita a própria página (127.0.0.1/localhost) e o Stremio (plugin); outros sites ficam de fora.
+const fontesOriginOk = (origin) => !origin || /^https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/.test(origin) ||
+  /^https:\/\/([a-z0-9-]+\.)*stremio\.com$/.test(origin) || /^(file:\/\/|app:\/\/|null$)/.test(origin);
+async function readBody(req) {
+  let body = '';
+  for await (const chunk of req) { body += chunk; if (body.length > 200_000) throw new Error('corpo grande demais'); }
+  return body ? JSON.parse(body) : {};
+}
+async function handleFontes(req, res, pathname) {
+  const base = `http://${req.headers.host || `127.0.0.1:${config.port}`}`;
+  let x;
+  if (pathname === '/fontes/manifest.json') return send(res, 200, fontes.fontesManifest(base));
+  if ((x = pathname.match(/^\/fontes\/stream\/(movie|series)\/([^/]+)\.json$/))) {
+    return send(res, 200, { streams: await fontes.streamsFor(x[1], decodeURIComponent(x[2])), cacheMaxAge: 0 });
+  }
+  if (pathname === '/fontes' || pathname === '/fontes/' || pathname === '/fontes/configure' || pathname === '/fontes/logo.svg') {
+    const file = pathname.endsWith('.svg') ? 'logo.svg' : 'index.html';
+    res.writeHead(200, { 'content-type': file.endsWith('.svg') ? 'image/svg+xml' : 'text/html; charset=utf-8', 'cache-control': 'no-cache',
+      'access-control-allow-origin': '*' });
+    return res.end(fs.readFileSync(path.join(FONTES_DIR, file)));
+  }
+  if (!pathname.startsWith('/fontes/api/')) return send(res, 404, { error: 'not found' });
+  const origin = req.headers.origin;
+  if (!fontesOriginOk(origin)) return send(res, 403, { error: 'origem não permitida' });
+  const reply = (status, body) => {
+    res.writeHead(status, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store',
+      ...(origin ? { 'access-control-allow-origin': origin, vary: 'Origin' } : {}),
+      'access-control-allow-headers': 'content-type', 'access-control-allow-methods': 'GET, POST, PATCH, DELETE',
+      'access-control-allow-private-network': 'true' });
+    res.end(JSON.stringify(body));
+  };
+  if (req.method === 'OPTIONS') return reply(204, {});
+  try {
+    if (pathname === '/fontes/api/list' && req.method === 'GET') return reply(200, fontes.listAll());
+    if (pathname === '/fontes/api/sources' && req.method === 'POST') return reply(200, fontes.addSource(await readBody(req)));
+    if ((x = pathname.match(/^\/fontes\/api\/sources\/([a-f0-9]+)$/))) {
+      if (req.method === 'PATCH') return reply(200, fontes.updateSource(x[1], await readBody(req)));
+      if (req.method === 'DELETE') { fontes.removeSource(x[1]); return reply(200, { ok: true }); }
+    }
+    if (pathname === '/fontes/api/addons' && req.method === 'POST') return reply(200, await fontes.addAddon((await readBody(req)).url));
+    if ((x = pathname.match(/^\/fontes\/api\/addons\/([a-f0-9]+)$/))) {
+      if (req.method === 'PATCH') return reply(200, fontes.updateAddon(x[1], await readBody(req)));
+      if (req.method === 'DELETE') { fontes.removeAddon(x[1]); return reply(200, { ok: true }); }
+    }
+    // Testar: o que o Stremio vai receber para um filme/episódio, com avisos dos pacotes e addons que falharem.
+    if ((x = pathname.match(/^\/fontes\/api\/test\/(movie|series)\/([^/]+)$/))) {
+      const notes = [];
+      const streams = await fontes.streamsFor(x[1], decodeURIComponent(x[2]), notes);
+      return reply(200, { streams, notes });
+    }
+    return reply(404, { error: 'not found' });
+  } catch (err) {
+    return reply(400, { error: err.message });
+  }
+}
+
 const CATALOG_RE = /^\/catalog\/(movie|series)\/([^/]+?)(?:\/([^/]+))?\.json$/;
 
 const server = http.createServer(async (req, res) => {
   const { pathname, searchParams } = new URL(req.url, 'http://localhost');
   try {
+    if (pathname === '/fontes' || pathname.startsWith('/fontes/')) {
+      if (!isLoopback(req)) return send(res, 404, { error: 'not found' });
+      if (req.method === 'OPTIONS' && !pathname.startsWith('/fontes/api/')) return send(res, 204, {});
+      return await handleFontes(req, res, pathname);
+    }
     if (req.method === 'OPTIONS') return send(res, 204, {});
     if (pathname === '/manifest.json') return send(res, 200, manifest());
     if (pathname === '/') {
@@ -179,6 +244,7 @@ server.listen(config.port, () => {
     console.warn('Sem chave do TMDB no .env: só o Top 10 oficial vai aparecer.');
   }
   console.log(`Para instalar, cole no Stremio (Addons > campo de busca): ${url}`);
+  console.log(`Minhas fontes: http://127.0.0.1:${config.port}/fontes (addon: http://127.0.0.1:${config.port}/fontes/manifest.json)`);
 
   // Pré-carrega o Top 10 (o arquivo da Netflix tem ~33 MB) para a Home não esperar.
   for (const type of ['series', 'movie']) {
