@@ -522,8 +522,64 @@
   const catalog = (type, id) => addon(`/catalog/${type}/${encodeURIComponent(id)}.json`).then((d) => d.metas || []);
   // Na cópia do GitHub o manifest da raiz é só o da Netflix; a lista de todos os streamings fica em sm/catalogs.json.
   const manifest = () => addon('/manifest.json', '/sm/catalogs.json');
-  const details = (type, id) => addon(`/sm/details/${type}/${id}.json`).then((d) => d.details).catch(() => null);
-  const season = (id, n) => addon(`/sm/season/${id}/${n}.json`).then((d) => d.episodes || []).catch(() => []);
+  // Addon do PC desligado: detalhes, temporadas e episódios vêm do Cinemeta (público, em inglês) em vez de sumirem.
+  const CINEMETA_GENRES = { Action: 'Ação', Adventure: 'Aventura', Animation: 'Animação', Comedy: 'Comédia', Crime: 'Crime',
+    Documentary: 'Documentário', Drama: 'Drama', Family: 'Família', Fantasy: 'Fantasia', History: 'História', Horror: 'Terror',
+    Music: 'Música', Mystery: 'Mistério', Romance: 'Romance', 'Science Fiction': 'Ficção científica', 'Sci-Fi': 'Ficção científica',
+    Thriller: 'Suspense', War: 'Guerra', Western: 'Faroeste', 'Action & Adventure': 'Ação e aventura',
+    'Sci-Fi & Fantasy': 'Ficção científica e fantasia', 'War & Politics': 'Guerra e política', Kids: 'Infantil',
+    News: 'Jornalismo', Reality: 'Reality show', 'Reality-TV': 'Reality show', 'Game-Show': 'Game show', Soap: 'Novela', Talk: 'Talk show' };
+  const cinemeta = (type, id) => (/^tt\d+$/.test(id)
+    ? getJSON(`https://v3-cinemeta.strem.io/meta/${type}/${id}.json`).then((d) => d.meta || null).catch(() => null)
+    : Promise.resolve(null));
+  const cinemetaEpisodes = (meta) => (meta?.videos || []).filter((v) => v.season > 0 && v.episode > 0);
+  async function cinemetaDetails(type, id) {
+    const m = await cinemeta(type, id);
+    if (!m) return null;
+    const eps = cinemetaEpisodes(m);
+    const counts = new Map();
+    for (const v of eps) counts.set(v.season, (counts.get(v.season) || 0) + 1);
+    const seasons = [...counts].sort((a, b) => a[0] - b[0]).map(([number, episodes]) => ({ number, name: `Temporada ${number}`, episodes }));
+    return {
+      id, type, name: m.name, description: m.description || '', tagline: '',
+      year: String(m.releaseInfo || m.year || '').slice(0, 4),
+      runtime: parseInt(m.runtime, 10) || null,
+      seasonsCount: type === 'series' ? seasons.length || null : null,
+      genres: (m.genres || []).map((g) => CINEMETA_GENRES[g] || g),
+      cast: (m.cast || []).slice(0, 6),
+      creators: (m.director || m.writer || []).slice(0, 3),
+      rating: Number(m.imdbRating) || null,
+      trailer: m.trailers?.find((t) => t.type === 'Trailer')?.source || m.trailers?.[0]?.source || null,
+      background: m.background, poster: m.poster, logo: m.logo,
+      seasons,
+    };
+  }
+  async function cinemetaSeason(id, n) {
+    const m = await cinemeta('series', id);
+    return cinemetaEpisodes(m).filter((v) => v.season === Number(n)).sort((a, b) => a.episode - b.episode).map((v) => ({
+      id: v.id || `${id}:${v.season}:${v.episode}`,
+      episode: v.episode,
+      name: v.name || v.title || `Episódio ${v.episode}`,
+      description: v.overview || v.description || '',
+      still: v.thumbnail || null,
+      runtime: null,
+      released: v.released || v.firstAired || null,
+    }));
+  }
+  // Próximo episódio já lançado depois de T{s}:E{e} (mesmo formato do /sm/next do addon).
+  async function cinemetaNext(id, s, e) {
+    const now = Date.now();
+    const eps = cinemetaEpisodes(await cinemeta('series', id))
+      .filter((v) => !v.released || new Date(v.released).getTime() <= now)
+      .sort((a, b) => a.season - b.season || a.episode - b.episode);
+    const v = eps.find((x) => x.season > Number(s) || (x.season === Number(s) && x.episode > Number(e)));
+    return v ? { next: { id: v.id || `${id}:${v.season}:${v.episode}`, season: v.season, episode: v.episode, title: v.name || v.title || '', thumbnail: v.thumbnail || null } } : { next: null };
+  }
+  const nextEpisode = (id, s, e) => addon(`/sm/next/${id}/${s}/${e}.json`).catch(() => cinemetaNext(id, s, e));
+  const details = (type, id) => addon(`/sm/details/${type}/${id}.json`).then((d) => d.details || Promise.reject(new Error('vazio')))
+    .catch(() => cinemetaDetails(type, id));
+  const season = (id, n) => addon(`/sm/season/${id}/${n}.json`).then((d) => (d.episodes?.length ? d.episodes : Promise.reject(new Error('vazio'))))
+    .catch(() => cinemetaSeason(id, n));
   const similar = (provider, type, id) =>
     addon(`/sm/similar/${provider}/${type}/${id}.json`).then((d) => d.metas || []).catch(() => []);
 
@@ -747,7 +803,7 @@
       const m = String(item.videoId || '').match(/^(tt\d+):(\d+):(\d+)$/);
       if (!m) return item;
       if (item.progress < 0.92) return { ...item, epLabel: epLabel(item.videoId) };
-      const data = await addon(`/sm/next/${m[1]}/${m[2]}/${m[3]}.json`).catch(() => null);
+      const data = await nextEpisode(m[1], m[2], m[3]).catch(() => null);
       const next = data?.next;
       if (!next) return null; // série terminada (ou próximo episódio ainda não saiu)
       return { ...item, videoId: next.id, progress: 0, epLabel: `Próximo: T${next.season}:E${next.episode}` };
@@ -3551,7 +3607,7 @@
       };
       // Novos episódios primeiro (com a marca "NOVO EPISÓDIO").
       for (const e of eps.slice(0, 6)) { if (!seen.has(e.item.id)) { seen.add(e.item.id); out.push({ ...e, ep: true }); } }
-      const today = new Date().toISOString().slice(0, 10);
+      const today = new Date().toLocaleDateString('sv'); // AAAA-MM-DD no fuso local
       for (const r of reminders()) if (r.date <= today) add('remind', r, 'Chegou! Você pediu para lembrar', r.name);
       ts.slice(0, 3).forEach((it, i) => add('top', it, `Nº ${i + 1} em séries esta semana`, it.name));
       tm.slice(0, 3).forEach((it, i) => add('top', it, `Nº ${i + 1} em filmes esta semana`, it.name));
@@ -4189,7 +4245,7 @@
           }
         } else if (key === '@soon') {
           row = makeRow(state.allContent ? 'Em breve nos streamings' : `Em breve ${mode.prep || 'na'} ${mode.label}`,
-            () => addon(`/sm/upcoming/${svc(mode)}.json`).then((d) => d.items || []),
+            () => upcomingList(svc(mode)),
             { render: (it) => upcomingCard(it), onExplore: () => setPage('new') });
         } else if (key === '@mylist') {
           const items = myList().slice(0, 30).map(fromLibrary);
@@ -5315,8 +5371,8 @@
     const add = (row) => { rows.appendChild(row); rowObserver.observe(row); };
 
     const ps = svc(mode);
-    const soon = addon(`/sm/upcoming/${ps}.json`).then((d) => d.items || []).catch(() => []);
-    const daysUntil = (it) => Math.round((new Date(`${it.date}T12:00:00`) - new Date(new Date().toDateString())) / 86400_000);
+    const soon = upcomingList(ps).catch(() => []);
+    const daysUntil = (it) => daysUntilDate(it.date);
     const upRow = (title, test) => makeRow(title, () => soon.then((list) => list.filter((it) => test(daysUntil(it)))),
       { render: (it) => upcomingCard(it) });
 
@@ -5341,10 +5397,20 @@
         })));
   }
 
+  // Dias de hoje até a data (AAAA-MM-DD), contando meia-noite a meia-noite no fuso local: hoje = 0, amanhã = 1.
+  function daysUntilDate(date) {
+    const [y, m, dd] = String(date || '').slice(0, 10).split('-').map(Number);
+    if (!y || !m || !dd) return NaN;
+    const now = new Date();
+    return Math.round((new Date(y, m - 1, dd) - new Date(now.getFullYear(), now.getMonth(), now.getDate())) / 86400_000);
+  }
+  // Estreias: a lista do GitHub é gerada a cada 3 h; o que já estreou (antes de hoje) sai da fileira.
+  const upcomingList = (ps) => addon(`/sm/upcoming/${ps}.json`).then((d) => (d.items || []).filter((it) => !(daysUntilDate(it.date) < 0)));
+
   // "Chega sexta-feira", "Chega amanhã", "Chega em 12 de dez."
   function arrivalLabel(date) {
     const when = new Date(`${date}T12:00:00`);
-    const d = Math.round((when - new Date(new Date().toDateString())) / 86400_000);
+    const d = daysUntilDate(date);
     if (d <= 0) return 'Chega hoje';
     if (d === 1) return 'Chega amanhã';
     if (d < 7) return `Chega ${when.toLocaleDateString('pt-BR', { weekday: 'long' })}`;
@@ -5476,7 +5542,7 @@
         if (!ep || stopped) return;
         const len = Math.round(v.duration || 0);
         addon(`/sm/skip/${ep.id}/${ep.season}/${ep.episode}.json?len=${len}`).then((d) => { skip = d; }).catch(() => {});
-        addon(`/sm/next/${ep.id}/${ep.season}/${ep.episode}.json`).then((d) => { next = d.next; }).catch(() => {});
+        nextEpisode(ep.id, ep.season, ep.episode).then((d) => { next = d.next; }).catch(() => {});
       };
       if (v.readyState >= 1) load();
       else v.addEventListener('loadedmetadata', load, { once: true });
