@@ -844,12 +844,44 @@
     return m ? `T${m[1]}:E${m[2]}` : '';
   };
 
+  // "Remover de Continuar assistindo" (como na Netflix): só esconde da fileira, sem mexer no progresso nem na biblioteca.
+  // Guarda a data do último "assistido" de cada título escondido; se a pessoa voltar a assistir, ele reaparece.
+  const cwHidden = () => store.get(pkey('cwHidden')) || {};
+  const isCwHidden = (id, watchedAt) => { const at = cwHidden()[id]; return at !== undefined && (watchedAt || '') <= at; };
+  function hideFromContinue(item, cardEl) {
+    const map = cwHidden();
+    map[item.id] = item.watchedAt || new Date().toISOString();
+    store.set(pkey('cwHidden'), map);
+    collapseCard();
+    hidePreview();
+    const track = cardEl?.parentElement;
+    const next = cardEl?.nextSibling || null;
+    cardEl?.remove();
+    const row = track?.closest('.sm-row');
+    if (track && !track.querySelector('.sm-card')) row?.remove();
+    toast(`"${item.name}" saiu de Continuar assistindo.`, 'Desfazer', () => {
+      const m = cwHidden();
+      delete m[item.id];
+      store.set(pkey('cwHidden'), m);
+      if (track?.isConnected && cardEl) track.insertBefore(cardEl, next?.parentElement === track ? next : null);
+      else schedule();
+    });
+  }
+  function toast(text, actionLabel, onAction) {
+    document.getElementById('sm-toast')?.remove();
+    const el = h('div', { id: 'sm-toast', role: 'status' }, h('span', { text }),
+      actionLabel ? h('button', { type: 'button', text: actionLabel, onclick: () => { el.remove(); onAction?.(); } }) : null);
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 7000);
+  }
+
   // Continuar assistindo como na Netflix: episódio quase terminado (ou terminado) vira o próximo episódio.
   async function continueRow(typeFilter) {
-    const base = continueWatching().map((it) => ({ lib: it, item: fromLibrary(it) }));
-    const done = finishedEpisodes().map((it) => ({ lib: it, item: { ...fromLibrary(it), progress: 1 } }));
+    const base = continueWatching().map((it) => ({ lib: it, item: { ...fromLibrary(it), watchedAt: it.state?.lastWatched } }));
+    const done = finishedEpisodes().map((it) => ({ lib: it, item: { ...fromLibrary(it), progress: 1, watchedAt: it.state?.lastWatched } }));
     const all = [...base, ...done]
       .filter(({ item }) => !typeFilter || item.type === typeFilter)
+      .filter(({ item }) => !isCwHidden(item.id, item.watchedAt))
       .sort((a, b) => (b.lib.state.lastWatched || '').localeCompare(a.lib.state.lastWatched || ''));
     const out = await Promise.all(all.map(async ({ item }) => {
       if (item.type !== 'series') return item;
@@ -1418,6 +1450,15 @@
   [class*="groups-"] > section[aria-label="Minhas fontes"] { order:-3; }
   [class*="groups-"] > section[aria-label^="FenixFlix" i] { order:-2; }
   [class*="groups-"] > section[aria-label*="Brazuca" i] { order:-1; }
+  .sm-cw-x { position:absolute; top:.4rem; left:.4rem; z-index:3; display:grid; place-items:center; width:1.9rem; height:1.9rem; padding:0;
+    border-radius:50%; border:1px solid rgba(255,255,255,.6) !important; background:rgba(0,0,0,.65) !important; color:#fff; cursor:pointer;
+    opacity:0; transition:opacity .15s; }
+  .sm-cw-x .sm-ico { width:1rem !important; height:1rem !important; }
+  .sm-card:hover > .sm-cw-x, .sm-card:focus-within > .sm-cw-x { opacity:1; }
+  .sm-card.expanded > .sm-cw-x { display:none; }
+  #sm-toast { position:fixed; left:50%; bottom:2rem; transform:translateX(-50%); z-index:100002; display:flex; align-items:center; gap:1.2rem;
+    padding:.8rem 1.1rem; border-radius:6px; background:#2b2b2b !important; color:#fff; font-size:.95rem; box-shadow:0 8px 30px rgba(0,0,0,.5) !important; }
+  #sm-toast button { border:0; background:none; color:#fff; font:inherit; font-weight:700; text-decoration:underline; cursor:pointer; }
   #sm-embed { position:fixed; inset:0; z-index:100001; background:#000; display:flex; flex-direction:column; }
   #sm-embed .sm-embed-bar { display:flex; align-items:center; gap:1rem; padding:.5rem 1rem; background:#111; color:#ddd; font-size:.95rem; }
   #sm-embed .sm-embed-bar span { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -4314,7 +4355,7 @@
           if (mode.brands?.length) row = brandsRow(mode);
         } else if (key === '@continue') {
           if (continueWatching().length || finishedEpisodes().length) {
-            row = makeRow('Continuar assistindo', () => continueRow(typeFilter), { progress: true });
+            row = makeRow('Continuar assistindo', () => continueRow(typeFilter), { progress: true, continueRow: true });
           }
         } else if (key === '@soon') {
           row = makeRow(state.allContent ? 'Em breve nos streamings' : `Em breve ${mode.prep || 'na'} ${mode.label}`,
@@ -4484,6 +4525,11 @@
     if (opts.progress && item.progress > 0) {
       el.appendChild(h('div', { class: 'sm-card-progress' }, h('i', { style: { width: `${Math.round(item.progress * 100)}%` } })));
     }
+    if (opts.continueRow) {
+      el.dataset.cw = '1';
+      el.appendChild(h('button', { type: 'button', class: 'sm-cw-x', 'aria-label': 'Remover de Continuar assistindo', title: 'Remover de Continuar assistindo',
+        onclick: (e) => { e.stopPropagation(); hideFromContinue(item, el); } }, icon('close')));
+    }
     wireCard(el, item);
     return el;
   }
@@ -4620,6 +4666,8 @@
         h('button', { type: 'button', class: 'sm-round white', 'aria-label': 'Assistir', onclick: stop(() => play(item)) }, icon('play', true)),
         listBtn,
         thumbButton(item),
+        el.dataset.cw ? h('button', { type: 'button', class: 'sm-round', 'aria-label': 'Remover de Continuar assistindo', title: 'Remover de Continuar assistindo',
+          onclick: stop(() => hideFromContinue(item, el)) }, icon('close')) : null,
         h('button', { type: 'button', class: 'sm-round', 'aria-label': 'Mais informações', onclick: stop(() => openModal(item)) }, icon('down'))), meta));
     el.appendChild(h('div', { class: 'sm-x' },
       h('div', { class: 'sm-x-bg', style: { backgroundImage: cssUrl(tmdbSize(item.background, 'w1280') || cardImage(item)) } }),
