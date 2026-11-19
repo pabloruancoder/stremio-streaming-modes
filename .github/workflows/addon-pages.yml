@@ -48,6 +48,9 @@ jobs:
         run: |
           mkdir -p dist/intro
           cp addon/intro-publica/*.mp4 addon/intro-publica/*.webm dist/intro/ 2>/dev/null || true
+      # Páginas extras (ex.: /tv = atalho do .apk do Fire Stick para o Downloader).
+      - name: Copiar páginas extras
+        run: cp -r addon/pages-extra/. dist/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
